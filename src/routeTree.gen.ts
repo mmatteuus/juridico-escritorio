@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OOrgRouteImport } from './routes/o.$org'
+import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
+import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
+import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +31,78 @@ const OOrgRoute = OOrgRouteImport.update({
   path: '/o/$org',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OOrgInicioRoute = OOrgInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgCasosIndexRoute = OOrgCasosIndexRouteImport.update({
+  id: '/casos/',
+  path: '/casos/',
+  getParentRoute: () => OOrgRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/o/$org': typeof OOrgRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/o/$org': typeof OOrgRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/o/$org': typeof OOrgRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/o/$org'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/o/$org'
-  id: '__root__' | '/' | '/login' | '/o/$org'
+  to:
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  OOrgRoute: typeof OOrgRoute
+  OOrgRoute: typeof OOrgRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +128,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$org/inicio': {
+      id: '/o/$org/inicio'
+      path: '/inicio'
+      fullPath: '/o/$org/inicio'
+      preLoaderRoute: typeof OOrgInicioRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/notificacoes': {
+      id: '/o/$org/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/o/$org/notificacoes'
+      preLoaderRoute: typeof OOrgNotificacoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/casos/': {
+      id: '/o/$org/casos/'
+      path: '/casos'
+      fullPath: '/o/$org/casos/'
+      preLoaderRoute: typeof OOrgCasosIndexRouteImport
+      parentRoute: typeof OOrgRoute
+    }
   }
 }
+
+interface OOrgRouteChildren {
+  OOrgInicioRoute: typeof OOrgInicioRoute
+  OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
+  OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
+}
+
+const OOrgRouteChildren: OOrgRouteChildren = {
+  OOrgInicioRoute: OOrgInicioRoute,
+  OOrgNotificacoesRoute: OOrgNotificacoesRoute,
+  OOrgCasosIndexRoute: OOrgCasosIndexRoute,
+}
+
+const OOrgRouteWithChildren = OOrgRoute._addFileChildren(OOrgRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  OOrgRoute: OOrgRoute,
+  OOrgRoute: OOrgRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
