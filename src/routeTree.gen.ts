@@ -15,6 +15,7 @@ import { Route as OOrgRouteImport } from './routes/o.$org'
 import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
 import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
 import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
+import { Route as OOrgCasosIdRouteImport } from './routes/o.$org.casos.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const OOrgCasosIndexRoute = OOrgCasosIndexRouteImport.update({
   path: '/casos/',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgCasosIdRoute = OOrgCasosIdRouteImport.update({
+  id: '/casos/$id',
+  path: '/casos/$id',
+  getParentRoute: () => OOrgRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/o/$org': typeof OOrgRouteWithChildren
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/o/$org': typeof OOrgRouteWithChildren
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/casos': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/o/$org': typeof OOrgRouteWithChildren
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/o/$org'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
     | '/o/$org/casos/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/o/$org'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
     | '/o/$org/casos'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/o/$org'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
     | '/o/$org/casos/'
   fileRoutesById: FileRoutesById
 }
@@ -149,18 +161,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgCasosIndexRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/casos/$id': {
+      id: '/o/$org/casos/$id'
+      path: '/casos/$id'
+      fullPath: '/o/$org/casos/$id'
+      preLoaderRoute: typeof OOrgCasosIdRouteImport
+      parentRoute: typeof OOrgRoute
+    }
   }
 }
 
 interface OOrgRouteChildren {
   OOrgInicioRoute: typeof OOrgInicioRoute
   OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
+  OOrgCasosIdRoute: typeof OOrgCasosIdRoute
   OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
 }
 
 const OOrgRouteChildren: OOrgRouteChildren = {
   OOrgInicioRoute: OOrgInicioRoute,
   OOrgNotificacoesRoute: OOrgNotificacoesRoute,
+  OOrgCasosIdRoute: OOrgCasosIdRoute,
   OOrgCasosIndexRoute: OOrgCasosIndexRoute,
 }
 
