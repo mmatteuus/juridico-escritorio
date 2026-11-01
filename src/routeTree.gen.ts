@@ -10,33 +10,111 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OOrgRouteImport } from './routes/o.$org'
+import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
+import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
+import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
+import { Route as OOrgCasosIdRouteImport } from './routes/o.$org.casos.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OOrgRoute = OOrgRouteImport.update({
+  id: '/o/$org',
+  path: '/o/$org',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OOrgInicioRoute = OOrgInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgCasosIndexRoute = OOrgCasosIndexRouteImport.update({
+  id: '/casos/',
+  path: '/casos/',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgCasosIdRoute = OOrgCasosIdRouteImport.update({
+  id: '/casos/$id',
+  path: '/casos/$id',
+  getParentRoute: () => OOrgRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/casos': typeof OOrgCasosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/casos/': typeof OOrgCasosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
+    | '/o/$org/casos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
+    | '/o/$org/casos'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/o/$org'
+    | '/o/$org/inicio'
+    | '/o/$org/notificacoes'
+    | '/o/$org/casos/$id'
+    | '/o/$org/casos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  OOrgRoute: typeof OOrgRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +126,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$org': {
+      id: '/o/$org'
+      path: '/o/$org'
+      fullPath: '/o/$org'
+      preLoaderRoute: typeof OOrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$org/inicio': {
+      id: '/o/$org/inicio'
+      path: '/inicio'
+      fullPath: '/o/$org/inicio'
+      preLoaderRoute: typeof OOrgInicioRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/notificacoes': {
+      id: '/o/$org/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/o/$org/notificacoes'
+      preLoaderRoute: typeof OOrgNotificacoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/casos/': {
+      id: '/o/$org/casos/'
+      path: '/casos'
+      fullPath: '/o/$org/casos/'
+      preLoaderRoute: typeof OOrgCasosIndexRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/casos/$id': {
+      id: '/o/$org/casos/$id'
+      path: '/casos/$id'
+      fullPath: '/o/$org/casos/$id'
+      preLoaderRoute: typeof OOrgCasosIdRouteImport
+      parentRoute: typeof OOrgRoute
+    }
   }
 }
 
+interface OOrgRouteChildren {
+  OOrgInicioRoute: typeof OOrgInicioRoute
+  OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
+  OOrgCasosIdRoute: typeof OOrgCasosIdRoute
+  OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
+}
+
+const OOrgRouteChildren: OOrgRouteChildren = {
+  OOrgInicioRoute: OOrgInicioRoute,
+  OOrgNotificacoesRoute: OOrgNotificacoesRoute,
+  OOrgCasosIdRoute: OOrgCasosIdRoute,
+  OOrgCasosIndexRoute: OOrgCasosIndexRoute,
+}
+
+const OOrgRouteWithChildren = OOrgRoute._addFileChildren(OOrgRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  OOrgRoute: OOrgRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
