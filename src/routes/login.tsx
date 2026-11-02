@@ -26,7 +26,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const { role, setRole } = useDemo();
-  const [office, setOffice] = useState(OFFICES[0].slug);
+  const [office, setOffice] = useState(OFFICES[0]?.slug ?? "");
   const navigate = useNavigate();
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">

@@ -16,13 +16,13 @@ export function NewMatterDialog({ office }: { office: Office }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [clientId, setClientId] = useState("");
-  const [area, setArea] = useState(office.practiceAreas[0].id);
+  const [area, setArea] = useState(office.practiceAreas[0]?.id ?? "");
   const [conf, setConf] = useState<Confidentiality>("normal");
   const [summary, setSummary] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !clientId) return toast.error("Informe título e cliente.");
+    if (!title.trim() || !clientId) { toast.error("Informe título e cliente."); return; }
     const id = uid("k");
     const n = v.matters.length + 1;
     const matter: Matter = {

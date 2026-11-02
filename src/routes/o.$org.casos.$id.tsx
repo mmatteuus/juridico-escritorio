@@ -22,7 +22,7 @@ type Tab = (typeof TABS)[number];
 
 export const Route = createFileRoute("/o/$org/casos/$id")({
   validateSearch: (s: Record<string, unknown>): { tab?: Tab } =>
-    TABS.includes(s.tab as Tab) ? { tab: s.tab as Tab } : {},
+    TABS.includes(s["tab"] as Tab) ? { tab: s["tab"] as Tab } : {},
   head: () => ({ meta: [{ title: "Dossiê do caso · JURIDO Escritórios" }, { name: "description", content: "Dossiê unificado do caso." }, { name: "robots", content: "noindex" }] }),
   component: Dossie,
 });
@@ -118,7 +118,7 @@ function Dossie() {
           {canProposeDeadline(v.role) && (
             <form className="flex flex-wrap gap-2" onSubmit={(e) => {
               e.preventDefault();
-              if (!dlTitle || !dlDate) return toast.error("Informe título e data.");
+              if (!dlTitle || !dlDate) { toast.error("Informe título e data."); return; }
               const d: Deadline = { id: uid("d"), officeId: office.id, matterId: m.id, title: dlTitle, dueDate: new Date(`${dlDate}T18:00`).toISOString(), status: "proposto", assigneeId: v.me?.id ?? "", proposedBy: actor, version: 1, sourceLabel: "Cadastro manual (demo)", history: [{ at: new Date().toISOString(), actor, action: "Propôs o prazo" }] };
               patch((s) => ({ ...s, deadlines: [...s.deadlines, d], timeline: [ev("prazo", `Propôs prazo: ${dlTitle}`), ...s.timeline] }));
               setDlTitle(""); setDlDate(""); toast.success("Prazo proposto — aguarda confirmação");
@@ -140,7 +140,7 @@ function Dossie() {
                 {d.status === "confirmado" && canConfirmDeadline(v.role) && <Button size="sm" variant="outline" onClick={() => setDeadline(d, { status: "concluido" }, "Concluiu o prazo")}>Concluir</Button>}
                 {d.status !== "concluido" && d.status !== "cancelado" && canProposeDeadline(v.role) && (
                   <label className="flex items-center gap-1 text-xs text-muted-foreground">Alterar data
-                    <Input type="date" className="h-8 w-40 bg-card" onChange={(e) => e.target.value && setDeadline(d, { dueDate: new Date(`${e.target.value}T18:00`).toISOString(), status: "em_revisao", version: d.version + 1, confirmedBy: undefined }, "Alterou a data (volta para revisão)")} />
+                    <Input type="date" className="h-8 w-40 bg-card" onChange={(e) => e.target.value && setDeadline(d, { dueDate: new Date(`${e.target.value}T18:00`).toISOString(), status: "em_revisao", version: d.version + 1 }, "Alterou a data (volta para revisão)")} />
                   </label>)}
               </div>
               <details className="mt-2 text-xs text-muted-foreground"><summary className="cursor-pointer">Histórico ({d.history.length})</summary>
@@ -184,10 +184,10 @@ function Dossie() {
           <p className="rounded-lg border border-dashed bg-info-soft p-3 text-xs">Nada é enviado automaticamente. O envio por WhatsApp será sempre manual; aqui só registramos uma ação simulada.</p>
           <form className="space-y-2" onSubmit={(e) => {
             e.preventDefault(); if (!msgText.trim()) return;
-            patch((s) => ({ ...s, messages: [...s.messages, { id: uid("msg"), officeId: office.id, matterId: m.id, recipient: v.clientName(m.clientIds[0]), content: msgText.trim(), status: "rascunho" }] }));
+            patch((s) => ({ ...s, messages: [...s.messages, { id: uid("msg"), officeId: office.id, matterId: m.id, recipient: v.clientName(m.clientIds[0] ?? ""), content: msgText.trim(), status: "rascunho" }] }));
             setMsgText(""); toast.success("Rascunho salvo");
           }}>
-            <Textarea aria-label="Mensagem ao cliente" placeholder={`Mensagem administrativa para ${v.clientName(m.clientIds[0])}`} value={msgText} onChange={(e) => setMsgText(e.target.value)} className="bg-card" />
+            <Textarea aria-label="Mensagem ao cliente" placeholder={`Mensagem administrativa para ${v.clientName(m.clientIds[0] ?? "")}`} value={msgText} onChange={(e) => setMsgText(e.target.value)} className="bg-card" />
             <Button type="submit" variant="outline">Salvar rascunho</Button>
           </form>
           {msgs.map((x) => (
