@@ -42,6 +42,14 @@ function day(offsetDays: number, hour = 10, min = 0): string {
 
 export function buildFixtures(): DemoData {
   return {
+    intakes: [
+      { id: "a-i1", officeId: "off-a", name: "Carlos Fictício Mendes", contact: "(00) 9000-0101", practiceAreaId: "trabalhista", summary: "Dispensa sem pagamento de verbas rescisórias (relato demo).", stage: "novo", createdAt: day(0, 8) },
+      { id: "a-i2", officeId: "off-a", name: "Padaria Exemplo ME", contact: "padaria@exemplo.test", practiceAreaId: "civel", summary: "Cobrança de fornecedor inadimplente.", stage: "em_triagem", createdAt: day(-1, 10) },
+      { id: "a-i3", officeId: "off-a", name: "Rita Modelo Souza", contact: "(00) 9000-0102", practiceAreaId: "civel", summary: "Problema com contrato de aluguel; aguardando cópia do contrato.", stage: "documentos_pendentes", createdAt: day(-3, 15) },
+      { id: "a-i4", officeId: "off-a", name: "Transportes Teste Ltda.", contact: "adm@transp.test", practiceAreaId: "civel", summary: "Revisão de cláusulas de seguro de frota.", stage: "aprovado", createdAt: day(-4, 9) },
+      { id: "b-i1", officeId: "off-b", name: "Pedro Horizonte Lima", contact: "(00) 9111-0201", practiceAreaId: "familia", summary: "Revisão de pensão alimentícia (relato demo).", stage: "novo", createdAt: day(0, 9) },
+      { id: "b-i2", officeId: "off-b", name: "Café Imaginário Ltda.", contact: "cafe@imag.test", practiceAreaId: "tributario", summary: "Dúvida sobre enquadramento tributário.", stage: "em_triagem", createdAt: day(-2, 14) },
+    ],
     members: [
       { id: "a-m1", officeId: "off-a", name: "Helena Almeida", role: "gestor", practiceAreaIds: ["civel"], title: "Gestora" },
       { id: "a-m2", officeId: "off-a", name: "Ricardo Prado", role: "socio", practiceAreaIds: ["civel", "trabalhista"], title: "Sócio" },

@@ -12,10 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OOrgRouteImport } from './routes/o.$org'
+import { Route as OOrgAtendimentosRouteImport } from './routes/o.$org.atendimentos'
 import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
 import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
+import { Route as OOrgProcessosRouteImport } from './routes/o.$org.processos'
 import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
 import { Route as OOrgCasosIdRouteImport } from './routes/o.$org.casos.$id'
+import { Route as OOrgClientesIndexRouteImport } from './routes/o.$org.clientes.index'
+import { Route as OOrgClientesIdRouteImport } from './routes/o.$org.clientes.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,6 +36,11 @@ const OOrgRoute = OOrgRouteImport.update({
   path: '/o/$org',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OOrgAtendimentosRoute = OOrgAtendimentosRouteImport.update({
+  id: '/atendimentos',
+  path: '/atendimentos',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgInicioRoute = OOrgInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
@@ -40,6 +49,11 @@ const OOrgInicioRoute = OOrgInicioRouteImport.update({
 const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgProcessosRoute = OOrgProcessosRouteImport.update({
+  id: '/processos',
+  path: '/processos',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgCasosIndexRoute = OOrgCasosIndexRouteImport.update({
@@ -52,34 +66,56 @@ const OOrgCasosIdRoute = OOrgCasosIdRouteImport.update({
   path: '/casos/$id',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgClientesIndexRoute = OOrgClientesIndexRouteImport.update({
+  id: '/clientes/',
+  path: '/clientes/',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgClientesIdRoute = OOrgClientesIdRouteImport.update({
+  id: '/clientes/$id',
+  path: '/clientes/$id',
+  getParentRoute: () => OOrgRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/processos': typeof OOrgProcessosRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
+  '/o/$org/clientes/': typeof OOrgClientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/processos': typeof OOrgProcessosRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos': typeof OOrgCasosIndexRoute
+  '/o/$org/clientes': typeof OOrgClientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/processos': typeof OOrgProcessosRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
+  '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
+  '/o/$org/clientes/': typeof OOrgClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,28 +123,40 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/atendimentos'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/processos'
     | '/o/$org/casos/$id'
+    | '/o/$org/clientes/$id'
     | '/o/$org/casos/'
+    | '/o/$org/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/atendimentos'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/processos'
     | '/o/$org/casos/$id'
+    | '/o/$org/clientes/$id'
     | '/o/$org/casos'
+    | '/o/$org/clientes'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/atendimentos'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/processos'
     | '/o/$org/casos/$id'
+    | '/o/$org/clientes/$id'
     | '/o/$org/casos/'
+    | '/o/$org/clientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$org/atendimentos': {
+      id: '/o/$org/atendimentos'
+      path: '/atendimentos'
+      fullPath: '/o/$org/atendimentos'
+      preLoaderRoute: typeof OOrgAtendimentosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/inicio': {
       id: '/o/$org/inicio'
       path: '/inicio'
@@ -152,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/o/$org/notificacoes'
       preLoaderRoute: typeof OOrgNotificacoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/processos': {
+      id: '/o/$org/processos'
+      path: '/processos'
+      fullPath: '/o/$org/processos'
+      preLoaderRoute: typeof OOrgProcessosRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/casos/': {
@@ -168,21 +230,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgCasosIdRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/clientes/': {
+      id: '/o/$org/clientes/'
+      path: '/clientes'
+      fullPath: '/o/$org/clientes/'
+      preLoaderRoute: typeof OOrgClientesIndexRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/clientes/$id': {
+      id: '/o/$org/clientes/$id'
+      path: '/clientes/$id'
+      fullPath: '/o/$org/clientes/$id'
+      preLoaderRoute: typeof OOrgClientesIdRouteImport
+      parentRoute: typeof OOrgRoute
+    }
   }
 }
 
 interface OOrgRouteChildren {
+  OOrgAtendimentosRoute: typeof OOrgAtendimentosRoute
   OOrgInicioRoute: typeof OOrgInicioRoute
   OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
+  OOrgProcessosRoute: typeof OOrgProcessosRoute
   OOrgCasosIdRoute: typeof OOrgCasosIdRoute
+  OOrgClientesIdRoute: typeof OOrgClientesIdRoute
   OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
+  OOrgClientesIndexRoute: typeof OOrgClientesIndexRoute
 }
 
 const OOrgRouteChildren: OOrgRouteChildren = {
+  OOrgAtendimentosRoute: OOrgAtendimentosRoute,
   OOrgInicioRoute: OOrgInicioRoute,
   OOrgNotificacoesRoute: OOrgNotificacoesRoute,
+  OOrgProcessosRoute: OOrgProcessosRoute,
   OOrgCasosIdRoute: OOrgCasosIdRoute,
+  OOrgClientesIdRoute: OOrgClientesIdRoute,
   OOrgCasosIndexRoute: OOrgCasosIndexRoute,
+  OOrgClientesIndexRoute: OOrgClientesIndexRoute,
 }
 
 const OOrgRouteWithChildren = OOrgRoute._addFileChildren(OOrgRouteChildren)

@@ -34,10 +34,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { label: "Notificações", icon: Bell, to: "notificacoes" },
   ]},
   { group: "Trabalho jurídico", items: [
-    { label: "Atendimentos", icon: Contact, step: 2, hideFor: ["financeiro"] },
-    { label: "Clientes", icon: UserRound, step: 2 },
+    { label: "Atendimentos", icon: Contact, to: "atendimentos", hideFor: ["financeiro"] },
+    { label: "Clientes", icon: UserRound, to: "clientes" },
     { label: "Casos", icon: BriefcaseBusiness, to: "casos" },
-    { label: "Processos", icon: Gavel, step: 2, hideFor: ["financeiro"] },
+    { label: "Processos", icon: Gavel, to: "processos", hideFor: ["financeiro"] },
     { label: "Documentos", icon: FileText, step: 4, hideFor: ["financeiro"] },
     { label: "Modelos", icon: LayoutTemplate, step: 4, hideFor: ["financeiro"] },
     { label: "Comunicações", icon: MessageSquare, step: 5, hideFor: ["financeiro"] },
@@ -153,6 +153,7 @@ export function AppShell({ office, children }: { office: Office; children: React
   const view = useOfficeView(office);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const navigate = useNavigate();
   const unread = view.notifications.filter((n) => !n.read).length;
 
   return (
@@ -193,7 +194,13 @@ export function AppShell({ office, children }: { office: Office; children: React
                   <BriefcaseBusiness /> Caso
                   {!canCreateMatter(role) && <span className="ml-auto text-[10px]">sem permissão</span>}
                 </DropdownMenuItem>
-                {["Atendimento", "Cliente", "Tarefa", "Prazo", "Documento"].map((l) => (
+                <DropdownMenuItem onSelect={() => navigate({ to: "/o/$org/atendimentos", params: { org: office.slug }, search: { novo: true } })}>
+                  <Contact /> Atendimento
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate({ to: "/o/$org/clientes", params: { org: office.slug }, search: { novo: true } })}>
+                  <UserRound /> Cliente
+                </DropdownMenuItem>
+                {["Tarefa", "Prazo", "Documento"].map((l) => (
                   <DropdownMenuItem key={l} disabled>
                     <ClipboardList /> {l} <span className="ml-auto text-[10px]">próximo passo</span>
                   </DropdownMenuItem>

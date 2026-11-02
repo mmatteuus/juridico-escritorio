@@ -50,6 +50,10 @@ export function canSeeLegalDocs(role: RoleId): boolean {
   return role !== "financeiro";
 }
 
+export function canApproveIntake(role: RoleId): boolean {
+  return LAWYER_ROLES.includes(role) || role === "gestor";
+}
+
 export function canCreateMatter(role: RoleId): boolean {
   return ["gestor", "socio", "coordenador", "advogado", "secretario"].includes(role);
 }
