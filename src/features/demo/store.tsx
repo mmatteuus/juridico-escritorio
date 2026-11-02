@@ -67,6 +67,7 @@ export function useOfficeView(office: Office) {
       me,
       role,
       matters,
+      intakes: data.intakes.filter((i) => i.officeId === office.id),
       members: data.members.filter((m) => m.officeId === office.id),
       clients: data.clients.filter((c) => c.officeId === office.id),
       proceedings: inScope(data.proceedings),

@@ -168,7 +168,22 @@ export interface Appointment {
   at: string;
 }
 
+export type IntakeStage = "novo" | "em_triagem" | "documentos_pendentes" | "aprovado" | "convertido" | "arquivado";
+
+export interface Intake {
+  id: string;
+  officeId: string;
+  name: string;
+  contact: string;
+  practiceAreaId: string;
+  summary: string;
+  stage: IntakeStage;
+  createdAt: string;
+  matterId?: string;
+}
+
 export interface DemoData {
+  intakes: Intake[];
   members: Member[];
   clients: Client[];
   matters: Matter[];
