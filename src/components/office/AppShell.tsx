@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { OFFICES } from "@/features/demo/fixtures";
-import { canCreateMatter, canSeeFinance, ROLE_LABEL } from "@/features/demo/permissions";
+import { canCreateMatter, canProposeDeadline, canSeeFinance, ROLE_LABEL } from "@/features/demo/permissions";
 import { useDemo, useOfficeView } from "@/features/demo/store";
 import type { Office, RoleId } from "@/features/demo/types";
 import { cn } from "@/lib/utils";
@@ -27,10 +27,10 @@ type NavItem = { label: string; icon: typeof Home; to?: string; step?: number; h
 const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Dia a dia", items: [
     { label: "Início", icon: Home, to: "inicio" },
-    { label: "Caixa de trabalho", icon: Inbox, step: 3 },
-    { label: "Prazos", icon: Timer, step: 3, hideFor: ["financeiro"] },
-    { label: "Tarefas", icon: ListChecks, step: 3 },
-    { label: "Agenda", icon: CalendarDays, step: 3 },
+    { label: "Caixa de trabalho", icon: Inbox, to: "caixa-de-trabalho" },
+    { label: "Prazos", icon: Timer, to: "prazos", hideFor: ["financeiro"] },
+    { label: "Tarefas", icon: ListChecks, to: "tarefas" },
+    { label: "Agenda", icon: CalendarDays, to: "agenda" },
     { label: "Notificações", icon: Bell, to: "notificacoes" },
   ]},
   { group: "Trabalho jurídico", items: [
@@ -200,7 +200,15 @@ export function AppShell({ office, children }: { office: Office; children: React
                 <DropdownMenuItem onSelect={() => navigate({ to: "/o/$org/clientes", params: { org: office.slug }, search: { novo: true } })}>
                   <UserRound /> Cliente
                 </DropdownMenuItem>
-                {["Tarefa", "Prazo", "Documento"].map((l) => (
+                <DropdownMenuItem onSelect={() => navigate({ to: "/o/$org/tarefas", params: { org: office.slug }, search: { novo: true } })}>
+                  <ListChecks /> Tarefa
+                </DropdownMenuItem>
+                {canProposeDeadline(role) && (
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/o/$org/prazos", params: { org: office.slug }, search: { novo: true } })}>
+                    <Timer /> Prazo
+                  </DropdownMenuItem>
+                )}
+                {["Documento"].map((l) => (
                   <DropdownMenuItem key={l} disabled>
                     <ClipboardList /> {l} <span className="ml-auto text-[10px]">próximo passo</span>
                   </DropdownMenuItem>

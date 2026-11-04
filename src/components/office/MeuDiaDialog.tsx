@@ -81,8 +81,11 @@ export function MeuDiaDialog({ office }: { office: Office }) {
             <Checkbox checked={hideToday} onCheckedChange={(c) => setHideToday(!!c)} /> Não exibir novamente hoje
           </label>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => { close(); navigate({ to: "/o/$org/casos", params: { org: office.slug } }); }}>
-              <CalendarDays /> Ver todos os casos
+            <Button variant="outline" onClick={() => { close(); navigate({ to: "/o/$org/agenda", params: { org: office.slug } }); }}>
+              <CalendarDays /> Abrir minha agenda
+            </Button>
+            <Button variant="outline" onClick={() => { close(); navigate({ to: "/o/$org/caixa-de-trabalho", params: { org: office.slug } }); }}>
+              Ver todas
             </Button>
             <Button onClick={close}>Dispensar</Button>
           </div>
