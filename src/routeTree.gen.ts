@@ -12,10 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OOrgRouteImport } from './routes/o.$org'
+import { Route as OOrgAgendaRouteImport } from './routes/o.$org.agenda'
 import { Route as OOrgAtendimentosRouteImport } from './routes/o.$org.atendimentos'
+import { Route as OOrgCaixaDeTrabalhoRouteImport } from './routes/o.$org.caixa-de-trabalho'
 import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
 import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
+import { Route as OOrgPrazosRouteImport } from './routes/o.$org.prazos'
 import { Route as OOrgProcessosRouteImport } from './routes/o.$org.processos'
+import { Route as OOrgTarefasRouteImport } from './routes/o.$org.tarefas'
 import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
 import { Route as OOrgCasosIdRouteImport } from './routes/o.$org.casos.$id'
 import { Route as OOrgClientesIndexRouteImport } from './routes/o.$org.clientes.index'
@@ -36,9 +40,19 @@ const OOrgRoute = OOrgRouteImport.update({
   path: '/o/$org',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OOrgAgendaRoute = OOrgAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgAtendimentosRoute = OOrgAtendimentosRouteImport.update({
   id: '/atendimentos',
   path: '/atendimentos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgCaixaDeTrabalhoRoute = OOrgCaixaDeTrabalhoRouteImport.update({
+  id: '/caixa-de-trabalho',
+  path: '/caixa-de-trabalho',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgInicioRoute = OOrgInicioRouteImport.update({
@@ -51,9 +65,19 @@ const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgPrazosRoute = OOrgPrazosRouteImport.update({
+  id: '/prazos',
+  path: '/prazos',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgProcessosRoute = OOrgProcessosRouteImport.update({
   id: '/processos',
   path: '/processos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgTarefasRoute = OOrgTarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgCasosIndexRoute = OOrgCasosIndexRouteImport.update({
@@ -81,10 +105,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRoute
   '/o/$org/processos': typeof OOrgProcessosRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
@@ -94,10 +122,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRoute
   '/o/$org/processos': typeof OOrgProcessosRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos': typeof OOrgCasosIndexRoute
@@ -108,10 +140,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRoute
   '/o/$org/processos': typeof OOrgProcessosRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
@@ -123,10 +159,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/agenda'
     | '/o/$org/atendimentos'
+    | '/o/$org/caixa-de-trabalho'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/prazos'
     | '/o/$org/processos'
+    | '/o/$org/tarefas'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
     | '/o/$org/casos/'
@@ -136,10 +176,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/agenda'
     | '/o/$org/atendimentos'
+    | '/o/$org/caixa-de-trabalho'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/prazos'
     | '/o/$org/processos'
+    | '/o/$org/tarefas'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
     | '/o/$org/casos'
@@ -149,10 +193,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/o/$org'
+    | '/o/$org/agenda'
     | '/o/$org/atendimentos'
+    | '/o/$org/caixa-de-trabalho'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
+    | '/o/$org/prazos'
     | '/o/$org/processos'
+    | '/o/$org/tarefas'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
     | '/o/$org/casos/'
@@ -188,11 +236,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$org/agenda': {
+      id: '/o/$org/agenda'
+      path: '/agenda'
+      fullPath: '/o/$org/agenda'
+      preLoaderRoute: typeof OOrgAgendaRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/atendimentos': {
       id: '/o/$org/atendimentos'
       path: '/atendimentos'
       fullPath: '/o/$org/atendimentos'
       preLoaderRoute: typeof OOrgAtendimentosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/caixa-de-trabalho': {
+      id: '/o/$org/caixa-de-trabalho'
+      path: '/caixa-de-trabalho'
+      fullPath: '/o/$org/caixa-de-trabalho'
+      preLoaderRoute: typeof OOrgCaixaDeTrabalhoRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/inicio': {
@@ -209,11 +271,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgNotificacoesRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/prazos': {
+      id: '/o/$org/prazos'
+      path: '/prazos'
+      fullPath: '/o/$org/prazos'
+      preLoaderRoute: typeof OOrgPrazosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/processos': {
       id: '/o/$org/processos'
       path: '/processos'
       fullPath: '/o/$org/processos'
       preLoaderRoute: typeof OOrgProcessosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/tarefas': {
+      id: '/o/$org/tarefas'
+      path: '/tarefas'
+      fullPath: '/o/$org/tarefas'
+      preLoaderRoute: typeof OOrgTarefasRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/casos/': {
@@ -248,10 +324,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface OOrgRouteChildren {
+  OOrgAgendaRoute: typeof OOrgAgendaRoute
   OOrgAtendimentosRoute: typeof OOrgAtendimentosRoute
+  OOrgCaixaDeTrabalhoRoute: typeof OOrgCaixaDeTrabalhoRoute
   OOrgInicioRoute: typeof OOrgInicioRoute
   OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
+  OOrgPrazosRoute: typeof OOrgPrazosRoute
   OOrgProcessosRoute: typeof OOrgProcessosRoute
+  OOrgTarefasRoute: typeof OOrgTarefasRoute
   OOrgCasosIdRoute: typeof OOrgCasosIdRoute
   OOrgClientesIdRoute: typeof OOrgClientesIdRoute
   OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
@@ -259,10 +339,14 @@ interface OOrgRouteChildren {
 }
 
 const OOrgRouteChildren: OOrgRouteChildren = {
+  OOrgAgendaRoute: OOrgAgendaRoute,
   OOrgAtendimentosRoute: OOrgAtendimentosRoute,
+  OOrgCaixaDeTrabalhoRoute: OOrgCaixaDeTrabalhoRoute,
   OOrgInicioRoute: OOrgInicioRoute,
   OOrgNotificacoesRoute: OOrgNotificacoesRoute,
+  OOrgPrazosRoute: OOrgPrazosRoute,
   OOrgProcessosRoute: OOrgProcessosRoute,
+  OOrgTarefasRoute: OOrgTarefasRoute,
   OOrgCasosIdRoute: OOrgCasosIdRoute,
   OOrgClientesIdRoute: OOrgClientesIdRoute,
   OOrgCasosIndexRoute: OOrgCasosIndexRoute,
