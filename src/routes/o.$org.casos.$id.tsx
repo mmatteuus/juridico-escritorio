@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ConfidentialityBadge, DeadlineStatusChip, DeniedState, EmptyState, PriorityBadge, TASK_STATUS_LABEL,
+  ConfidentialityBadge, DeadlineStatusChip, DueBadge, DeniedState, EmptyState, PriorityBadge, TASK_STATUS_LABEL,
 } from "@/components/office/badges";
 import {
   canConfirmDeadline, canProposeDeadline, canSeeCnj, canSeeFinance, canSeeLegalDocs,
@@ -130,7 +130,7 @@ function Dossie() {
           )}
           {dls.length === 0 ? <EmptyState title="Sem prazos" /> : dls.map((d) => (
             <article key={d.id} className="rounded-xl border bg-card p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{d.title}</h3><DeadlineStatusChip status={d.status} /></div>
+              <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{d.title}</h3><span className="flex gap-2"><DueBadge iso={d.dueDate} done={["concluido", "cancelado"].includes(d.status)} /><DeadlineStatusChip status={d.status} /></span></div>
               <p className="text-sm text-muted-foreground">Vence {fmtDateTime(d.dueDate)} · Fonte: {d.sourceLabel} · v{d.version}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {(d.status === "proposto" || d.status === "em_revisao") && (canConfirmDeadline(v.role)
