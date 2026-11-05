@@ -63,7 +63,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function EmptyState({ title, hint }: { title: string; hint?: string }) {
+export function EmptyState({ title, hint }: { title: string; hint?: string | undefined }) {
   return (
     <div className="rounded-xl border border-dashed bg-card p-8 text-center">
       <p className="font-medium text-foreground">{title}</p>

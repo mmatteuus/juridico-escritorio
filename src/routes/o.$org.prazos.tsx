@@ -91,7 +91,7 @@ function Prazos() {
               <DialogTitle className="font-display text-xl font-medium">{review.title}</DialogTitle>
               <DialogDescription>Vence {fmtDateTime(review.dueDate)} · Fonte: {review.sourceLabel} · v{review.version}</DialogDescription>
             </DialogHeader>
-            <DeadlineStatusChip status={review.status} />
+            <div><DeadlineStatusChip status={review.status} /></div>
             <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-muted-foreground">
               {review.history.map((h, i) => <li key={i}>{fmtDateTime(h.at)} — {h.actor}: {h.action}</li>)}
             </ul>
