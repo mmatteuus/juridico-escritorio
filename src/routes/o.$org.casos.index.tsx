@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ConfidentialityBadge, EmptyState, PageHeader } from "@/components/office/badges";
+import { ConfidentialityBadge, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
 import { canCreateMatter } from "@/features/demo/permissions";
 import { findOffice, fmtDate, useDemo, useOfficeView } from "@/features/demo/store";
 
@@ -41,6 +41,7 @@ function Casos() {
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {list.map((m) => {
             const procs = v.proceedings.filter((p) => p.matterId === m.id).length;
+            const next = v.deadlines.filter((d) => d.matterId === m.id && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
             return (
               <Link key={m.id} to="/o/$org/casos/$id" params={{ org, id: m.id }} className="group rounded-xl border bg-card p-4 shadow-soft transition hover:border-primary/40">
                 <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground"><span className="tabular">{m.code}</span><ConfidentialityBadge value={m.confidentiality} /></div>
@@ -48,8 +49,9 @@ function Casos() {
                 <p className="mt-1 text-sm text-muted-foreground">{m.clientIds.map(v.clientName).join(", ")}</p>
                 <div className="mt-3 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
                   <span>{v.areaName(m.practiceAreaId)}</span><span>{STATUS[m.status]}</span>
-                  <span>{procs ? `${procs} processo(s)` : "Sem processo"}</span><span>Atual. {fmtDate(m.updatedAt)}</span>
+                  <span>{procs ? `${procs} ${procs === 1 ? "processo" : "processos"}` : "Sem processo"}</span><span>Atual. {fmtDate(m.updatedAt)}</span>
                 </div>
+                {next && <div className="mt-3 flex items-center gap-2 border-t pt-3 text-xs"><DueBadge iso={next.dueDate} /><span className="truncate text-muted-foreground">{next.title}</span></div>}
               </Link>
             );
           })}

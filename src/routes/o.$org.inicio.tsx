@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertTriangle, BriefcaseBusiness, CalendarDays, ShieldAlert, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DeadlineStatusChip, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
+import { DeadlineStatusChip, DueBadge, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
 import { findOffice, fmtDateTime, fmtTime, isOverdue, isToday, useDemo, useOfficeView } from "@/features/demo/store";
 
 export const Route = createFileRoute("/o/$org/inicio")({
@@ -16,30 +16,36 @@ function Inicio() {
   const { setMeuDiaOpen } = useDemo();
   const open = v.tasks.filter((t) => t.status !== "concluida");
   const stats = [
-    { label: "Casos visíveis", value: v.matters.length, Icon: BriefcaseBusiness },
-    { label: "Tarefas atrasadas", value: open.filter(isOverdue).length, Icon: AlertTriangle },
-    { label: "Prazos a revisar", value: v.deadlines.filter((d) => d.status === "proposto" || d.status === "em_revisao").length, Icon: ShieldAlert },
-    { label: "Compromissos hoje", value: v.appointments.filter((a) => isToday(a.at)).length, Icon: CalendarDays },
+    { label: "Casos visíveis", value: v.matters.length, Icon: BriefcaseBusiness, to: "/o/$org/casos" as const, alert: false },
+    { label: "Tarefas atrasadas", value: open.filter(isOverdue).length, Icon: AlertTriangle, to: "/o/$org/tarefas" as const, alert: true },
+    { label: "Prazos a revisar", value: v.deadlines.filter((d) => d.status === "proposto" || d.status === "em_revisao").length, Icon: ShieldAlert, to: "/o/$org/prazos" as const, alert: true },
+    { label: "Compromissos hoje", value: v.appointments.filter((a) => isToday(a.at)).length, Icon: CalendarDays, to: "/o/$org/agenda" as const, alert: false },
   ];
+  const openDls = v.deadlines.filter((d) => !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const today = v.appointments.filter((a) => isToday(a.at)).sort((a, b) => a.at.localeCompare(b.at));
+  const h = new Date().getHours();
+  const hello = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const first = v.me?.name.split(" ")[0];
   const caseLink = (id?: string) => id && v.matterById(id);
 
   return (
     <>
-      <PageHeader title="Início" subtitle={`${office.displayName} · visão do seu perfil`} actions={<Button variant="outline" onClick={() => setMeuDiaOpen(true)}><Sun /> Abrir Meu Dia</Button>} />
+      <PageHeader title={first ? `${hello}, ${first}` : "Início"} subtitle={`${office.displayName} · ${new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}`} actions={<Button variant="outline" onClick={() => setMeuDiaOpen(true)}><Sun /> Abrir Meu Dia</Button>} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map(({ label, value, Icon }) => (
-          <div key={label} className="rounded-xl border bg-card p-4 shadow-soft">
-            <Icon className="size-4 text-copper" />
-            <p className="mt-3 font-display text-3xl tabular">{value}</p>
-            <p className="text-sm text-muted-foreground">{label}</p>
-          </div>
+        {stats.map(({ label, value, Icon, to, alert }) => (
+          <Link key={label} to={to} params={{ org }} className="group rounded-xl border bg-card p-4 shadow-soft transition-colors hover:border-primary/40">
+            <Icon className={alert && value > 0 ? "size-4 text-destructive" : "size-4 text-copper"} />
+            <p className={`mt-3 font-display text-3xl tabular ${alert && value > 0 ? "text-destructive" : ""}`}>{value}</p>
+            <p className="text-sm text-muted-foreground group-hover:text-foreground">{label}</p>
+          </Link>
         ))}
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <section className="rounded-xl border bg-card p-5 shadow-soft">
-          <h2 className="mb-3 font-display text-xl">Tarefas próximas</h2>
+          <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Tarefas próximas</h2><Link to="/o/$org/tarefas" params={{ org }} className="text-sm text-primary hover:underline">Ver todas</Link></div>
+          {open.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma tarefa em aberto.</p>}
           <ul className="divide-y">
-            {open.sort((a, b) => a.dueAt.localeCompare(b.dueAt)).map((t) => {
+            {[...open].sort((a, b) => a.dueAt.localeCompare(b.dueAt)).slice(0, 8).map((t) => {
               const m = caseLink(t.matterId);
               return (
                 <li key={t.id} className="flex flex-wrap items-center gap-2 py-2.5">
@@ -58,20 +64,22 @@ function Inicio() {
         </section>
         <div className="space-y-6">
           <section className="rounded-xl border bg-card p-5 shadow-soft">
-            <h2 className="mb-3 font-display text-xl">Prazos</h2>
-            <ul className="space-y-3">
-              {v.deadlines.map((d) => (
+            <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Prazos em aberto</h2><Link to="/o/$org/prazos" params={{ org }} className="text-sm text-primary hover:underline">Ver todos</Link></div>
+            {openDls.length === 0 && <p className="text-sm text-muted-foreground">Nenhum prazo em aberto.</p>}
+            <ul className="space-y-1">
+              {openDls.slice(0, 5).map((d) => (
                 <li key={d.id}><Link to="/o/$org/casos/$id" params={{ org, id: d.matterId }} search={{ tab: "prazos" }} className="block rounded-lg p-2 hover:bg-muted">
                   <p className="text-sm font-medium">{d.title}</p>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><DeadlineStatusChip status={d.status} /> {fmtDateTime(d.dueDate)}</div>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><DueBadge iso={d.dueDate} /><DeadlineStatusChip status={d.status} /> <span className="tabular">{fmtDateTime(d.dueDate)}</span></div>
                 </Link></li>
               ))}
             </ul>
           </section>
           <section className="rounded-xl border bg-card p-5 shadow-soft">
-            <h2 className="mb-3 font-display text-xl">Agenda de hoje</h2>
+            <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Agenda de hoje</h2><Link to="/o/$org/agenda" params={{ org }} className="text-sm text-primary hover:underline">Abrir agenda</Link></div>
+            {today.length === 0 && <p className="text-sm text-muted-foreground">Nenhum compromisso hoje.</p>}
             <ul className="space-y-2 text-sm">
-              {v.appointments.filter((a) => isToday(a.at)).map((a) => <li key={a.id}><span className="tabular font-semibold">{fmtTime(a.at)}</span> · {a.title}</li>)}
+              {today.map((a) => <li key={a.id}><span className="tabular font-semibold">{fmtTime(a.at)}</span> · {a.title}</li>)}
             </ul>
           </section>
           <section className="rounded-xl border bg-card p-5 shadow-soft">

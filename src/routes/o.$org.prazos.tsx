@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DeadlineStatusChip, DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
+import { DeadlineStatusChip, DeniedState, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
 import { changeDeadline, rescheduleDeadline } from "@/features/demo/actions";
 import { canConfirmDeadline, canProposeDeadline, canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, fmtDateTime, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
@@ -34,6 +34,7 @@ function Prazos() {
   const [f, setF] = useState<(typeof FILTERS)[number]["id"]>("abertos");
   const [review, setReview] = useState<Deadline | null>(null);
   const [cancelWhy, setCancelWhy] = useState("");
+  const [newDate, setNewDate] = useState("");
   const [form, setForm] = useState({ matterId: "", title: "", date: "" });
   const actor = v.me?.name ?? "—";
   if (!canSeeCnj(v.role)) return <DeniedState />;
@@ -76,6 +77,7 @@ function Prazos() {
                     {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "prazos" }} className="text-primary hover:underline">{m.code}</Link></>}
                   </p>
                 </div>
+                <DueBadge iso={d.dueDate} done={["concluido", "cancelado"].includes(d.status)} />
                 <DeadlineStatusChip status={d.status} />
                 <Button size="sm" variant="outline" onClick={() => setReview(d)}>Revisar</Button>
               </li>
@@ -84,27 +86,30 @@ function Prazos() {
         </ul>
       )}
 
-      <Dialog open={!!review} onOpenChange={(o) => { if (!o) { setReview(null); setCancelWhy(""); } }}>
+      <Dialog open={!!review} onOpenChange={(o) => { if (!o) { setReview(null); setCancelWhy(""); setNewDate(""); } }}>
         <DialogContent>
           {review && <>
             <DialogHeader>
               <DialogTitle className="font-display text-xl font-medium">{review.title}</DialogTitle>
               <DialogDescription>Vence {fmtDateTime(review.dueDate)} · Fonte: {review.sourceLabel} · v{review.version}</DialogDescription>
             </DialogHeader>
-            <div><DeadlineStatusChip status={review.status} /></div>
+            <div className="flex flex-wrap gap-2"><DeadlineStatusChip status={review.status} /><DueBadge iso={review.dueDate} done={["concluido", "cancelado"].includes(review.status)} /></div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Histórico</p>
             <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-muted-foreground">
               {review.history.map((h, i) => <li key={i}>{fmtDateTime(h.at)} — {h.actor}: {h.action}</li>)}
             </ul>
             {!["concluido", "cancelado"].includes(review.status) && (
               <div className="space-y-3">
                 {canProposeDeadline(v.role) && (
-                  <label className="flex items-center gap-2 text-sm">Alterar data
-                    <Input type="date" className="w-44" onChange={(e) => e.target.value && act(review, rescheduleDeadline(review, new Date(`${e.target.value}T18:00`).toISOString()), "Alterou a data (volta para revisão)")} />
-                  </label>
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <Label htmlFor="r-d">Nova data</Label>
+                    <Input id="r-d" type="date" className="w-44" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+                    <Button variant="outline" size="sm" disabled={!newDate} onClick={() => { act(review, rescheduleDeadline(review, new Date(`${newDate}T18:00`).toISOString()), "Alterou a data (volta para revisão)"); setNewDate(""); }}>Aplicar</Button>
+                  </div>
                 )}
                 <div className="flex gap-2">
                   <Input aria-label="Justificativa do cancelamento" placeholder="Justificativa para cancelar" value={cancelWhy} onChange={(e) => setCancelWhy(e.target.value)} />
-                  <Button variant="outline" disabled={!cancelWhy.trim() || !canConfirmDeadline(v.role)} onClick={() => act(review, { status: "cancelado" }, `Cancelou: ${cancelWhy.trim()}`)}>Cancelar prazo</Button>
+                  <Button variant="outline" disabled={!cancelWhy.trim() || !canConfirmDeadline(v.role)} onClick={() => { act(review, { status: "cancelado" }, `Cancelou: ${cancelWhy.trim()}`); setCancelWhy(""); }}>Cancelar prazo</Button>
                 </div>
               </div>
             )}

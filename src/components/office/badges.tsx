@@ -1,5 +1,6 @@
 import { Lock, ShieldAlert, Users, CircleDashed, Eye, CheckCircle2, CircleCheckBig, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { daysUntil } from "@/features/demo/store";
 import type { Confidentiality, DeadlineStatus, TaskPriority, TaskStatus } from "@/features/demo/types";
 
 const base = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap";
@@ -82,4 +83,13 @@ export function DeniedState() {
       </p>
     </div>
   );
+}
+
+/** Countdown chip for open deadlines: atrasado / hoje / amanhã / em N dias. */
+export function DueBadge({ iso, done }: { iso: string; done?: boolean }) {
+  if (done) return null;
+  const n = daysUntil(iso);
+  const label = n < 0 ? `Atrasado ${-n} ${-n === 1 ? "dia" : "dias"}` : n === 0 ? "Vence hoje" : n === 1 ? "Vence amanhã" : `Em ${n} dias`;
+  const cls = n <= 0 ? "bg-destructive-soft text-destructive" : n <= 3 ? "bg-warning-soft text-warning" : "bg-muted text-muted-foreground";
+  return <span className={cn(base, "tabular", cls)}>{label}</span>;
 }
