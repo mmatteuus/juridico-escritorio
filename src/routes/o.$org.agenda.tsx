@@ -14,7 +14,7 @@ export const Route = createFileRoute("/o/$org/agenda")({
 });
 
 type Mode = "dia" | "semana" | "mes";
-type Item = { id: string; at: string; title: string; kind: "Tarefa" | "Prazo" | "Compromisso"; matterId?: string; who?: string; status?: DeadlineStatus };
+type Item = { id: string; at: string; title: string; kind: "Tarefa" | "Prazo" | "Compromisso"; matterId?: string | undefined; who?: string; status?: DeadlineStatus };
 
 const startOf = (d: Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 
