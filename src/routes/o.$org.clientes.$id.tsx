@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { ConfidentialityBadge, DeniedState, EmptyState } from "@/components/office/badges";
+import { ConfidentialityBadge, DeniedState, DueBadge, EmptyState } from "@/components/office/badges";
 import { canSeeLegalDocs } from "@/features/demo/permissions";
-import { findOffice, fmtDate, useOfficeView } from "@/features/demo/store";
+import { findOffice, fmtDate, fmtDateTime, useOfficeView } from "@/features/demo/store";
 
 export const Route = createFileRoute("/o/$org/clientes/$id")({
   head: () => ({ meta: [{ title: "Ficha do cliente · JURIDO Escritórios" }, { name: "description", content: "Ficha do cliente." }, { name: "robots", content: "noindex" }] }),
@@ -19,6 +19,13 @@ function Cliente() {
   const ids = new Set(matters.map((m) => m.id));
   const docs = canSeeLegalDocs(v.role) ? v.docs.filter((d) => ids.has(d.matterId)) : [];
   const intakes = v.intakes.filter((i) => i.name === c.name);
+  const openDls = v.deadlines.filter((d) => ids.has(d.matterId) && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const nextFor = (mid: string) => openDls.find((d) => d.matterId === mid);
+  const summary = [
+    { label: "Casos visíveis", value: String(matters.length) },
+    { label: "Prazos em aberto", value: String(openDls.length) },
+    { label: "Próximo prazo", value: openDls[0] ? fmtDateTime(openDls[0].dueDate) : "—" },
+  ];
 
   return (
     <>
@@ -27,6 +34,9 @@ function Cliente() {
         <p className="text-xs text-muted-foreground">{c.kind === "PF" ? "Pessoa física" : "Empresa"} · dados fictícios</p>
         <h1 className="mt-1 font-display text-3xl font-medium">{c.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Contato: {c.contact} · {c.city}</p>
+        <dl className="mt-4 grid grid-cols-3 gap-3 border-t pt-4">
+          {summary.map((x) => <div key={x.label}><dt className="text-xs text-muted-foreground">{x.label}</dt><dd className="font-display text-xl tabular">{x.value}</dd></div>)}
+        </dl>
       </header>
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
@@ -34,7 +44,8 @@ function Cliente() {
           {matters.length === 0 ? <EmptyState title="Nenhum caso visível para seu perfil" /> : (
             <ul className="space-y-2">{matters.map((m) => (
               <li key={m.id}><Link to="/o/$org/casos/$id" params={{ org, id: m.id }} className="flex items-center justify-between gap-2 rounded-xl border bg-card p-4 hover:border-primary/40">
-                <span><span className="block text-sm font-medium">{m.title}</span><span className="text-xs text-muted-foreground">{m.code} · {v.areaName(m.practiceAreaId)}</span></span>
+                <span><span className="block text-sm font-medium">{m.title}</span><span className="text-xs text-muted-foreground">{m.code} · {v.areaName(m.practiceAreaId)}</span>
+                  {nextFor(m.id) && <span className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground"><DueBadge iso={nextFor(m.id)!.dueDate} /> {nextFor(m.id)!.title}</span>}</span>
                 <ConfidentialityBadge value={m.confidentiality} /></Link></li>))}</ul>
           )}
         </section>
