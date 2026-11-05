@@ -109,3 +109,11 @@ export const fmtDateTime = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 export const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+/** Whole calendar days from today until iso (negative = past). */
+export function daysUntil(iso: string, now = new Date()) {
+  const a = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const d = new Date(iso);
+  const b = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.round((b - a) / 86_400_000);
+}
