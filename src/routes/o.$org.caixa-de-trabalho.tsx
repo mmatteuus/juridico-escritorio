@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { DeadlineStatusChip, EmptyState, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
+import { DeadlineStatusChip, DueBadge, EmptyState, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
 import { findOffice, fmtDateTime, isOverdue, useDemo, useOfficeView } from "@/features/demo/store";
 
 export const Route = createFileRoute("/o/$org/caixa-de-trabalho")({
@@ -53,6 +53,7 @@ function Caixa() {
           {dls.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1"><p className="text-sm font-medium">Prazo: {d.title}</p><p className="text-xs text-muted-foreground">{fmtDateTime(d.dueDate)} · proposto por {d.proposedBy}</p></div>
+              <DueBadge iso={d.dueDate} />
               <DeadlineStatusChip status={d.status} />
               <Button size="sm" variant="outline" asChild><Link to="/o/$org/casos/$id" params={{ org, id: d.matterId }} search={{ tab: "prazos" }}>Revisar</Link></Button>
             </li>
