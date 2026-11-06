@@ -14,6 +14,7 @@ type DayTarget =
   | { type: "tarefa"; id: string }
   | { type: "prazo"; id: string }
   | { type: "caso"; id: string }
+  | { type: "documento"; id: string }
   | { type: "prazos" }
   | { type: "agenda" }
   | { type: "procuracoes" };
@@ -40,6 +41,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
     if (target.type === "tarefa") navigate({ to: "/o/$org/tarefas/$id", params: { org: office.slug, id: target.id } });
     if (target.type === "prazo") navigate({ to: "/o/$org/prazos/$id", params: { org: office.slug, id: target.id } });
     if (target.type === "caso") navigate({ to: "/o/$org/casos/$id", params: { org: office.slug, id: target.id }, search: { tab: "comunicacoes" } });
+    if (target.type === "documento") navigate({ to: "/o/$org/documentos", params: { org: office.slug }, search: { docId: target.id } });
     if (target.type === "prazos") navigate({ to: "/o/$org/prazos", params: { org: office.slug } });
     if (target.type === "agenda") navigate({ to: "/o/$org/agenda", params: { org: office.slug } });
     if (target.type === "procuracoes") navigate({ to: "/o/$org/procuracoes", params: { org: office.slug } });
@@ -57,6 +59,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
     { title: "Retornos de clientes", Icon: Hourglass, items: v.notifications.filter((n) => n.category === "resposta_cliente" && !n.read && n.matterId && v.matterById(n.matterId)).map((n) => ({ id: n.id, label: n.title, meta: "Retorno demonstrativo · revisar comunicações", target: { type: "caso" as const, id: n.matterId! } })) },
     ...(canSeeCnj(v.role) ? [{ title: "Cobertura a conferir", Icon: ShieldAlert, items: v.notifications.filter((n) => n.category === "sincronizacao" && !n.read && (!n.matterId || v.matterById(n.matterId))).map((n) => ({ id: n.id, label: n.title, meta: "Estado ilustrativo · não confirma coleta externa", target: { type: "prazos" as const } })) }] : []),
     ...(canSeeLegalDocs(v.role) ? [{ title: "Procurações em revisão", Icon: FileText, items: v.mandates.filter((mandate) => mandate.status === "minuta" || mandate.status === "em_revisao").map((mandate) => ({ id: mandate.id, label: mandate.title, meta: mandate.status === "minuta" ? "Minuta · revisão pendente" : "Aguardando revisão", target: { type: "procuracoes" as const } })) }] : []),
+    ...(canSeeLegalDocs(v.role) ? [{ title: "Documentos aguardando revisão", Icon: FileText, items: v.docs.filter((doc) => doc.status === "revisao_pendente").map((doc) => ({ id: doc.id, label: doc.title, meta: `${doc.category} · revisão profissional pendente · demonstração`, target: { type: "documento" as const, id: doc.id } })) }] : []),
   ];
   const hasWork = groups.some((group) => group.items.length > 0);
 

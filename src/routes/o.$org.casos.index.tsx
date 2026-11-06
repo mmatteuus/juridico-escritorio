@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConfidentialityBadge, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
 import { canCreateMatter } from "@/features/demo/permissions";
 import { findOffice, fmtDate, useDemo, useOfficeView } from "@/features/demo/store";
+import type { MatterNature } from "@/features/demo/types";
 
 export const Route = createFileRoute("/o/$org/casos/")({
   head: () => ({ meta: [{ title: "Casos · JURIDO Escritórios" }, { name: "description", content: "Lista de casos jurídicos do escritório." }, { name: "robots", content: "noindex" }] }),
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/o/$org/casos/")({
 });
 
 const STATUS: Record<string, string> = { ativo: "Ativo", em_analise: "Em análise", suspenso: "Suspenso", encerrado: "Encerrado" };
+const MATTER_NATURE: Record<MatterNature, string> = { consultivo: "Consultivo", extrajudicial: "Extrajudicial", pre_contencioso: "Pré-contencioso", judicial: "Judicial" };
 
 function Casos() {
   const { org } = Route.useParams();
@@ -48,7 +50,7 @@ function Casos() {
                 <h2 className="mt-2 font-display text-lg leading-snug group-hover:text-primary">{m.title}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">{m.clientIds.map(v.clientName).join(", ")}</p>
                 <div className="mt-3 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                  <span>{v.areaName(m.practiceAreaId)}</span><span>{STATUS[m.status]}</span>
+                  <span>{v.areaName(m.practiceAreaId)}</span><span>{MATTER_NATURE[m.matterNature]}</span><span>{STATUS[m.status]}</span>
                   <span>{procs ? `${procs} ${procs === 1 ? "processo" : "processos"}` : "Sem processo"}</span><span>Atual. {fmtDate(m.updatedAt)}</span>
                 </div>
                 {next && <div className="mt-3 flex items-center gap-2 border-t pt-3 text-xs"><DueBadge iso={next.dueDate} /><span className="truncate text-muted-foreground">{next.title}</span></div>}

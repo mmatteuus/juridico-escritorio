@@ -85,12 +85,14 @@ export interface Client {
 }
 
 export type MatterStatus = "ativo" | "em_analise" | "suspenso" | "encerrado";
+export type MatterNature = "consultivo" | "extrajudicial" | "pre_contencioso" | "judicial";
 
 export interface Matter {
   id: string;
   officeId: string;
   code: string;
   title: string;
+  matterNature: MatterNature;
   clientIds: string[];
   opposingParties?: string;
   practiceAreaId: string;
@@ -350,8 +352,8 @@ export interface Receivable {
   relatedCostId?: string;
   reason?: string;
   reviewStatus?: "pendente" | "em_revisao" | "revisado_demo";
-  amount: number;
-  paid: number;
+  /** Forecast amount, stored in integer BRL cents. */
+  amountCents: number;
   dueDate: string;
 }
 
@@ -430,7 +432,9 @@ export interface Intake {
   contact: string;
   clientKind: Client["kind"];
   existingClientId?: string;
+  assigneeId?: string;
   practiceAreaId: string;
+  matterNature: MatterNature;
   summary: string;
   stage: IntakeStage;
   createdAt: string;

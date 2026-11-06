@@ -86,7 +86,9 @@ A biblioteca de documentos aceita descrição e texto demonstrativo, cria snapsh
 - `npx vitest run --maxWorkers=1`: 6 arquivos, 19 testes aprovados, incluindo isolamento entre escritórios, sigilo documental e sessões demonstrativas.
 - ESLint direcionado a `src/components/office`, `src/features/demo` e `src/routes`, com regra Prettier desativada: aprovado.
 - Rotas amostradas no servidor de desenvolvimento responderam HTTP 200. Inspeção responsiva com viewport CSS de 390 px confirmou largura de documento e conteúdo sem overflow horizontal em Início, criação de documento, detalhe de tarefa, Financeiro e Equipe; a captura do Início foi inspecionada.
-- **Validação posterior pendente:** os testes e a inspeção visual manual dos fluxos adicionados ainda não foram executados nesta continuação; os registros anteriores de testes não se estendem a essas mudanças.
+- Na auditoria de 2026-11-06 contra as notas 06, 19, 20, 39 e 44: documentos com revisão pendente agora aparecem na Caixa de Trabalho e no Meu Dia, com link limitado ao documento visível/autorizado; a fila de atendimentos recorta por responsável, exceto para gestão; casos registram natureza explicitamente e não inferem isso pelo número de processos; financeiro grava previsões em centavos inteiros e deixou de exibir liquidação/pagamento.
+- `npx tsc --noEmit` e `npm run build` passaram após essa auditoria. Não foram executados testes nem inspeção manual de cada fluxo e viewport nesta rodada.
+- O cadastro direto de caso é rotulado como rascunho em análise e orienta novos potenciais clientes a passar primeiro por atendimento e revisão humana de conflitos.
 
 ## O que ainda não está comprovado
 

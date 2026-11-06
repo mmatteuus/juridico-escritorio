@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DeniedState, PageHeader } from "@/components/office/badges";
 import { canApproveIntake } from "@/features/demo/permissions";
 import { findOffice, fmtDate, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
-import type { ConflictCheck, Intake, IntakeStage, Matter } from "@/features/demo/types";
+import type { ConflictCheck, Intake, IntakeStage, Matter, MatterNature } from "@/features/demo/types";
 
 export const Route = createFileRoute("/o/$org/atendimentos")({
   validateSearch: (s: Record<string, unknown>): { novo?: boolean; intakeId?: string } => ({
@@ -42,9 +42,10 @@ function Atendimentos() {
   const v = useOfficeView(office);
   const { update } = useDemo();
   const [sel, setSel] = useState<Intake | null>(null);
-  const [form, setForm] = useState({ name: "", contact: "", clientKind: "PF" as Intake["clientKind"], existingClientId: "", counterparty: "", area: office.practiceAreas[0]?.id ?? "", summary: "" });
+  const [form, setForm] = useState({ name: "", contact: "", clientKind: "PF" as Intake["clientKind"], existingClientId: "", counterparty: "", area: office.practiceAreas[0]?.id ?? "", matterNature: "" as MatterNature | "", summary: "" });
   const actor = v.me?.name ?? "—";
   const canApprove = canApproveIntake(v.role);
+  const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(v.role);
   const existingClients = v.clients.filter(client => client.officeId === office.id);
 
   useEffect(() => {
@@ -52,6 +53,13 @@ function Atendimentos() {
     const intake = v.intakes.find(item => item.id === intakeId);
     if (intake) setSel(intake);
   }, [intakeId, v.intakes]);
+
+  useEffect(() => {
+    if (sel && !v.intakes.some((intake) => intake.id === sel.id && intake.officeId === office.id)) {
+      setSel(null);
+      navigate({ search: {}, replace: true });
+    }
+  }, [intakeId, navigate, office.id, sel, v.intakes]);
 
   const conflictsFor = (intake: Intake) => v.conflicts.filter(check => check.intakeId === intake.id);
   const conflictReviewComplete = (intake: Intake) => {
@@ -61,6 +69,11 @@ function Atendimentos() {
   if (v.role === "financeiro") return <DeniedState />;
 
   const setStage = (i: Intake, stage: IntakeStage) => {
+    if (!v.intakes.some((intake) => intake.id === i.id && intake.officeId === office.id)) {
+      toast.error("Este atendimento não está mais disponível na sua fila.");
+      setSel(null);
+      return;
+    }
     if ((stage === "documentos_pendentes" || stage === "aprovado") && !conflictReviewComplete(i)) {
       toast.error("Conclua a revisão humana de conflito antes de avançar.");
       return;
@@ -72,6 +85,13 @@ function Atendimentos() {
   };
 
   const convert = (i: Intake) => {
+    const visibleIntake = v.intakes.find((intake) => intake.id === i.id && intake.officeId === office.id);
+    if (!visibleIntake) {
+      toast.error("Este atendimento não está mais disponível na sua fila.");
+      setSel(null);
+      return;
+    }
+    i = visibleIntake;
     if (i.stage !== "aprovado" || !canApprove || !conflictReviewComplete(i)) {
       toast.error("A conversão exige aprovação profissional e revisão de conflito concluída.");
       return;
@@ -89,7 +109,7 @@ function Atendimentos() {
     const cleared = checks.every(check => check.status === "sem_indicio");
     const matter: Matter = {
       id: matterId, officeId: office.id, code: `${office.monogram}-2026-${100 + v.matters.length + 1}`,
-      title: `Caso – ${i.name}`, clientIds: [clientId], opposingParties: checks.map(check => check.counterparty).join(", "), practiceAreaId: i.practiceAreaId, status: "em_analise",
+      title: `Caso – ${i.name}`, matterNature: i.matterNature, clientIds: [clientId], opposingParties: checks.map(check => check.counterparty).join(", "), practiceAreaId: i.practiceAreaId, status: "em_analise",
       assignedMemberIds: v.me ? [v.me.id] : [], confidentiality: "normal", grantRoles: [],
       updatedAt: new Date().toISOString(), summary: i.summary,
     };
@@ -114,21 +134,21 @@ function Atendimentos() {
       ? existingClients.find(client => client.id === form.existingClientId)
       : undefined;
     if (form.existingClientId && (!selectedClient || selectedClient.kind !== form.clientKind)) { toast.error("Selecione um cliente visível deste escritório."); return; }
-    if ((!selectedClient && (!form.name.trim() || !form.contact.trim())) || !counterparties.length || !form.area) { toast.error("Preencha nome, contato, ao menos uma parte relacionada e área de atuação."); return; }
+    if ((!selectedClient && (!form.name.trim() || !form.contact.trim())) || !counterparties.length || !form.area || !form.matterNature || !v.me?.id) { toast.error("Preencha nome, contato, partes relacionadas, área, natureza e responsável do perfil atual."); return; }
     const prospectName = selectedClient?.name ?? form.name.trim();
     const prospectContact = selectedClient?.contact ?? form.contact.trim();
     const intakeId = uid("i");
     const createdAt = new Date().toISOString();
     const checks: ConflictCheck[] = counterparties.map(counterparty => ({ id: uid("conflito"), officeId: office.id, intakeId, prospect: prospectName, counterparty, summary: form.summary.trim(), status: "pendente", createdAt, reviewedBy: undefined, reviewReason: undefined, reviewedAt: undefined }));
-    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: prospectName, contact: prospectContact, clientKind: selectedClient?.kind ?? form.clientKind, ...(selectedClient ? { existingClientId: selectedClient.id } : {}), practiceAreaId: form.area, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
-    setForm({ ...form, name: "", contact: "", clientKind: "PF", existingClientId: "", counterparty: "", summary: "" });
+    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: prospectName, contact: prospectContact, clientKind: selectedClient?.kind ?? form.clientKind, ...(selectedClient ? { existingClientId: selectedClient.id } : {}), assigneeId: v.me!.id, practiceAreaId: form.area, matterNature: form.matterNature as MatterNature, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
+    setForm({ ...form, name: "", contact: "", clientKind: "PF", existingClientId: "", counterparty: "", matterNature: "", summary: "" });
     navigate({ search: {}, replace: true });
     toast.success("Atendimento registrado; revisão de conflito pendente na demonstração");
   };
 
   return (
     <>
-      <PageHeader title="Atendimentos" subtitle="Da primeira conversa ao caso — conversão só após aprovação profissional."
+      <PageHeader title="Atendimentos" subtitle={canSeeOfficeQueue ? "Fila de todo o escritório. Da primeira conversa ao caso, com conversão só após aprovação profissional." : `Minha carteira: exibe apenas atendimentos atribuídos a ${v.me?.name ?? "este perfil"}.`}
         actions={<Button onClick={() => navigate({ search: { novo: true } })}><Plus /> Novo atendimento</Button>} />
       <div className="flex gap-3 overflow-x-auto pb-4">
         {STAGES.map((s) => {
@@ -142,6 +162,7 @@ function Atendimentos() {
                     <button onClick={() => setSel(i)} className="w-full rounded-lg border bg-card p-3 text-left shadow-soft hover:border-primary/40">
                       <p className="text-sm font-medium">{i.name}</p>
                       <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{i.summary}</p>
+                      <p className="mt-2 text-xs text-muted-foreground">Responsável: {v.memberName(i.assigneeId)}</p>
                       <p className="mt-2 text-[11px] text-muted-foreground">{v.areaName(i.practiceAreaId)} · {fmtDate(i.createdAt)}</p>
                     </button>
                   </li>
@@ -157,7 +178,7 @@ function Atendimentos() {
           {sel && <>
             <DialogHeader>
               <DialogTitle className="font-display text-xl font-medium">{sel.name}</DialogTitle>
-              <DialogDescription>{sel.clientKind} · {sel.existingClientId ? "Cliente existente selecionado" : "Novo cliente na conversão"} · {v.areaName(sel.practiceAreaId)} · {STAGES.find((s) => s.id === sel.stage)?.label} · {sel.contact}</DialogDescription>
+              <DialogDescription>{sel.clientKind} · {sel.existingClientId ? "Cliente existente selecionado" : "Novo cliente na conversão"} · {v.areaName(sel.practiceAreaId)} · Responsável: {v.memberName(sel.assigneeId)} · {STAGES.find((s) => s.id === sel.stage)?.label} · {sel.contact}</DialogDescription>
             </DialogHeader>
             <p className="text-sm">{sel.summary}</p>
             <section className="rounded-lg border bg-muted/30 p-3">
@@ -211,6 +232,11 @@ function Atendimentos() {
             <div className="space-y-1.5"><Label htmlFor="i-area">Área</Label>
               <Select value={form.area} onValueChange={(a) => setForm({ ...form, area: a })}><SelectTrigger id="i-area" aria-label="Área de atuação" aria-required="true"><SelectValue /></SelectTrigger>
                 <SelectContent>{office.practiceAreas.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="i-nature">Natureza provável do caso</Label>
+              <Select value={form.matterNature} onValueChange={(matterNature) => setForm({ ...form, matterNature: matterNature as MatterNature })}><SelectTrigger id="i-nature" aria-label="Natureza provável do caso" aria-required="true"><SelectValue placeholder="Selecione a natureza" /></SelectTrigger>
+                <SelectContent><SelectItem value="consultivo">Consultivo</SelectItem><SelectItem value="extrajudicial">Extrajudicial</SelectItem><SelectItem value="pre_contencioso">Pré-contencioso</SelectItem><SelectItem value="judicial">Judicial</SelectItem></SelectContent></Select>
+              <p className="text-xs text-muted-foreground">Classificação inicial, preservada se o atendimento for convertido em caso.</p>
+            </div>
             <div className="space-y-1.5"><Label htmlFor="i-s">Relato</Label><Textarea id="i-s" value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} /></div>
             <DialogFooter><Button type="submit">Registrar atendimento demo</Button></DialogFooter>
           </form>

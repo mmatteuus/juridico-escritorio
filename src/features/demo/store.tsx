@@ -70,6 +70,10 @@ export function useOfficeView(office: Office) {
     });
     const visibleDocIds = new Set(docs.map((doc) => doc.id));
     const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(role);
+    const intakes = data.intakes.filter((intake) =>
+      intake.officeId === office.id && (canSeeOfficeQueue || intake.assigneeId === me?.id),
+    );
+    const visibleIntakeIds = new Set(intakes.map((intake) => intake.id));
     const tasks = inScope(data.tasks).filter((task) => !!task.matterId || task.assigneeId === me?.id || task.requesterId === me?.id || canSeeOfficeQueue);
     const notifications = inScope(data.notifications).filter((notification) =>
       (!notification.recipientMemberId || notification.recipientMemberId === me?.id || canSeeOfficeQueue) &&
@@ -93,8 +97,10 @@ export function useOfficeView(office: Office) {
         .sort((a, b) => b.proposedAt.localeCompare(a.proposedAt)),
       role,
       matters,
-      intakes: data.intakes.filter((i) => i.officeId === office.id),
-      conflicts: data.conflicts.filter((c) => c.officeId === office.id),
+      intakes,
+      conflicts: data.conflicts.filter((check) =>
+        check.officeId === office.id && (!check.intakeId || visibleIntakeIds.has(check.intakeId)),
+      ),
       clientPortalInvites: inScope(data.clientPortalInvites),
       collaboratorInvites: data.collaboratorInvites.filter((invite) => invite.officeId === office.id),
       teams: data.teams.filter((team) => team.officeId === office.id),

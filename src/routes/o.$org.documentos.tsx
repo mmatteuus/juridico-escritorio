@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { findOffice, fmtDate, uid, useDemo, useOfficeView } from "@/features/dem
 import type { Doc, DocRevision, DocWorkflowEvent, DocumentFileMetadata, RoleId } from "@/features/demo/types";
 
 export const Route = createFileRoute("/o/$org/documentos")({
-  validateSearch: (s: Record<string, unknown>): { novo?: boolean } => (s["novo"] ? { novo: true } : {}),
+  validateSearch: (s: Record<string, unknown>): { novo?: boolean; docId?: string } => ({ ...(s["novo"] ? { novo: true } : {}), ...(typeof s["docId"] === "string" ? { docId: s["docId"] } : {}) }),
   head: () => ({ meta: [{ title: "Documentos · JURIDO Escritórios" }, { name: "robots", content: "noindex" }] }),
   component: DocumentosPage,
 });
@@ -39,7 +39,7 @@ const grantableRoles: { id: RoleId; label: string }[] = [
 
 function DocumentosPage() {
   const { org } = Route.useParams();
-  const { novo } = Route.useSearch();
+  const { novo, docId } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const office = findOffice(org)!;
   const view = useOfficeView(office);
@@ -64,6 +64,14 @@ function DocumentosPage() {
     (doc.title + " " + doc.category + " " + (doc.description ?? "") + " " + (doc.content ?? "") + " " + (view.matterById(doc.matterId)?.title ?? "")).toLocaleLowerCase("pt-BR").includes(query.toLocaleLowerCase("pt-BR")),
   ) : [];
   const preview = view.docs.find((doc) => doc.id === previewId) ?? null;
+
+  useEffect(() => {
+    if (!docId || !canSeeLegalDocs(view.role)) return;
+    const visibleDoc = view.docs.find((doc) => doc.id === docId && doc.officeId === office.id);
+    if (!visibleDoc) return;
+    setStatusFilter(visibleDoc.status ?? "todos");
+    setPreviewId(visibleDoc.id);
+  }, [docId, office.id, view.docs, view.role]);
 
   function formatFileSize(sizeBytes: number) {
     return sizeBytes < 1024 * 1024 ? `${Math.max(1, Math.round(sizeBytes / 1024))} KB` : `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;

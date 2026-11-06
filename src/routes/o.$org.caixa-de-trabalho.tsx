@@ -43,6 +43,9 @@ function Caixa() {
   const pendingMessages = q === "revisao" && canSeeLegalDocs(v.role)
     ? v.messages.filter((message) => message.status === "aguardando_revisao" && inArea(message.matterId))
     : [];
+  const pendingDocuments = q === "revisao" && canSeeLegalDocs(v.role)
+    ? v.docs.filter((doc) => doc.status === "revisao_pendente" && inArea(doc.matterId))
+    : [];
 
   const changeTaskStatus = (task: Task, next: TaskStatus) => {
     const current = v.tasks.find((item) => item.id === task.id && item.officeId === office.id);
@@ -72,7 +75,7 @@ function Caixa() {
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Filtrar caixa de trabalho">
         {(Object.keys(queues) as Q[]).map((k) => (
           <Button key={k} aria-pressed={q === k} size="sm" variant={q === k ? "default" : "outline"} onClick={() => setQ(k)}>
-            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length : 0)}</span>
+            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length + pendingDocuments.length : 0)}</span>
           </Button>
         ))}
       </div>
@@ -81,7 +84,7 @@ function Caixa() {
           <Button key={a.id} size="sm" variant={area === a.id ? "secondary" : "ghost"} aria-pressed={area === a.id} onClick={() => setArea(a.id)}>{a.name}</Button>
         ))}
       </div>
-      {tasks.length + dls.length + pendingMessages.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
+      {tasks.length + dls.length + pendingMessages.length + pendingDocuments.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
           {dls.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
@@ -95,6 +98,12 @@ function Caixa() {
             <li key={message.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Comunicação aguardando revisão: {message.recipient}</p><p className="mt-1 break-words text-xs text-muted-foreground">Rascunho não enviado · {message.content}</p></div>
               <Button size="sm" variant="outline" asChild><Link to="/o/$org/comunicacao/$id" params={{ org, id: message.id }}>Revisar rascunho</Link></Button>
+            </li>
+          ))}
+          {pendingDocuments.map((doc) => (
+            <li key={doc.id} className="flex flex-wrap items-center gap-3 p-4">
+              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Documento aguardando revisão: {doc.title}</p><p className="mt-1 break-words text-xs text-muted-foreground">{doc.category} · {v.matterById(doc.matterId)?.code ?? "Caso indisponível"} · revisão profissional pendente · demonstração</p></div>
+              <Button size="sm" variant="outline" asChild><Link to="/o/$org/documentos" params={{ org }} search={{ docId: doc.id }}>Abrir revisão</Link></Button>
             </li>
           ))}
           {tasks.map((t) => {
