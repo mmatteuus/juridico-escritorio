@@ -155,7 +155,7 @@ export function isToday(iso: string) {
 }
 
 export function isOverdue(t: Pick<Task, "dueAt" | "status">) {
-  return t.status !== "concluida" && new Date(t.dueAt) < new Date() && !isToday(t.dueAt);
+  return !!t.dueAt && t.status !== "concluida" && new Date(t.dueAt) < new Date() && !isToday(t.dueAt);
 }
 
 export const fmtDate = (iso: string) =>

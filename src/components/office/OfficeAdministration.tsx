@@ -58,7 +58,7 @@ export function OfficeAdministration({office,section}:{office:Office;section:Sec
   const since=new Date(); since.setDate(since.getDate()-days); since.setHours(0,0,0,0);
   const inPeriod=(date:string)=>{const time=new Date(date).getTime(); return Number.isFinite(time)&&time>=since.getTime()&&time<=Date.now()};
   const recentMatters=view.matters.filter(m=>inPeriod(m.updatedAt));
-  const recentTasks=view.tasks.filter(t=>inPeriod(t.dueAt));
+  const recentTasks=view.tasks.filter(t=>t.dueAt && inPeriod(t.dueAt));
   const recentDeadlines=view.deadlines.filter(d=>inPeriod(d.dueDate));
   const recentIntakes=view.intakes.filter(i=>inPeriod(i.createdAt));
   const submitTicket=(event:FormEvent)=>{

@@ -201,7 +201,7 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   assigneeId: string;
-  dueAt: string;
+  dueAt?: string;
   requesterId?: string;
   instructions?: string;
   proceedingId?: string;

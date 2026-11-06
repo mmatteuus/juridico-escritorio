@@ -104,7 +104,7 @@ function CaseDetail() {
   const processes = view.proceedings.filter((item) => item.matterId === matter.id);
   const tasks = view.tasks
     .filter((item) => item.matterId === matter.id)
-    .sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+    .sort((a, b) => (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999"));
   const deadlines = view.deadlines
     .filter((item) => item.matterId === matter.id)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
@@ -501,7 +501,7 @@ function CaseDetail() {
                   {item.title}
                 </Link>
                 <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  {view.memberName(item.assigneeId)} · {fmtDateTime(item.dueAt)} ·{" "}
+                  {view.memberName(item.assigneeId)} · {(item.dueAt ? fmtDateTime(item.dueAt) : "Sem data-alvo")} ·{" "}
                   {TASK_STATUS_LABEL[item.status]} <PriorityBadge value={item.priority} />
                 </p>
               </li>

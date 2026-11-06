@@ -62,14 +62,14 @@ function Inicio() {
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-display text-xl">Tarefas próximas</h2><Link to="/o/$org/tarefas" params={{ org }} className="shrink-0 text-sm text-primary hover:underline">Ver todas</Link></div>
           {open.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma tarefa em aberto.</p>}
           <ul className="divide-y">
-            {[...open].sort((a, b) => a.dueAt.localeCompare(b.dueAt)).slice(0, 8).map((t) => {
+            {[...open].sort((a, b) => (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999")).slice(0, 8).map((t) => {
               const m = caseLink(t.matterId);
               return (
                 <li key={t.id} className="flex flex-wrap items-center gap-2 py-2.5">
                   <div className="min-w-0 flex-1">
-                    <p className="break-words text-sm font-medium">{t.title}</p>
+                    <Link to="/o/$org/tarefas/$id" params={{ org, id: t.id }} className="break-words text-sm font-medium hover:text-primary hover:underline">{t.title}</Link>
                     <p className="text-xs text-muted-foreground">
-                      {v.memberName(t.assigneeId)} · {TASK_STATUS_LABEL[t.status]} · {isOverdue(t) ? <strong className="text-destructive">atrasada</strong> : fmtDateTime(t.dueAt)}
+                      {v.memberName(t.assigneeId)} · {TASK_STATUS_LABEL[t.status]} · {isOverdue(t) ? <strong className="text-destructive">atrasada</strong> : (t.dueAt ? fmtDateTime(t.dueAt) : "Sem data-alvo")}
                       {m && <> · <Link className="text-primary underline-offset-2 hover:underline" to="/o/$org/casos/$id" params={{ org, id: m.id }}>{m.code}</Link></>}
                     </p>
                   </div>

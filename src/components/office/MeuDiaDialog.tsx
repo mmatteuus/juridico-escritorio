@@ -55,7 +55,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
     { title: "Críticos e atrasados", Icon: AlertTriangle, items: mine.filter((t) => isOverdue(t) || t.priority === "critica").map((t) => ({ id: t.id, label: t.title, meta: "Tarefa", target: { type: "tarefa" as const, id: t.id } })) },
     ...(canSeeCnj(v.role) ? [{ title: "Prazos pendentes de revisão", Icon: ShieldAlert, items: v.deadlines.filter((d) => d.status === "proposto" || d.status === "em_revisao").map((d) => ({ id: d.id, label: d.title, meta: d.status === "proposto" ? "Proposto · não confirmado" : "Em revisão", target: { type: "prazo" as const, id: d.id } })) }] : []),
     { title: "Hoje", Icon: Clock, items: [
-      ...mine.filter((t) => isToday(t.dueAt) && t.status !== "aguardando_cliente").map((t) => ({ id: t.id, label: t.title, meta: `Tarefa · ${fmtTime(t.dueAt)}`, target: { type: "tarefa" as const, id: t.id } })),
+      ...mine.filter((t) => !!t.dueAt && isToday(t.dueAt) && t.status !== "aguardando_cliente").map((t) => ({ id: t.id, label: t.title, meta: `Tarefa · ${fmtTime(t.dueAt!)}`, target: { type: "tarefa" as const, id: t.id } })),
       ...v.appointments.filter((a) => isToday(a.at)).map((a) => ({ id: a.id, label: a.title, meta: `Compromisso · ${fmtTime(a.at)}`, target: { type: "agenda" as const } })),
     ] },
     { title: "Aguardando cliente", Icon: Hourglass, items: mine.filter((t) => t.status === "aguardando_cliente").map((t) => ({ id: t.id, label: t.title, meta: "Aguardando documentos", target: { type: "tarefa" as const, id: t.id } })) },

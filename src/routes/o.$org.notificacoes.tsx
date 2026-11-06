@@ -53,12 +53,14 @@ function Notificacoes() {
                 <p className={cn("text-sm", !n.read && "font-semibold")}>{n.title} {n.priority === "alta" && <span className="ml-1 text-xs font-semibold text-destructive">· prioridade alta</span>}</p>
                 <p className="text-xs text-muted-foreground">{CATS[n.category]} · {fmtDateTime(n.at)} {!n.read && "· não lida"}{isSnoozed(n) && n.snoozedUntil && ` · adiada até ${fmtDateTime(n.snoozedUntil)}`}</p>
               </div>
+              <div className="flex w-full flex-wrap gap-2 pl-5 sm:w-auto sm:pl-0">
               {n.taskId && v.tasks.some(task => task.id === n.taskId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/tarefas/$id" params={{ org, id: n.taskId }} onClick={() => mark(n.id)}>Abrir tarefa</Link></Button>}
               {n.docId && v.docs.some(doc => doc.id === n.docId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId ?? v.docs.find(doc => doc.id === n.docId)!.matterId }} search={{ tab: "documentos" }} onClick={() => mark(n.id)}>Abrir documento</Link></Button>}
               {!n.taskId && !n.docId && n.matterId && v.matterById(n.matterId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId }} onClick={() => mark(n.id)}>Abrir caso</Link></Button>}
               {n.category === "suporte" && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/suporte" params={{ org }} onClick={() => mark(n.id)}>Abrir suporte</Link></Button>}
               {!n.read && <Button size="sm" variant="outline" onClick={() => mark(n.id)}>Marcar lida</Button>}
               {cat === "adiadas" ? <Button size="sm" variant="outline" onClick={() => unsnooze(n.id)}>Reativar agora</Button> : <Button size="sm" variant="ghost" onClick={() => snooze(n.id)}>Adiar 24h</Button>}
+              </div>
             </li>
           ))}
         </ul>

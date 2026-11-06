@@ -51,7 +51,7 @@ function Agenda() {
   if (mode === "mes") to.setMonth(to.getMonth() + 1);
 
   const items: Item[] = [
-    ...v.tasks.filter((t) => t.status !== "concluida").map((t): Item => ({ id: t.id, at: t.dueAt, title: t.title, kind: "Tarefa", matterId: t.matterId, who: t.assigneeId })),
+    ...v.tasks.filter((t) => t.status !== "concluida" && !!t.dueAt).map((t): Item => ({ id: t.id, at: t.dueAt!, title: t.title, kind: "Tarefa", matterId: t.matterId, who: t.assigneeId })),
     ...v.deadlines.filter((d) => d.status !== "cancelado").map((d): Item => ({ id: d.id, at: d.dueDate, title: d.title, kind: "Prazo", matterId: d.matterId, who: d.assigneeId, status: d.status })),
     ...v.appointments.map((a): Item => ({ id: a.id, at: a.at, title: a.title, kind: "Compromisso", matterId: a.matterId, who: a.assigneeId, practiceAreaId: a.practiceAreaId })),
   ].filter((i) => {

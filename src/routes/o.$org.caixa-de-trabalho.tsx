@@ -41,7 +41,7 @@ function Caixa() {
     delegadas: { label: "Aguardando cliente", tasks: open.filter((t) => t.status === "aguardando_cliente") },
     area: { label: "Toda a equipe", tasks: open },
   };
-  const tasks = queues[q].tasks.filter((t) => inArea(t.matterId)).sort((a, b) => PRI[a.priority] - PRI[b.priority] || a.dueAt.localeCompare(b.dueAt));
+  const tasks = queues[q].tasks.filter((t) => inArea(t.matterId)).sort((a, b) => PRI[a.priority] - PRI[b.priority] || (a.dueAt ?? "9999").localeCompare(b.dueAt ?? "9999"));
   const dls = q === "revisao" && canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)) : [];
   const pendingMessages = q === "revisao" && canSeeLegalDocs(v.role)
     ? v.messages.filter((message) => message.status === "aguardando_revisao" && inArea(message.matterId))
@@ -137,7 +137,7 @@ function Caixa() {
               return <li key={`task-${task.id}`} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{task.title}</p>
-                  <p className="text-xs text-muted-foreground">{v.memberName(task.assigneeId)} · {TASK_STATUS_LABEL[task.status]} · {isOverdue(task) ? <strong className="text-destructive">atrasada</strong> : fmtDateTime(task.dueAt)}{matter && <> · <Link to="/o/$org/casos/$id" params={{ org, id: matter.id }} className="text-primary hover:underline">{matter.code}</Link></>}</p>
+                  <p className="text-xs text-muted-foreground">{v.memberName(task.assigneeId)} · {TASK_STATUS_LABEL[task.status]} · {isOverdue(task) ? <strong className="text-destructive">atrasada</strong> : (task.dueAt ? fmtDateTime(task.dueAt) : "Sem data-alvo")}{matter && <> · <Link to="/o/$org/casos/$id" params={{ org, id: matter.id }} className="text-primary hover:underline">{matter.code}</Link></>}</p>
                 </div>
                 <PriorityBadge value={task.priority} />
                 <Button size="sm" variant="outline" disabled={!canManageTask(v.role, task, v.me?.id)} onClick={() => { setSelectedTask(task); setReason(""); }}>Etapa rápida</Button>
@@ -151,7 +151,7 @@ function Caixa() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedTask?.title}</DialogTitle>
-            <DialogDescription>Responsável: {v.memberName(selectedTask?.assigneeId)} · Data-alvo interna: {selectedTask && fmtDateTime(selectedTask.dueAt)}</DialogDescription>
+            <DialogDescription>Responsável: {v.memberName(selectedTask?.assigneeId)} · Data-alvo interna: {selectedTask?.dueAt ? fmtDateTime(selectedTask.dueAt) : "Sem data-alvo"}</DialogDescription>
           </DialogHeader>
           {selectedTask && <>
             <div className="flex flex-wrap gap-2"><PriorityBadge value={selectedTask.priority}/><span className="text-sm">{TASK_STATUS_LABEL[selectedTask.status]}</span></div>
