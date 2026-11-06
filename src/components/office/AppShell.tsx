@@ -215,6 +215,9 @@ export function AppShell({ office, children }: { office: Office; children: React
 
   return (
     <div className="flex min-h-screen bg-background">
+      <a href="#office-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg">
+        Pular para o conteúdo principal
+      </a>
       <aside className={cn("sticky top-0 hidden h-screen shrink-0 transition-[width] duration-200 lg:block", sidebarCollapsed ? "w-[74px]" : "w-64")}>
         <SidebarBody office={office} compact={sidebarCollapsed} />
       </aside>
@@ -338,7 +341,7 @@ export function AppShell({ office, children }: { office: Office; children: React
             </DropdownMenu>
           </div>
         </header>
-        <main key={`${office.id}-${role}`} className="mx-auto min-w-0 w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main id="office-main" key={`${office.id}-${role}`} tabIndex={-1} className="mx-auto min-w-0 w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>

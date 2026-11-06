@@ -18,7 +18,9 @@ function Cliente() {
   const matters = v.matters.filter((m) => m.clientIds.includes(c.id));
   const ids = new Set(matters.map((m) => m.id));
   const docs = canSeeLegalDocs(v.role) ? v.docs.filter((d) => ids.has(d.matterId)) : [];
-  const intakes = v.intakes.filter((intake) => !!intake.matterId && matters.some((matter) => matter.id === intake.matterId));
+  const intakes = v.intakes
+    .filter((intake) => intake.existingClientId === c.id || (!!intake.matterId && matters.some((matter) => matter.id === intake.matterId)))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const openDls = v.deadlines.filter((d) => ids.has(d.matterId) && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const nextFor = (mid: string) => openDls.find((d) => d.matterId === mid);
   const summary = [
@@ -59,7 +61,7 @@ function Cliente() {
           <div>
             <h2 className="mb-2 font-display text-xl">Histórico de atendimento</h2>
             {intakes.length === 0 ? <EmptyState title="Sem atendimentos registrados" /> : (
-              <ul className="space-y-2 text-sm">{intakes.map((i) => <li key={i.id} className="rounded-xl border bg-card p-3">{i.summary}<span className="block text-xs text-muted-foreground">{fmtDate(i.createdAt)} · {i.stage.replace("_", " ")}</span></li>)}</ul>
+              <ul className="space-y-2 text-sm">{intakes.map((i) => <li key={i.id}><Link to="/o/$org/atendimentos" params={{ org }} search={{ intakeId: i.id }} className="block rounded-xl border bg-card p-3 hover:border-primary/40"><span className="block font-medium">{i.summary || i.name}</span><span className="mt-1 block text-xs text-muted-foreground">{fmtDate(i.createdAt)} · {i.stage.replaceAll("_", " ")} · {i.matterId ? "Caso vinculado" : "Ainda sem caso"}</span></Link></li>)}</ul>
             )}
           </div>
         </section>

@@ -267,7 +267,7 @@ export function OfficeProfileEditor({ office }: { office: Office }) {
           <p className="mt-0.5 text-xs text-muted-foreground">Proposta de {view.memberName(revision.proposedByMemberId)} · {fmtDateTime(revision.proposedAt)}</p>
           {revision.submittedAt && <p className="text-xs text-muted-foreground">Enviada para revisão · {fmtDateTime(revision.submittedAt)}</p>}
           {revision.reviewedAt && <p className="text-xs text-muted-foreground">Decisão de {view.memberName(revision.reviewedByMemberId)} · {fmtDateTime(revision.reviewedAt)}. {revision.reviewReason}</p>}
-        </li>)}</ol> : <div className="mt-4"><EmptyState title="Nenhuma alteração proposta" hint="A versão atual foi aprovada em " /></div>}
+        </li>)}</ol> : <div className="mt-4"><EmptyState title="Nenhuma alteração proposta" hint="A versão institucional vigente está aprovada. Novas propostas aparecem neste histórico." /></div>}
         {!view.officeProfileRevisions.length && <p className="mt-1 text-xs text-muted-foreground">{fmtDateTime(profile.approvedAt)} · v{profile.version}</p>}
       </section>
     </div>

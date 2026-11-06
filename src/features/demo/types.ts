@@ -358,6 +358,9 @@ export interface Receivable {
   relatedCostId?: string;
   reason?: string;
   reviewStatus?: "pendente" | "em_revisao" | "revisado_demo";
+  reviewedByMemberId?: string;
+  reviewReason?: string;
+  reviewedAt?: string;
   /** Forecast amount, stored in integer BRL cents. */
   amountCents: number;
   dueDate: string;

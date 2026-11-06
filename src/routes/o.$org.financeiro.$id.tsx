@@ -3,8 +3,9 @@ import { useState } from "react";
 import { ArrowLeft, CircleAlert, FileText, Wallet } from "lucide-react";
 import { DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { canSeeFinance } from "@/features/demo/permissions";
-import { findOffice, fmtDate, useDemo, useOfficeView } from "@/features/demo/store";
+import { findOffice, fmtDate, timelineEvent, useDemo, useOfficeView } from "@/features/demo/store";
 import { formatBrlCents } from "@/features/demo/money";
 import type { Receivable } from "@/features/demo/types";
 
@@ -47,6 +48,9 @@ function FinancialDetail() {
   const view = useOfficeView(office);
   const { update } = useDemo();
   const [reviewNote, setReviewNote] = useState("");
+  const [reviewerId, setReviewerId] = useState(view.me?.id ?? "");
+  const [acknowledgeDemo, setAcknowledgeDemo] = useState(false);
+  const [reviewError, setReviewError] = useState("");
   if (!canSeeFinance(view.role)) return <DeniedState />;
   const item = view.receivables.find((row) => row.id === id);
   if (!item)
@@ -73,16 +77,24 @@ function FinancialDetail() {
     ? relatedCosts.find((row) => row.id === item.relatedCostId && row.clientId === item.clientId)
     : undefined;
   const review = () => {
-    if (!reviewNote.trim()) return;
+    if (!reviewerId || !reviewNote.trim() || !acknowledgeDemo) {
+      setReviewError("Informe o revisor, a justificativa e confirme que esta revisão não comprova uma operação financeira.");
+      return;
+    }
+    const reviewedAt = new Date().toISOString();
+    const reviewerName = view.memberName(reviewerId);
     update((data) => ({
       ...data,
       receivables: data.receivables.map((row) =>
         row.id === item.id && row.officeId === office.id
-          ? { ...row, reviewStatus: "revisado_demo", reason: reviewNote.trim() }
+          ? { ...row, reviewStatus: "revisado_demo", reviewedByMemberId: reviewerId, reviewReason: reviewNote.trim(), reviewedAt }
           : row,
       ),
+      timeline: [timelineEvent({ officeId: office.id, matterId: item.matterId, actor: reviewerName, kind: "aprovacao", text: `Registrou revisão demonstrativa da previsão “${item.label}”. ${reviewNote.trim()}` }), ...data.timeline],
     }));
     setReviewNote("");
+    setAcknowledgeDemo(false);
+    setReviewError("");
   };
   return (
     <div className="space-y-5">
@@ -114,6 +126,62 @@ function FinancialDetail() {
           <p className="mt-2 font-display text-3xl tabular-nums">{fmtDate(item.dueDate)}</p>
         </div>
       </div>
+      <section className={card} aria-labelledby="finance-review-title">
+        <h2 id="finance-review-title" className="font-display text-xl">Revisão da previsão</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          A revisão é demonstrativa e não confirma recebimento, pagamento ou movimentação bancária.
+        </p>
+        {item.reviewStatus === "revisado_demo" ? (
+          <p role="status" className="mt-4 rounded-lg bg-muted p-3 text-sm">
+            Revisão registrada por {view.memberName(item.reviewedByMemberId ?? "")}.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="finance-reviewer">Revisor</Label>
+                <select
+                  id="finance-reviewer"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={reviewerId}
+                  onChange={(event) => setReviewerId(event.target.value)}
+                  required
+                >
+                  <option value="">Selecione o revisor</option>
+                  {view.members.map((member) => (
+                    <option key={member.id} value={member.id}>{member.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="finance-review-reason">Justificativa da revisão</Label>
+                <textarea
+                  id="finance-review-reason"
+                  className="min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={reviewNote}
+                  onChange={(event) => setReviewNote(event.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  required
+                />
+              </div>
+            </div>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={acknowledgeDemo}
+                onChange={(event) => setAcknowledgeDemo(event.target.checked)}
+              />
+              <span>Confirmo que esta ação registra somente uma revisão demonstrativa, sem comprovar uma operação financeira.</span>
+            </label>
+            {reviewError && <p role="alert" className="text-sm text-destructive">{reviewError}</p>}
+            <Button onClick={review} disabled={!reviewerId || !reviewNote.trim() || !acknowledgeDemo}>
+              Registrar revisão demonstrativa
+            </Button>
+          </div>
+        )}
+      </section>
       <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         <section className={card}>
           <div className="flex items-center gap-2">
@@ -136,6 +204,9 @@ function FinancialDetail() {
                     : "Pendente"
               }
             />
+            {item.reviewedByMemberId && <Info label="Revisor" value={view.memberName(item.reviewedByMemberId)} />}
+            {item.reviewReason && <Info label="Justificativa da revisão" value={item.reviewReason} />}
+            {item.reviewedAt && <Info label="Revisado em" value={new Date(item.reviewedAt).toLocaleString("pt-BR")} />}
             <Info label="Justificativa" value={item.reason ?? "Não informada"} />
             <Info
               label="Custo de origem"

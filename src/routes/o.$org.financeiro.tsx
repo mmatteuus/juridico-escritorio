@@ -36,6 +36,7 @@ function FinancePage() {
   const { update } = useDemo();
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("todos");
+  const [reviewState, setReviewState] = useState<"todos" | "pendente" | "em_revisao" | "revisado_demo">("todos");
   const [open, setOpen] = useState(false);
   const [matterId, setMatterId] = useState("");
   const [label, setLabel] = useState("");
@@ -59,12 +60,13 @@ function FinancePage() {
         .filter(
           (r) =>
             (kind === "todos" || r.kind === kind) &&
+            (reviewState === "todos" || (r.reviewStatus ?? "pendente") === reviewState) &&
             `${r.label} ${v.matterById(r.matterId)?.code ?? ""}`
               .toLowerCase()
               .includes(query.toLowerCase()),
         )
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
-    [v, kind, query],
+    [v, kind, reviewState, query],
   );
   if (!canSeeFinance(v.role)) return <DeniedState />;
   const incoming = v.receivables
@@ -322,6 +324,17 @@ function FinancePage() {
                 </option>
               ))}
             </select>
+            <select
+              aria-label="Filtrar estado da revisão"
+              className="rounded-md border bg-background px-2 text-sm"
+              value={reviewState}
+              onChange={(e) => setReviewState(e.target.value as typeof reviewState)}
+            >
+              <option value="todos">Todos os estados</option>
+              <option value="pendente">Pendente</option>
+              <option value="em_revisao">Em revisão</option>
+              <option value="revisado_demo">Revisado na demonstração</option>
+            </select>
           </div>
         </div>
         {rows.length ? (
@@ -338,6 +351,7 @@ function FinancePage() {
                     <p className="font-medium">{r.label}</p>
                     <p className="text-xs text-muted-foreground">
                       {r.category ? categories[r.category] : kinds[r.kind]} ·{" "}
+                      {r.reviewStatus === "revisado_demo" ? "Revisado na demonstração" : r.reviewStatus === "em_revisao" ? "Em revisão" : "Pendente de revisão"} ·{" "}
                       {v.matterById(r.matterId)?.code ?? "Caso não disponível"} · Referência{" "}
                       {fmtDate(r.dueDate)}
                     </p>
