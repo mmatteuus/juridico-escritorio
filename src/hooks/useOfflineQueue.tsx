@@ -6,7 +6,7 @@ import { useOnline } from "@/hooks/useOnline"; // corrected import
  * When the network comes back it replays them in order.
  */
 export function useOfflineQueue() {
-  const queue = useRef<Array<() => Promise<any>>([]);
+  const queue = useRef<Array<() => Promise<unknown>>>([]);
   const { isOnline } = useOnline();
 
   useEffect(() => {
