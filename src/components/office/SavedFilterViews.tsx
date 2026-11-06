@@ -42,20 +42,24 @@ export function SavedFilterViews<T extends FilterValues>({
   const [selectedId, setSelectedId] = useState("");
   const [name, setName] = useState("");
   const [announcement, setAnnouncement] = useState("");
+  const [storageError, setStorageError] = useState(false);
 
   useEffect(() => {
     let stored: string | null = null;
     try { stored = window.localStorage.getItem(storageKey); } catch { stored = null; }
     setViews(readSavedViews(stored, schemaKey ? schemaKey.split("|") : []));
     setSelectedId("");
+    setStorageError(false);
   }, [storageKey, schemaKey]);
 
   const saveViews = (next: SavedView<T>[]) => {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(next));
       setViews(next);
+      setStorageError(false);
       return true;
     } catch {
+      setStorageError(true);
       setAnnouncement("Não foi possível salvar a visualização neste navegador.");
       return false;
     }
@@ -119,6 +123,7 @@ export function SavedFilterViews<T extends FilterValues>({
       </select>
       <Button type="button" size="sm" onClick={applySelected} disabled={!selectedId}>Aplicar</Button>
       <Button type="button" size="sm" variant="ghost" onClick={deleteSelected} disabled={!selectedId} aria-label="Excluir visualização selecionada">Excluir</Button>
+      {storageError && <p role="alert" className="w-full text-sm text-destructive">Não foi possível salvar a visualização neste navegador.</p>}
       <p role="status" aria-live="polite" className="sr-only">{announcement}</p>
     </div>
   );
