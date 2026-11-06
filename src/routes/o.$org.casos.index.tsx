@@ -51,12 +51,12 @@ function Casos() {
       </div>
       <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="casos" currentValues={{ q, area, nature }} onApply={(filters) => { setQ(filters.q); setArea(filters.area); setNature(filters.nature as MatterNature | "todas"); }} /></div>
       {list.length === 0 ? <EmptyState title="Nenhum caso encontrado" hint="Ajuste os filtros ou crie um novo caso." /> : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {pagination.items.map((m) => {
             const procs = v.proceedings.filter((p) => p.matterId === m.id).length;
             const next = v.deadlines.filter((d) => d.matterId === m.id && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
             return (
-              <Link key={m.id} to="/o/$org/casos/$id" params={{ org, id: m.id }} className="group rounded-xl border bg-card p-4 shadow-soft transition hover:border-primary/40">
+              <Link key={m.id} to="/o/$org/casos/$id" params={{ org, id: m.id }} className="group min-w-0 rounded-xl border bg-card p-4 shadow-soft transition hover:border-primary/40">
                 <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground"><span className="tabular">{m.code}</span><ConfidentialityBadge value={m.confidentiality} /></div>
                 <h2 className="mt-2 font-display text-lg leading-snug group-hover:text-primary">{m.title}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">{m.clientIds.map(v.clientName).join(", ")}</p>
