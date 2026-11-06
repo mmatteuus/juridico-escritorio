@@ -13,6 +13,11 @@ const names: Record<Tab, string> = { resumo: "Resumo", processos: "Processos", d
 const status: Record<Matter["status"], string> = { ativo: "Ativo", em_analise: "Em análise", suspenso: "Suspenso", encerrado: "Encerrado" };
 const visibility: Record<Doc["visibility"], string> = { equipe: "Equipe", restrito: "Restrito", cliente: "Liberado ao cliente" };
 const card = "min-w-0 rounded-xl border bg-card p-5 shadow-soft";
+const defaultDocumentChecklist = [
+  { id: "identificacao", label: "Identificação ou documentos constitutivos", status: "pendente" as const },
+  { id: "representacao", label: "Representação e poderes", status: "pendente" as const },
+  { id: "suporte", label: "Documentos de suporte do caso", status: "pendente" as const },
+];
 
 export const Route = createFileRoute("/o/$org/casos/$id")({
   validateSearch: (search: Record<string, unknown>): { tab?: Tab } => tabs.includes(search["tab"] as Tab) ? { tab: search["tab"] as Tab } : {},
@@ -29,6 +34,7 @@ function CaseDetail() {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const matter = view.matterById(id);
   if (!matter) return <DeniedState />;
+  const matterId = matter.id;
   const processes = view.proceedings.filter(item => item.matterId === matter.id);
   const tasks = view.tasks.filter(item => item.matterId === matter.id).sort((a,b) => a.dueAt.localeCompare(b.dueAt));
   const deadlines = view.deadlines.filter(item => item.matterId === matter.id).sort((a,b) => a.dueDate.localeCompare(b.dueDate));
@@ -69,6 +75,18 @@ function CaseDetail() {
     }));
   }
 
+  function toggleChecklistItem(itemId: string, checked: boolean) {
+    const checklist = view.matterDocumentChecklists.find(item => item.matterId === matterId);
+    const items = (checklist?.items ?? defaultDocumentChecklist).map(item => item.id === itemId ? { ...item, status: checked ? "conferido" as const : "pendente" as const } : item);
+    update(data => ({
+      ...data,
+      matterDocumentChecklists: [
+        ...data.matterDocumentChecklists.filter(item => item.officeId !== office.id || item.matterId !== matterId),
+        { officeId: office.id, matterId, items },
+      ],
+    }));
+  }
+
   return <div className="space-y-5">
     <Link to="/o/$org/casos" params={{ org }} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Casos</Link>
     <PageHeader title={matter.title} subtitle={`${matter.code} · ${view.areaName(matter.practiceAreaId)} · ${clients.map(client=>client.name).join(", ") || "Sem cliente vinculado"}${matter.opposingParties ? ` · Parte contrária: ${matter.opposingParties}` : ""} · Equipe: ${members.map(member=>member.name).join(", ") || "Sem responsável"} · atualizado em ${fmtDate(matter.updatedAt)}`} actions={<ConfidentialityBadge value={matter.confidentiality} />} />
@@ -91,6 +109,7 @@ function CaseDetail() {
       {!canSeeLegalDocs(view.role) ? <EmptyState title="Documentos indisponíveis para este perfil"/> : <>
         <p className="mt-1 text-xs text-muted-foreground">Documento restrito exige concessão expressa por perfil, além do acesso ao caso. O vínculo com a equipe não libera seu conteúdo.</p>
         <Records empty="Nenhum documento visível neste caso.">{docs.map(item => <li key={item.id} className="border-b py-3 last:border-0"><div className="flex flex-wrap items-start justify-between gap-3"><button type="button" onClick={() => setSelectedDocId(item.id)} className="text-left font-medium text-primary hover:underline">{item.title}</button><span className="rounded-full bg-muted px-2 py-0.5 text-xs">{visibility[item.visibility]}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.category} · v{item.version} · {fmtDate(item.createdAt)} · {item.createdBy}</p></li>)}</Records>
+        <section className="mt-5 rounded-lg border bg-muted/20 p-4" aria-labelledby="document-checklist-title"><h3 id="document-checklist-title" className="font-semibold">Checklist documental</h3><p className="mt-1 text-xs text-muted-foreground">Marque a conferência dos itens. Isso não confirma upload nem substitui um documento no dossiê.</p><ul className="mt-3 space-y-2">{(view.matterDocumentChecklists.find(item => item.matterId === matter.id)?.items ?? defaultDocumentChecklist).map(item=><li key={item.id}><label className="flex items-start gap-2 rounded-md border bg-card p-3 text-sm"><input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={item.status === "conferido"} onChange={event=>toggleChecklistItem(item.id,event.target.checked)}/><span>{item.label}<span className="mt-0.5 block text-xs text-muted-foreground">{item.status === "conferido" ? "Conferido nesta demonstração" : "Pendente de conferência"}</span></span></label></li>)}</ul></section>
         {selectedDoc && <div className="mt-4 rounded-lg border bg-muted/30 p-4 text-sm">
           <h3 className="font-semibold">{selectedDoc.title}</h3>
           <p className="mt-1 text-muted-foreground">Metadados do documento demonstrativo. O arquivo não está disponível.</p>

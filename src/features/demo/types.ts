@@ -192,6 +192,10 @@ export interface Task {
   status: TaskStatus;
   assigneeId: string;
   dueAt: string;
+  requesterId?: string;
+  instructions?: string;
+  proceedingId?: string;
+  appointmentId?: string;
 }
 
 export interface DocumentFileMetadata {
@@ -222,6 +226,18 @@ export interface Doc {
   originalContent?: string;
   interpretation?: string;
   interpretationVersion?: number;
+}
+
+export interface MatterDocumentChecklistItem {
+  id: string;
+  label: string;
+  status: "pendente" | "conferido";
+}
+
+export interface MatterDocumentChecklist {
+  officeId: string;
+  matterId: string;
+  items: MatterDocumentChecklistItem[];
 }
 
 export interface DocumentModel {
@@ -437,6 +453,7 @@ export interface SecuritySession {
 }
 
 export interface DemoData {
+  matterDocumentChecklists: MatterDocumentChecklist[];
   contractAnalysisDrafts: ContractAnalysisDraft[];
   fiscalPreparationDrafts: FiscalPreparationDraft[];
   userPreferences: OfficeUserPreferences[];

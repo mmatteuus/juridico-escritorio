@@ -75,6 +75,7 @@ export function useOfficeView(office: Office) {
     );
     return {
       me,
+      matterDocumentChecklists: data.matterDocumentChecklists.filter((checklist) => checklist.officeId === office.id && visible.has(checklist.matterId)),
       contractAnalysisDraft: data.contractAnalysisDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
       fiscalPreparationDraft: data.fiscalPreparationDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
       userPreferences: data.userPreferences.find((preference) => preference.officeId === office.id && preference.memberId === me?.id),

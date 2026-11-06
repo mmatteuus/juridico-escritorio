@@ -55,6 +55,7 @@ function day(offsetDays: number, hour = 10, min = 0): string {
 
 export function buildFixtures(): DemoData {
   return {
+    matterDocumentChecklists: [],
     contractAnalysisDrafts: [],
     fiscalPreparationDrafts: [],
     userPreferences: [],
