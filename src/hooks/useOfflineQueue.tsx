@@ -6,7 +6,7 @@ import { useOnline } from "@/hooks/useOnline"; // corrected import
  * When the network comes back it replays them in order.
  */
 export function useOfflineQueue() {
-  const queue = useRef<Array<() > Promise<any>>([]);
+  const queue = useRef<Array<() => Promise<unknown>>>([]);
   const { isOnline } = useOnline();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function useOfflineQueue() {
   }, [isOnline]);
 
   // Return a function that callers can wrap their mutation in.
-  const enqueue = (mutation: () > Promise<any>) => {
+  const enqueue = (mutation: () => Promise<any>) => {
     if (isOnline) {
       mutation();
     } else {

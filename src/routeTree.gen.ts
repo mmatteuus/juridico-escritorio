@@ -15,6 +15,7 @@ import { Route as OOrgRouteImport } from './routes/o.$org'
 import { Route as OOrgAgendaRouteImport } from './routes/o.$org.agenda'
 import { Route as OOrgAtendimentosRouteImport } from './routes/o.$org.atendimentos'
 import { Route as OOrgCaixaDeTrabalhoRouteImport } from './routes/o.$org.caixa-de-trabalho'
+import { Route as OOrgFinanceiroRouteImport } from './routes/o.$org.financeiro'
 import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
 import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
 import { Route as OOrgPrazosRouteImport } from './routes/o.$org.prazos'
@@ -53,6 +54,11 @@ const OOrgAtendimentosRoute = OOrgAtendimentosRouteImport.update({
 const OOrgCaixaDeTrabalhoRoute = OOrgCaixaDeTrabalhoRouteImport.update({
   id: '/caixa-de-trabalho',
   path: '/caixa-de-trabalho',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgFinanceiroRoute = OOrgFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgInicioRoute = OOrgInicioRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
   '/o/$org/prazos': typeof OOrgPrazosRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
   '/o/$org/prazos': typeof OOrgPrazosRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/o/$org/agenda': typeof OOrgAgendaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
   '/o/$org/prazos': typeof OOrgPrazosRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/o/$org/agenda'
     | '/o/$org/atendimentos'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/financeiro'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
     | '/o/$org/prazos'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/o/$org/agenda'
     | '/o/$org/atendimentos'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/financeiro'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
     | '/o/$org/prazos'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/o/$org/agenda'
     | '/o/$org/atendimentos'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/financeiro'
     | '/o/$org/inicio'
     | '/o/$org/notificacoes'
     | '/o/$org/prazos'
@@ -255,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/caixa-de-trabalho'
       fullPath: '/o/$org/caixa-de-trabalho'
       preLoaderRoute: typeof OOrgCaixaDeTrabalhoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/financeiro': {
+      id: '/o/$org/financeiro'
+      path: '/financeiro'
+      fullPath: '/o/$org/financeiro'
+      preLoaderRoute: typeof OOrgFinanceiroRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/inicio': {
@@ -327,6 +346,7 @@ interface OOrgRouteChildren {
   OOrgAgendaRoute: typeof OOrgAgendaRoute
   OOrgAtendimentosRoute: typeof OOrgAtendimentosRoute
   OOrgCaixaDeTrabalhoRoute: typeof OOrgCaixaDeTrabalhoRoute
+  OOrgFinanceiroRoute: typeof OOrgFinanceiroRoute
   OOrgInicioRoute: typeof OOrgInicioRoute
   OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
   OOrgPrazosRoute: typeof OOrgPrazosRoute
@@ -342,6 +362,7 @@ const OOrgRouteChildren: OOrgRouteChildren = {
   OOrgAgendaRoute: OOrgAgendaRoute,
   OOrgAtendimentosRoute: OOrgAtendimentosRoute,
   OOrgCaixaDeTrabalhoRoute: OOrgCaixaDeTrabalhoRoute,
+  OOrgFinanceiroRoute: OOrgFinanceiroRoute,
   OOrgInicioRoute: OOrgInicioRoute,
   OOrgNotificacoesRoute: OOrgNotificacoesRoute,
   OOrgPrazosRoute: OOrgPrazosRoute,
