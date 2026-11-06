@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { DeniedState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canApproveIntake } from "@/features/demo/permissions";
 import { findOffice, fmtDate, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { ConflictCheck, Intake, IntakeStage, Matter, MatterNature } from "@/features/demo/types";
@@ -193,18 +195,7 @@ function Atendimentos() {
           return (
             <section key={s.id} className="w-64 shrink-0 rounded-xl border bg-muted/60 p-3" aria-label={s.label}>
               <h2 className="mb-2 flex justify-between text-sm font-semibold">{s.label}<span className="text-muted-foreground">{items.length}</span></h2>
-              <ul className="space-y-2">
-                {items.map((i) => (
-                  <li key={i.id}>
-                    <button onClick={() => setSel(i)} className="w-full rounded-lg border bg-card p-3 text-left shadow-soft hover:border-primary/40">
-                      <p className="text-sm font-medium">{i.name}</p>
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{i.summary}</p>
-                      <p className="mt-2 text-xs text-muted-foreground">Responsável: {v.memberName(i.assigneeId)}</p>
-                      <p className="mt-2 text-[11px] text-muted-foreground">{v.areaName(i.practiceAreaId)} · {fmtDate(i.createdAt)}</p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <IntakeStageCards items={items} resetKey={`${query}|${stageFilter}|${s.id}`} onSelect={setSel} memberName={v.memberName} areaName={v.areaName} />
             </section>
           );
         })}
@@ -281,4 +272,29 @@ function Atendimentos() {
       </Dialog>
     </>
   );
+}
+
+function IntakeStageCards({ items, resetKey, onSelect, memberName, areaName }: {
+  items: Intake[];
+  resetKey: string;
+  onSelect: (item: Intake) => void;
+  memberName: (memberId: string | undefined) => string;
+  areaName: (areaId: string) => string;
+}) {
+  const pagination = useOfficePagination(items, resetKey);
+  return <>
+    <ul className="space-y-2">
+      {pagination.items.map((item) => (
+        <li key={item.id}>
+          <button type="button" onClick={() => onSelect(item)} className="w-full rounded-lg border bg-card p-3 text-left shadow-soft hover:border-primary/40">
+            <p className="text-sm font-medium">{item.name}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.summary}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Responsável: {memberName(item.assigneeId)}</p>
+            <p className="mt-2 text-[11px] text-muted-foreground">{areaName(item.practiceAreaId)} · {fmtDate(item.createdAt)}</p>
+          </button>
+        </li>
+      ))}
+    </ul>
+    <OfficePaginationControls pagination={pagination} />
+  </>;
 }

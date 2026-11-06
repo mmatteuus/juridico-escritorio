@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { findOffice, useOfficeView } from "@/features/demo/store";
 
 export const Route = createFileRoute("/o/$org/clientes/")({
@@ -25,6 +27,7 @@ function Clientes() {
     if (novo) navigate({ to: "/o/$org/clientes/novo", params: { org }, replace: true });
   }, [novo, navigate, org]);
   const list = v.clients.filter((c) => (kind === "todos" || c.kind === kind) && c.name.toLowerCase().includes(q.toLowerCase()));
+  const pagination = useOfficePagination(list, `${q}|${kind}`);
 
   return (
     <>
@@ -38,7 +41,7 @@ function Clientes() {
       <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="clientes" currentValues={{ q, kind }} onApply={(filters) => { setQ(filters.q); setKind(filters.kind as typeof kind); }} /></div>
       {list.length === 0 ? <EmptyState title="Nenhum cliente encontrado" /> : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {list.map((c) => {
+          {pagination.items.map((c) => {
             const n = v.matters.filter((m) => m.clientIds.includes(c.id)).length;
             return (
               <li key={c.id}>
@@ -52,6 +55,7 @@ function Clientes() {
           })}
         </ul>
       )}
+      <OfficePaginationControls pagination={pagination} />
     </>
   );
 }

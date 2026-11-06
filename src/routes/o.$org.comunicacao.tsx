@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader, EmptyState } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { findOffice, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { MessageDraft } from "@/features/demo/types";
 
@@ -38,6 +40,7 @@ function ComunicacaoPage() {
       ),
     [v, status, query],
   );
+  const pagination = useOfficePagination(filtered, `${query}|${status}`);
   const save = (e: React.FormEvent) => {
     e.preventDefault();
     const client = v.clients.find((item) => item.id === clientId && item.officeId === office.id);
@@ -156,7 +159,7 @@ function ComunicacaoPage() {
       <div className="mt-3"><SavedFilterViews officeId={office.id} role={v.role} collection="comunicacao" currentValues={{ query, status }} onApply={(filters) => { setQuery(filters.query); setStatus(filters.status); }} /></div>
       {filtered.length ? (
         <div className="grid gap-3">
-          {filtered.map((m) => (
+          {pagination.items.map((m) => (
             <article key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex items-start gap-3">
@@ -190,6 +193,7 @@ function ComunicacaoPage() {
               </div>
             </article>
           ))}
+          <OfficePaginationControls pagination={pagination} />
         </div>
       ) : (
         <EmptyState

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canSeeLegalDocs } from "@/features/demo/permissions";
 import { findOffice, fmtDate, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { Doc, DocRevision, DocWorkflowEvent, DocumentFileMetadata, RoleId } from "@/features/demo/types";
@@ -64,6 +66,7 @@ function DocumentosPage() {
     (statusFilter === "todos" || doc.status === statusFilter) &&
     (doc.title + " " + doc.category + " " + (doc.description ?? "") + " " + (doc.content ?? "") + " " + (view.matterById(doc.matterId)?.title ?? "")).toLocaleLowerCase("pt-BR").includes(query.toLocaleLowerCase("pt-BR")),
   ) : [];
+  const pagination = useOfficePagination(docs, `${query}|${type}|${statusFilter}`);
   const preview = view.docs.find((doc) => doc.id === previewId) ?? null;
 
   useEffect(() => {
@@ -205,13 +208,14 @@ function DocumentosPage() {
     </div>
     <div className="mb-4"><SavedFilterViews officeId={office.id} role={view.role} collection="documentos" currentValues={{ query, type, statusFilter }} onApply={(filters) => { setQuery(filters.query); setType(filters.type); setStatusFilter(filters.statusFilter as typeof statusFilter); }} /></div>
     {docs.length === 0 ? <EmptyState title="Nenhum documento encontrado" hint="Ajuste os filtros ou crie um registro para um caso visível." /> : <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {docs.map((doc) => <li key={doc.id}><button type="button" onClick={() => setPreviewId(doc.id)} className="h-full w-full rounded-xl border bg-card p-5 text-left shadow-soft hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary">
+      {pagination.items.map((doc) => <li key={doc.id}><button type="button" onClick={() => setPreviewId(doc.id)} className="h-full w-full rounded-xl border bg-card p-5 text-left shadow-soft hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary">
         <div className="mb-3 flex items-center justify-between"><FileText className="size-5 text-primary" /><span className="rounded-full bg-muted px-2 py-1 text-xs">v{doc.version} · {statusLabel(doc)}</span></div>
         <p className="font-display text-lg leading-snug">{doc.title}</p><p className="mt-1 text-sm text-muted-foreground">{view.matterById(doc.matterId)?.title}</p>
         {doc.description && <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{doc.description}</p>}
         <p className="mt-4 text-xs text-muted-foreground">{doc.category} · {visibility[doc.visibility]} · {fmtDate(doc.createdAt)}</p>
       </button></li>)}
     </ul>}
+    <OfficePaginationControls pagination={pagination} />
     <Dialog open={!!novo} onOpenChange={(open) => { if (!open) { resetForm(); navigate({ search: {}, replace: true }); } }}><DialogContent className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>Novo registro de documento</DialogTitle><DialogDescription>Catálogo demonstrativo. A seleção local valida e registra apenas nome, tipo e tamanho; os bytes não são enviados nem armazenados.</DialogDescription></DialogHeader><form onSubmit={create} className="space-y-4">
       <div className="space-y-1.5"><Label htmlFor="doc-title">Título</Label><Input id="doc-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
       <div className="space-y-1.5"><Label htmlFor="doc-description">Descrição</Label><textarea id="doc-description" className="min-h-20 w-full rounded-md border bg-background p-3 text-sm" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={1000} required /></div>

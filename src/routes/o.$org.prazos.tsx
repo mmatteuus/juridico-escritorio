@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeadlineStatusChip, DeniedState, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { changeDeadline, rescheduleDeadline } from "@/features/demo/actions";
 import { canConfirmDeadline, canProposeDeadline, canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, fmtDateTime, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
@@ -122,8 +124,6 @@ function Prazos() {
   const [changeReason, setChangeReason] = useState("");
   const [form, setForm] = useState({ matterId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
   const actor = v.me?.name ?? "—";
-  if (!canSeeCnj(v.role)) return <DeniedState />;
-
   const sources = [...new Set(v.deadlines.map((deadline) => deadline.sourceLabel.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   const filteredDeadlines = v.deadlines.filter((deadline) => {
     const statusMatches = f === "todos" ? true : f === "abertos" ? !["concluido", "cancelado"].includes(deadline.status) : deadline.status === f;
@@ -144,6 +144,8 @@ function Prazos() {
     ...(typeFilter === "prazos" ? [] : filteredAppointments.map((appointment): ScheduleItem => ({ type: "compromisso", id: appointment.id, at: appointment.at, title: appointment.title, assigneeId: appointment.assigneeId, ...(appointment.matterId ? { matterId: appointment.matterId } : {}), appointment }))),
   ].sort((a, b) => a.at.localeCompare(b.at));
   const list = scheduleItems.filter((item) => !selectedDay || (item.type === "prazo" ? deadlineDayKey(item.deadline) : appointmentDayKey(item.appointment)) === selectedDay);
+  const pagination = useOfficePagination(list, `${query}|${f}|${typeFilter}|${sourceFilter}|${selectedDay ?? ""}`);
+  if (!canSeeCnj(v.role)) return <DeniedState />;
   const calendarYear = calendarMonth.getFullYear();
   const calendarMonthIndex = calendarMonth.getMonth();
   const daysInMonth = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
@@ -261,7 +263,7 @@ function Prazos() {
       <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="prazos" currentValues={{ query, f, typeFilter, sourceFilter, selectedDay: selectedDay ?? "" }} onApply={(filters) => { setQuery(filters.query); setF(filters.f as typeof f); setTypeFilter(filters.typeFilter as typeof typeFilter); setSourceFilter(filters.sourceFilter); setSelectedDay(filters.selectedDay || null); }} /></div>
       {list.length === 0 ? <EmptyState title={typeFilter === "compromissos" ? "Nenhum compromisso neste filtro" : "Nenhum prazo ou compromisso neste filtro"} /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
-          {list.map((item) => {
+          {pagination.items.map((item) => {
             if (item.type === "compromisso") {
               const matter = item.matterId ? v.matterById(item.matterId) : undefined;
               return <li key={`appointment-${item.id}`} className="flex flex-wrap items-center gap-3 p-4">
@@ -294,6 +296,7 @@ function Prazos() {
           })}
         </ul>
       )}
+      <OfficePaginationControls pagination={pagination} />
 
       <Dialog open={!!review} onOpenChange={(o) => { if (!o) { setReview(null); setCancelWhy(""); setNewDate(""); setChangeReason(""); } }}>
         <DialogContent>

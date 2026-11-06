@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader, EmptyState, DeniedState } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canSeeFinance } from "@/features/demo/permissions";
 import { findOffice, fmtDate, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import { formatBrlCents, parseBrlCents } from "@/features/demo/money";
@@ -69,6 +71,7 @@ function FinancePage() {
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
     [v, kind, reviewState, query],
   );
+  const pagination = useOfficePagination(rows, `${query}|${kind}|${reviewState}`);
   if (!canSeeFinance(v.role)) return <DeniedState />;
   const incoming = v.receivables
     .filter((r) => r.kind === "honorario" || r.category?.startsWith("reembolso"))
@@ -340,8 +343,9 @@ function FinancePage() {
         </div>
         <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="financeiro" currentValues={{ query, kind, reviewState }} onApply={(filters) => { setQuery(filters.query); setKind(filters.kind); setReviewState(filters.reviewState as typeof reviewState); }} /></div>
         {rows.length ? (
+          <>
           <div className="grid gap-2">
-            {rows.map((r) => {
+            {pagination.items.map((r) => {
               return (
                 <button
                   key={r.id}
@@ -366,6 +370,8 @@ function FinancePage() {
               );
             })}
           </div>
+          <OfficePaginationControls pagination={pagination} />
+          </>
         ) : (
           <EmptyState
             title="Nenhum lançamento encontrado"

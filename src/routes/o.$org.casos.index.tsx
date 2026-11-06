@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfidentialityBadge, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canCreateMatter } from "@/features/demo/permissions";
 import { findOffice, fmtDate, useDemo, useOfficeView } from "@/features/demo/store";
 import type { MatterNature } from "@/features/demo/types";
@@ -30,6 +32,7 @@ function Casos() {
     (area === "todas" || m.practiceAreaId === area) &&
     (nature === "todas" || m.matterNature === nature) &&
     `${m.title} ${m.code} ${m.clientIds.map(v.clientName).join(" ")}`.toLowerCase().includes(q.toLowerCase()));
+  const pagination = useOfficePagination(list, `${q}|${area}|${nature}`);
 
   return (
     <>
@@ -49,7 +52,7 @@ function Casos() {
       <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="casos" currentValues={{ q, area, nature }} onApply={(filters) => { setQ(filters.q); setArea(filters.area); setNature(filters.nature as MatterNature | "todas"); }} /></div>
       {list.length === 0 ? <EmptyState title="Nenhum caso encontrado" hint="Ajuste os filtros ou crie um novo caso." /> : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {list.map((m) => {
+          {pagination.items.map((m) => {
             const procs = v.proceedings.filter((p) => p.matterId === m.id).length;
             const next = v.deadlines.filter((d) => d.matterId === m.id && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
             return (
@@ -67,6 +70,7 @@ function Casos() {
           })}
         </div>
       )}
+      <OfficePaginationControls pagination={pagination} />
     </>
   );
 }

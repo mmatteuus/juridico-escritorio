@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
 import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
 
@@ -39,8 +41,6 @@ function Processos() {
   const [query, setQuery] = useState("");
   const [matterFilter, setMatterFilter] = useState<MatterFilter>("todos");
 
-  if (!canSeeCnj(v.role)) return <DeniedState />;
-
   const linked = v.proceedings.filter((item) => item.matterId);
   const unlinked = v.proceedings.filter((item) => !item.matterId);
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
@@ -51,6 +51,8 @@ function Processos() {
       .filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
     return matchesMatter && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
+  const pagination = useOfficePagination(visible, `${normalizedQuery}|${matterFilter}`);
+  if (!canSeeCnj(v.role)) return <DeniedState />;
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -113,7 +115,7 @@ function Processos() {
 
       {visible.length === 0 ? <EmptyState title={v.proceedings.length ? "Nenhum processo encontrado" : "Nenhum processo visível"} hint={v.proceedings.length ? "Ajuste a busca ou o filtro de vínculo." : "Cadastre um processo fictício para iniciar a demonstração."} /> : (
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {visible.map((item) => {
+          {pagination.items.map((item) => {
             const matter = item.matterId ? v.matterById(item.matterId) : undefined;
             return <li key={item.id} className="rounded-xl border bg-card p-4 shadow-soft">
               <Link to="/o/$org/processos/$id" params={{ org, id: item.id }} className="break-words font-semibold text-primary hover:underline">{item.title || item.cnjMasked || "Processo sem título"}</Link>
@@ -125,6 +127,7 @@ function Processos() {
           })}
         </ul>
       )}
+      <OfficePaginationControls pagination={pagination} />
       <p className="text-xs text-muted-foreground">Todos os registros são fictícios e editáveis somente nesta demonstração. Nenhum dado é consultado ou validado em fonte oficial.</p>
     </div>
   );
