@@ -124,3 +124,14 @@ A autorização permanece uma simulação no navegador: a concessão por papel a
 - Os conectores do navegador da VPS recusaram acesso por reautenticação/HTTP 429 nesta rodada. O requisito de comparação visual com os 61 originais Stitch segue sem evidência neste checkout; os HTML e as capturas de referência continuam no app separado descrito nas notas 65/68/72/77.
 - Busca global ampliada, cards da matriz e visualizações salvas foram verificados com `npx tsc --noEmit`, `npm run build`, lint direcionado e `git diff --check` após a rodada. Não foram executados testes automatizados nem QA visual tela a tela.
 
+### Continuação — vínculos opcionais em Documentos e Prazos
+
+- Documentos agora pode ser criado sem caso, sem processo, ligado apenas a processo ou ligado aos dois. Quando caso e processo são escolhidos juntos, a UI valida se pertencem ao mesmo vínculo visível. Lista, busca, prévia, ficha de processo e notificações exibem/abrem os vínculos disponíveis; `useOfficeView` filtra pelo escritório ativo, perfil e processo/caso visíveis.
+- Prazos aceita caso e processo opcionais. A seleção de processo acompanha o caso escolhido; sem caso, só oferece processos independentes. Revisão profissional, fuso, fonte e data continuam exigidos, e prazos sem caso não são inseridos na atividade de um caso.
+- `useOfficeView` descarta prazos cujo processo associado não está visível ao perfil ou cuja referência a caso e processo seja inconsistente. Fichas e agenda mostram links disponíveis, inclusive para processos sem caso.
+- A data-alvo interna das tarefas tornou-se opcional em cadastro e ficha; sem data, elas aparecem como “Sem data-alvo”, não entram na agenda por data e não são classificadas como atrasadas. A lista de tarefas próximas abre sua ficha diretamente. Notificações organiza os botões em uma linha responsiva para não sobrepor texto em mobile.
+- Validação integrada: `npx tsc --noEmit`, ESLint direcionado, `git diff --check` e `npm run build` passaram. Chromium confirmou criação de documento sem caso ligado a processo e criação de prazo sem caso com processo independente. Sem execução de testes automatizados nesta rodada.
+- Revisão manual no Chromium a 390 px confirmou que o cartão de Notificações não sobrepõe texto e ações e não cria rolagem horizontal; a data-alvo do formulário Nova tarefa está marcada como opcional no DOM.
+- Commit/push no `main`: `b2da15a` (tarefas/notificações) e `530d291` (vínculos opcionais).
+- A comparação visual com os 61 HTMLs Stitch do workspace VPS continua sem comprovação neste checkout; `src/stitch/pages` não existe neste repositório e o endpoint público não estava acessível. Os relatórios históricos da VPS não são tratados como evidência visual deste app Lovable.
+

@@ -130,7 +130,7 @@ function Prazos() {
     const sourceMatches = sourceFilter === "todas" || deadline.sourceLabel === sourceFilter;
     const matter = deadline.matterId ? v.matterById(deadline.matterId) : undefined;
     const proceeding = v.proceedings.find((item) => item.id === deadline.proceedingId);
-    const searchable = `${deadline.title} ${deadline.sourceLabel} ${deadline.basis ?? ""} ${deadline.notes ?? ""} ${matter?.code ?? ""} ${matter?.title ?? ""} ${proceeding?.cnjMasked ?? ""} ${v.memberName(deadline.assigneeId)}`.toLocaleLowerCase("pt-BR");
+    const searchable = `${deadline.title} ${deadline.sourceLabel} ${deadline.basis ?? ""} ${deadline.notes ?? ""} ${matter?.code ?? ""} ${matter?.title ?? ""} ${proceeding?.cnjMasked ?? ""} ${proceeding?.title ?? ""} ${v.memberName(deadline.assigneeId)}`.toLocaleLowerCase("pt-BR");
     return statusMatches && sourceMatches && searchable.includes(query.trim().toLocaleLowerCase("pt-BR"));
   });
   const search = query.trim().toLocaleLowerCase("pt-BR");
@@ -290,7 +290,7 @@ function Prazos() {
                     <span className="tabular">{fmtDeadlineDateTime(d)} ({d.timeZone ?? "fuso não informado"})</span> · {v.memberName(d.assigneeId)} · proposto por {d.proposedBy}
                     {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "prazos" }} className="text-primary hover:underline">{m.code}</Link></>}
                     {!m && <span> · Sem caso vinculado</span>}
-                    {linkedProceeding && <> · <Link to="/o/$org/processos/$id" params={{ org, id: linkedProceeding.id }} className="text-primary hover:underline">{linkedProceeding.cnjMasked ?? "Processo vinculado"}</Link></>}
+                    {linkedProceeding && <> · <Link to="/o/$org/processos/$id" params={{ org, id: linkedProceeding.id }} className="text-primary hover:underline">{linkedProceeding.cnjMasked ?? linkedProceeding.title ?? "Processo sem número"}</Link></>}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">Origem: {d.sourceLabel || "Não informada"}</p>
                 </div>
