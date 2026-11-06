@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { QuickActionFab } from "@/components/office/QuickActionFab";
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import {
   Bell, BriefcaseBusiness, CalendarDays, ChevronsUpDown, CircleHelp, ClipboardList, CheckCircle2, FileText, Gavel, Home, ScrollText,
   Inbox, LayoutTemplate, Lock, Menu, MessageSquare, PanelLeftClose, PanelLeftOpen, Plus, RotateCcw, Search, Settings, ShieldCheck, Sun, Timer,
@@ -180,7 +180,17 @@ export function AppShell({ office, children }: { office: Office; children: React
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarPreferenceLoaded, setSidebarPreferenceLoaded] = useState(false);
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const previousPathname = useRef(pathname);
+  const mainRef = useRef<HTMLElement>(null);
   const unread = view.notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
+    const frame = window.requestAnimationFrame(() => mainRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
 
   useEffect(() => {
     try {
@@ -341,7 +351,7 @@ export function AppShell({ office, children }: { office: Office; children: React
             </DropdownMenu>
           </div>
         </header>
-        <main id="office-main" key={`${office.id}-${role}`} tabIndex={-1} className="mx-auto min-w-0 w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main ref={mainRef} id="office-main" key={`${office.id}-${role}`} tabIndex={-1} className="mx-auto min-w-0 w-full max-w-[1400px] flex-1 px-4 py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>
