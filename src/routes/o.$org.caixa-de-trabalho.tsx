@@ -6,6 +6,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DeadlineStatusChip, DueBadge, EmptyState, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { canTransitionTask, TASK_TRANSITIONS } from "@/features/demo/actions";
 import { findOffice, fmtDateTime, isOverdue, timelineEvent, useDemo, useOfficeView } from "@/features/demo/store";
 import { canApproveTask, canManageTask, canSeeCnj, canSeeLegalDocs } from "@/features/demo/permissions";
@@ -49,6 +52,14 @@ function Caixa() {
   const pendingDocuments = q === "revisao" && canSeeLegalDocs(v.role)
     ? v.docs.filter((doc) => doc.status === "revisao_pendente" && inArea(doc.matterId))
     : [];
+  const workItems = [
+    ...pendingIntakes.map((data) => ({ kind: "intake" as const, data })),
+    ...dls.map((data) => ({ kind: "deadline" as const, data })),
+    ...pendingMessages.map((data) => ({ kind: "message" as const, data })),
+    ...pendingDocuments.map((data) => ({ kind: "document" as const, data })),
+    ...tasks.map((data) => ({ kind: "task" as const, data })),
+  ];
+  const pagination = useOfficePagination(workItems, `${q}|${area}`);
 
   const changeTaskStatus = (task: Task, next: TaskStatus) => {
     const current = v.tasks.find((item) => item.id === task.id && item.officeId === office.id);
@@ -87,51 +98,54 @@ function Caixa() {
           <Button key={a.id} size="sm" variant={area === a.id ? "secondary" : "ghost"} aria-pressed={area === a.id} onClick={() => setArea(a.id)}>{a.name}</Button>
         ))}
       </div>
-      {tasks.length + dls.length + pendingMessages.length + pendingDocuments.length + pendingIntakes.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
-        <ul className="divide-y rounded-xl border bg-card shadow-soft">
-          {pendingIntakes.map((intake) => (
-            <li key={intake.id} className="flex flex-wrap items-center gap-3 p-4">
-              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Atendimento aguardando triagem: {intake.name}</p><p className="mt-1 break-words text-xs text-muted-foreground">{intake.stage.replaceAll("_", " ")} · responsável {v.memberName(intake.assigneeId)} · revisão humana pendente</p></div>
-              <Button size="sm" variant="outline" asChild><Link to="/o/$org/atendimentos" params={{ org }} search={{ intakeId: intake.id }}>Revisar atendimento</Link></Button>
-            </li>
-          ))}
-          {dls.map((d) => (
-            <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
-              <div className="flex-1"><p className="text-sm font-medium">Prazo: {d.title}</p><p className="text-xs text-muted-foreground">{fmtDateTime(d.dueDate)} · proposto por {d.proposedBy}</p></div>
-              <DueBadge iso={d.dueDate} />
-              <DeadlineStatusChip status={d.status} />
-              <Button size="sm" variant="outline" asChild><Link to="/o/$org/prazos/$id" params={{ org, id: d.id }}>Revisar</Link></Button>
-            </li>
-          ))}
-          {pendingMessages.map((message) => (
-            <li key={message.id} className="flex flex-wrap items-center gap-3 p-4">
-              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Comunicação aguardando revisão: {message.recipient}</p><p className="mt-1 break-words text-xs text-muted-foreground">Rascunho não enviado · {message.content}</p></div>
-              <Button size="sm" variant="outline" asChild><Link to="/o/$org/comunicacao/$id" params={{ org, id: message.id }}>Revisar rascunho</Link></Button>
-            </li>
-          ))}
-          {pendingDocuments.map((doc) => (
-            <li key={doc.id} className="flex flex-wrap items-center gap-3 p-4">
-              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Documento aguardando revisão: {doc.title}</p><p className="mt-1 break-words text-xs text-muted-foreground">{doc.category} · {v.matterById(doc.matterId)?.code ?? "Caso indisponível"} · revisão profissional pendente · demonstração</p></div>
-              <Button size="sm" variant="outline" asChild><Link to="/o/$org/documentos" params={{ org }} search={{ docId: doc.id }}>Abrir revisão</Link></Button>
-            </li>
-          ))}
-          {tasks.map((t) => {
-            const m = v.matterById(t.matterId);
-            return (
-              <li key={t.id} className="flex flex-wrap items-center gap-3 p-4">
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="caixa-de-trabalho" currentValues={{ q, area }} onApply={(filters) => { const queue = filters.q as Q; const queueIds = Object.keys(queues) as Q[]; const areaIds = ["todas", ...office.practiceAreas.map((item) => item.id)]; setQ(queueIds.includes(queue) ? queue : "minhas"); setArea(areaIds.includes(filters.area) ? filters.area : "todas"); }} /></div>
+      {workItems.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
+        <>
+          <ul className="divide-y rounded-xl border bg-card shadow-soft">
+            {pagination.items.map((item) => {
+              if (item.kind === "intake") {
+                const intake = item.data;
+                return <li key={`intake-${intake.id}`} className="flex flex-wrap items-center gap-3 p-4">
+                  <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Atendimento aguardando triagem: {intake.name}</p><p className="mt-1 break-words text-xs text-muted-foreground">{intake.stage.replaceAll("_", " ")} · responsável {v.memberName(intake.assigneeId)} · revisão humana pendente</p></div>
+                  <Button size="sm" variant="outline" asChild><Link to="/o/$org/atendimentos" params={{ org }} search={{ intakeId: intake.id }}>Revisar atendimento</Link></Button>
+                </li>;
+              }
+              if (item.kind === "deadline") {
+                const deadline = item.data;
+                return <li key={`deadline-${deadline.id}`} className="flex flex-wrap items-center gap-3 p-4">
+                  <div className="flex-1"><p className="text-sm font-medium">Prazo: {deadline.title}</p><p className="text-xs text-muted-foreground">{fmtDateTime(deadline.dueDate)} · proposto por {deadline.proposedBy}</p></div>
+                  <DueBadge iso={deadline.dueDate} /><DeadlineStatusChip status={deadline.status} />
+                  <Button size="sm" variant="outline" asChild><Link to="/o/$org/prazos/$id" params={{ org, id: deadline.id }}>Revisar</Link></Button>
+                </li>;
+              }
+              if (item.kind === "message") {
+                const message = item.data;
+                return <li key={`message-${message.id}`} className="flex flex-wrap items-center gap-3 p-4">
+                  <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Comunicação aguardando revisão: {message.recipient}</p><p className="mt-1 break-words text-xs text-muted-foreground">Rascunho não enviado · {message.content}</p></div>
+                  <Button size="sm" variant="outline" asChild><Link to="/o/$org/comunicacao/$id" params={{ org, id: message.id }}>Revisar rascunho</Link></Button>
+                </li>;
+              }
+              if (item.kind === "document") {
+                const doc = item.data;
+                return <li key={`document-${doc.id}`} className="flex flex-wrap items-center gap-3 p-4">
+                  <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Documento aguardando revisão: {doc.title}</p><p className="mt-1 break-words text-xs text-muted-foreground">{doc.category} · {v.matterById(doc.matterId)?.code ?? "Caso indisponível"} · revisão profissional pendente · demonstração</p></div>
+                  <Button size="sm" variant="outline" asChild><Link to="/o/$org/documentos" params={{ org }} search={{ docId: doc.id }}>Abrir revisão</Link></Button>
+                </li>;
+              }
+              const task = item.data;
+              const matter = v.matterById(task.matterId);
+              return <li key={`task-${task.id}`} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{t.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {v.memberName(t.assigneeId)} · {TASK_STATUS_LABEL[t.status]} · {isOverdue(t) ? <strong className="text-destructive">atrasada</strong> : fmtDateTime(t.dueAt)}
-                    {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} className="text-primary hover:underline">{m.code}</Link></>}
-                  </p>
+                  <p className="text-sm font-medium">{task.title}</p>
+                  <p className="text-xs text-muted-foreground">{v.memberName(task.assigneeId)} · {TASK_STATUS_LABEL[task.status]} · {isOverdue(task) ? <strong className="text-destructive">atrasada</strong> : fmtDateTime(task.dueAt)}{matter && <> · <Link to="/o/$org/casos/$id" params={{ org, id: matter.id }} className="text-primary hover:underline">{matter.code}</Link></>}</p>
                 </div>
-                <PriorityBadge value={t.priority} />
-                <Button size="sm" variant="outline" disabled={!canManageTask(v.role, t, v.me?.id)} onClick={() => { setSelectedTask(t); setReason(""); }}>Etapa rápida</Button>
-              </li>
-            );
-          })}
-        </ul>
+                <PriorityBadge value={task.priority} />
+                <Button size="sm" variant="outline" disabled={!canManageTask(v.role, task, v.me?.id)} onClick={() => { setSelectedTask(task); setReason(""); }}>Etapa rápida</Button>
+              </li>;
+            })}
+          </ul>
+          <OfficePaginationControls pagination={pagination} />
+        </>
       )}
       <Dialog open={!!selectedTask} onOpenChange={(isOpen) => { if (!isOpen) { setSelectedTask(null); setReason(""); } }}>
         <DialogContent>

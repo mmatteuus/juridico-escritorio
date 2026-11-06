@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { findOffice, fmtDateTime, useDemo, useOfficeView } from "@/features/demo/store";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +25,7 @@ function Notificacoes() {
   const isSnoozed = (n: (typeof v.notifications)[number]) => !!n.snoozedUntil && new Date(n.snoozedUntil).getTime() > now;
   const activeUnread = v.notifications.filter((n) => !n.read && !isSnoozed(n)).length;
   const list = v.notifications.filter((n) => cat === "adiadas" ? isSnoozed(n) : !isSnoozed(n) && (cat === "todas" || n.category === cat)).sort((a, b) => b.at.localeCompare(a.at));
+  const pagination = useOfficePagination(list, cat);
   const ids = new Set(v.notifications.map((n) => n.id));
   const mark = (id?: string) => update((d) => ({ ...d, notifications: d.notifications.map((n) => (n.officeId === office.id && (id ? n.id === id : ids.has(n.id)) ? { ...n, read: true } : n)) }));
   const snooze = (id: string) => update((d) => ({ ...d, notifications: d.notifications.map((n) => n.officeId === office.id && n.id === id ? { ...n, snoozedUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() } : n) }));
@@ -39,9 +43,10 @@ function Notificacoes() {
           <Button key={c} aria-pressed={cat === c} size="sm" variant={cat === c ? "default" : "outline"} onClick={() => setCat(c)}>{CATS[c]}</Button>
         ))}
       </div>
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="notificacoes" currentValues={{ cat }} onApply={(filters) => { const categories = Object.keys(CATS) as (keyof typeof CATS)[]; setCat(categories.includes(filters.cat as keyof typeof CATS) ? filters.cat as keyof typeof CATS : "todas"); }} /></div>
       {list.length === 0 ? <EmptyState title="Sem notificações nesta categoria" /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
-          {list.map((n) => (
+          {pagination.items.map((n) => (
             <li key={n.id} className={cn("flex flex-wrap items-center gap-3 p-4", !n.read && "bg-secondary/50")}>
               <span className={cn("size-2 rounded-full", n.read ? "bg-transparent" : "bg-primary")} aria-hidden />
               <div className="min-w-0 flex-1">
@@ -58,6 +63,7 @@ function Notificacoes() {
           ))}
         </ul>
       )}
+      <OfficePaginationControls pagination={pagination} />
     </>
   );
 }
