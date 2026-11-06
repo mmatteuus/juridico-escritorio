@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { withAuth } from "@/components/withAuth"; // assumed HOC
 import { CreditCard, LayoutTemplate } from "lucide-react";
 
 export const Route = createFileRoute("/o/$org/financeiro")({
@@ -15,7 +14,7 @@ function FinancePage() {
           Financeiro
         </h1>
         <LayoutTemplate className="size-4 opacity-60" />
-      </h1>
+      </div>
 
       <div className="grid gap-4">
         <div className="rounded-lg border p-4 hover:bg-muted/50 transition-colors">
@@ -61,4 +60,3 @@ function FinancePage() {
   );
 }
 
-export const withAuthRoute = withAuth(Route);

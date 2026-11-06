@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { withAuth } from "@/components/withAuth"; // assumed HOC
 import { ListChecks, Timer, ClipboardList } from "lucide-react";
 
 export const Route = createFileRoute("/o/$org/tarefas")({
@@ -44,4 +43,3 @@ function TasksPage() {
   );
 }
 
-export const withAuthRoute = withAuth(Route);
