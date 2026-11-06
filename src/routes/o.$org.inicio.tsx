@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, BriefcaseBusiness, CalendarDays, ShieldAlert, Sun } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, CheckSquare2, FileText, Gavel, Sun, Users, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeadlineStatusChip, DueBadge, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
 import { findOffice, fmtDateTime, fmtTime, isOverdue, isToday, useDemo, useOfficeView } from "@/features/demo/store";
+import { canSeeCnj, canSeeFinance } from "@/features/demo/permissions";
 
 export const Route = createFileRoute("/o/$org/inicio")({
   head: () => ({ meta: [{ title: "Início · JURIDO Escritórios" }, { name: "description", content: "Meu Dia e visão geral do escritório." }, { name: "robots", content: "noindex" }] }),
@@ -15,11 +16,21 @@ function Inicio() {
   const v = useOfficeView(office);
   const { setMeuDiaOpen } = useDemo();
   const open = v.tasks.filter((t) => t.status !== "concluida");
+  const unverifiedProceedings = canSeeCnj(v.role) ? v.proceedings.filter((item) => item.sourceState === "manual_demo") : [];
+  const pendingFinancial = canSeeFinance(v.role) ? v.receivables.filter((item) => item.reviewStatus === "pendente" || item.reviewStatus === "em_revisao") : [];
   const stats = [
+    { label: "Clientes visíveis", value: v.clients.length, Icon: Users, to: "/o/$org/clientes" as const, alert: false },
     { label: "Casos visíveis", value: v.matters.length, Icon: BriefcaseBusiness, to: "/o/$org/casos" as const, alert: false },
-    { label: "Tarefas atrasadas", value: open.filter(isOverdue).length, Icon: AlertTriangle, to: "/o/$org/tarefas" as const, alert: true },
-    { label: "Prazos a revisar", value: v.deadlines.filter((d) => d.status === "proposto" || d.status === "em_revisao").length, Icon: ShieldAlert, to: "/o/$org/prazos" as const, alert: true },
-    { label: "Compromissos hoje", value: v.appointments.filter((a) => isToday(a.at)).length, Icon: CalendarDays, to: "/o/$org/agenda" as const, alert: false },
+    { label: "Processos sem conferência oficial", value: unverifiedProceedings.length, Icon: Gavel, to: "/o/$org/processos" as const, alert: unverifiedProceedings.length > 0 },
+    { label: "Tarefas não concluídas", value: open.length, Icon: CheckSquare2, to: "/o/$org/tarefas" as const, alert: false },
+  ];
+  const attention = [
+    { label: "Atendimentos em triagem", count: v.intakes.filter((item) => !["convertido", "arquivado"].includes(item.stage)).length, Icon: Users, to: "/o/$org/atendimentos" as const },
+    { label: "Prazos aguardando revisão", count: v.deadlines.filter((item) => item.status === "proposto" || item.status === "em_revisao").length, Icon: CalendarDays, to: "/o/$org/prazos" as const },
+    { label: "Tarefas em revisão", count: v.tasks.filter((item) => item.status === "aguardando_revisao").length, Icon: CheckSquare2, to: "/o/$org/caixa-de-trabalho" as const },
+    { label: "Documentos em revisão", count: v.docs.filter((item) => item.status === "revisao_pendente").length, Icon: FileText, to: "/o/$org/documentos" as const },
+    ...(canSeeFinance(v.role) ? [{ label: "Previsões financeiras a revisar", count: pendingFinancial.length, Icon: Wallet, to: "/o/$org/financeiro" as const }] : []),
+    ...(canSeeCnj(v.role) ? [{ label: "Processos sem conferência oficial", count: unverifiedProceedings.length, Icon: Gavel, to: "/o/$org/processos" as const }] : []),
   ];
   const openDls = v.deadlines.filter((d) => !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const today = v.appointments.filter((a) => isToday(a.at)).sort((a, b) => a.at.localeCompare(b.at));
@@ -40,6 +51,12 @@ function Inicio() {
           </Link>
         ))}
       </div>
+      <section aria-labelledby="attention-title" className="mt-6 rounded-xl border bg-card p-5 shadow-soft">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><div><h2 id="attention-title" className="font-display text-xl">Fila de atenção</h2><p className="text-xs text-muted-foreground">Pendências demonstrativas do seu perfil; processos não foram conferidos em fonte oficial.</p></div><Button variant="outline" size="sm" onClick={() => setMeuDiaOpen(true)}>Abrir Meu Dia</Button></div>
+        <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {attention.map(({ label, count, Icon, to }) => <li key={label}><Link to={to} params={{ org }} className="flex min-h-12 items-center gap-3 rounded-lg border p-3 text-sm transition-colors hover:border-primary/40 hover:bg-muted/40"><Icon className="size-4 shrink-0 text-primary"/><span className="min-w-0 flex-1">{label}</span><span className={`tabular font-semibold ${count ? "text-copper" : "text-muted-foreground"}`}>{count}</span></Link></li>)}
+        </ul>
+      </section>
       <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[1.4fr_1fr]">
         <section className="min-w-0 rounded-xl border bg-card p-5 shadow-soft">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-display text-xl">Tarefas próximas</h2><Link to="/o/$org/tarefas" params={{ org }} className="shrink-0 text-sm text-primary hover:underline">Ver todas</Link></div>

@@ -75,10 +75,12 @@ export function useOfficeView(office: Office) {
     );
     const visibleIntakeIds = new Set(intakes.map((intake) => intake.id));
     const tasks = inScope(data.tasks).filter((task) => !!task.matterId || task.assigneeId === me?.id || task.requesterId === me?.id || canSeeOfficeQueue);
+    const userPreferences = data.userPreferences.find((preference) => preference.officeId === office.id && preference.memberId === me?.id);
     const notifications = inScope(data.notifications).filter((notification) =>
       (!notification.recipientMemberId || notification.recipientMemberId === me?.id || canSeeOfficeQueue) &&
       (!notification.taskId || tasks.some((task) => task.id === notification.taskId)) &&
       (!notification.docId || visibleDocIds.has(notification.docId)) &&
+      (notification.priority === "alta" || userPreferences?.categories[notification.category] !== false) &&
       (canSeeCnj(role) || notification.category !== "prazo"),
     );
     const visibleClientIds = new Set(matters.flatMap((matter) => matter.clientIds));
@@ -90,7 +92,7 @@ export function useOfficeView(office: Office) {
       matterDocumentChecklists: data.matterDocumentChecklists.filter((checklist) => checklist.officeId === office.id && visible.has(checklist.matterId)),
       contractAnalysisDraft: data.contractAnalysisDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
       fiscalPreparationDraft: data.fiscalPreparationDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
-      userPreferences: data.userPreferences.find((preference) => preference.officeId === office.id && preference.memberId === me?.id),
+      userPreferences,
       officeProfile: data.officeProfiles.find((profile) => profile.officeId === office.id),
       officeProfileRevisions: data.officeProfileRevisions
         .filter((revision) => revision.officeId === office.id)

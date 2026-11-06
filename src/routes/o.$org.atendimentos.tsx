@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Plus, ShieldCheck } from "lucide-react";
+import { ArrowRight, Plus, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -42,11 +42,26 @@ function Atendimentos() {
   const v = useOfficeView(office);
   const { update } = useDemo();
   const [sel, setSel] = useState<Intake | null>(null);
+  const [query, setQuery] = useState("");
+  const [stageFilter, setStageFilter] = useState<IntakeStage | "todas">("todas");
   const [form, setForm] = useState({ name: "", contact: "", clientKind: "PF" as Intake["clientKind"], existingClientId: "", counterparty: "", area: office.practiceAreas[0]?.id ?? "", matterNature: "" as MatterNature | "", summary: "" });
   const actor = v.me?.name ?? "—";
   const canApprove = canApproveIntake(v.role);
   const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(v.role);
   const existingClients = v.clients.filter(client => client.officeId === office.id);
+  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
+  const matchingIntakes = v.intakes.filter((intake) => {
+    if (!normalizedQuery) return true;
+    const searchable = [
+      intake.name,
+      intake.contact,
+      intake.summary,
+      v.memberName(intake.assigneeId),
+      v.areaName(intake.practiceAreaId),
+      intake.matterNature,
+    ].join(" ").toLocaleLowerCase("pt-BR");
+    return searchable.includes(normalizedQuery);
+  });
 
   useEffect(() => {
     if (!intakeId) return;
@@ -158,9 +173,21 @@ function Atendimentos() {
     <>
       <PageHeader title="Atendimentos" subtitle={canSeeOfficeQueue ? "Fila de todo o escritório. Da primeira conversa ao caso, com conversão só após aprovação profissional." : `Minha carteira: exibe apenas atendimentos atribuídos a ${v.me?.name ?? "este perfil"}.`}
         actions={<Button onClick={() => navigate({ search: { novo: true } })}><Plus /> Novo atendimento</Button>} />
+      <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_13rem]">
+        <div className="relative min-w-0">
+          <Search aria-hidden="true" className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+          <Input aria-label="Buscar atendimentos" placeholder="Buscar nome, contato, resumo ou responsável" value={query} onChange={(event) => setQuery(event.target.value)} className="bg-card pl-9" />
+        </div>
+        <Select value={stageFilter} onValueChange={(value) => setStageFilter(value as IntakeStage | "todas")}>
+          <SelectTrigger className="bg-card" aria-label="Filtrar atendimentos por etapa"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="todas">Todas as etapas</SelectItem>{STAGES.map((stage) => <SelectItem key={stage.id} value={stage.id}>{stage.label}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+      <p className="mb-3 text-sm text-muted-foreground" aria-live="polite">{matchingIntakes.filter((intake) => stageFilter === "todas" || intake.stage === stageFilter).length} de {v.intakes.length} atendimento(s) na busca atual</p>
       <div className="flex gap-3 overflow-x-auto pb-4">
         {STAGES.map((s) => {
-          const items = v.intakes.filter((i) => i.stage === s.id);
+          const items = matchingIntakes.filter((i) => i.stage === s.id);
+          if (stageFilter !== "todas" && stageFilter !== s.id) return null;
           return (
             <section key={s.id} className="w-64 shrink-0 rounded-xl border bg-muted/60 p-3" aria-label={s.label}>
               <h2 className="mb-2 flex justify-between text-sm font-semibold">{s.label}<span className="text-muted-foreground">{items.length}</span></h2>

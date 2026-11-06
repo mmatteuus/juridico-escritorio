@@ -23,7 +23,7 @@ import { GlobalSearch } from "./GlobalSearch";
 import { MeuDiaDialog } from "./MeuDiaDialog";
 import { NewMatterDialog } from "./NewMatterDialog";
 
-type NavItem = { label: string; icon: typeof Home; to?: string; step?: number; hideFor?: RoleId[] };
+type NavItem = { label: string; icon: typeof Home; to?: string; step?: number; tag?: string; hideFor?: RoleId[] };
 
 const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Dia a dia", items: [
@@ -48,7 +48,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { label: "Modelos", icon: LayoutTemplate, to: "modelos", hideFor: ["financeiro"] },
     { label: "Comunicações", icon: MessageSquare, to: "comunicacao", hideFor: ["financeiro"] },
     { label: "Financeiro", icon: Wallet, to: "financeiro" },
-    { label: "Relatórios", icon: ClipboardList, to: "relatorios" },
+    { label: "Relatórios", icon: ClipboardList, to: "relatorios", tag: "Conceito · Fase 2" },
   ]},
   { group: "Escritório", items: [
     { label: "Equipe", icon: Users, to: "equipe" },
@@ -145,8 +145,8 @@ function SidebarBody({ office, onNavigate, compact = false }: { office: Office; 
                       <Link
                         to={href}
                         onClick={onNavigate}
-                        aria-label={compact ? i.label : undefined}
-                        title={compact ? i.label : undefined}
+                        aria-label={compact ? `${i.label}${i.tag ? ` · ${i.tag}` : ""}` : undefined}
+                        title={compact ? `${i.label}${i.tag ? ` · ${i.tag}` : ""}` : undefined}
                         className={cn(
                           "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                           compact && "justify-center px-0",
@@ -154,7 +154,8 @@ function SidebarBody({ office, onNavigate, compact = false }: { office: Office; 
                         )}
                       >
                         <Icon className={cn("size-4", active && "text-sidebar-primary")} />
-                        <span className={compact ? "sr-only" : undefined}>{i.label}</span>
+                        <span className={compact ? "sr-only" : "min-w-0 flex-1"}>{i.label}</span>
+                        {!compact && i.tag && <span className="whitespace-nowrap rounded border border-sidebar-foreground/20 px-1 py-0.5 text-[9px] font-medium leading-none text-sidebar-foreground/70">{i.tag}</span>}
                       </Link>
                     </li>
                   );

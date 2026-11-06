@@ -24,8 +24,10 @@ function Casos() {
   const { setNewMatterOpen } = useDemo();
   const [q, setQ] = useState("");
   const [area, setArea] = useState("todas");
+  const [nature, setNature] = useState<MatterNature | "todas">("todas");
   const list = v.matters.filter((m) =>
     (area === "todas" || m.practiceAreaId === area) &&
+    (nature === "todas" || m.matterNature === nature) &&
     `${m.title} ${m.code} ${m.clientIds.map(v.clientName).join(" ")}`.toLowerCase().includes(q.toLowerCase()));
 
   return (
@@ -37,6 +39,10 @@ function Casos() {
         <Select value={area} onValueChange={setArea}>
           <SelectTrigger className="w-44 bg-card" aria-label="Área"><SelectValue /></SelectTrigger>
           <SelectContent><SelectItem value="todas">Todas as áreas</SelectItem>{office.practiceAreas.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+        </Select>
+        <Select value={nature} onValueChange={(value) => setNature(value as MatterNature | "todas")}>
+          <SelectTrigger className="w-48 bg-card" aria-label="Filtrar casos por natureza"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="todas">Todas as naturezas</SelectItem>{Object.entries(MATTER_NATURE).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       {list.length === 0 ? <EmptyState title="Nenhum caso encontrado" hint="Ajuste os filtros ou crie um novo caso." /> : (

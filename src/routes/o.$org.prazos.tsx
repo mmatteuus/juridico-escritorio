@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, CircleHelp, Clock3, Plus, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Clock3, Plus, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { DeadlineStatusChip, DeniedState, DueBadge, EmptyState, PageHeader } fro
 import { changeDeadline, rescheduleDeadline } from "@/features/demo/actions";
 import { canConfirmDeadline, canProposeDeadline, canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, fmtDateTime, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
-import type { Deadline, DeadlineStatus } from "@/features/demo/types";
+import type { Appointment, Deadline, DeadlineStatus } from "@/features/demo/types";
 
 export const Route = createFileRoute("/o/$org/prazos")({
   validateSearch: (s: Record<string, unknown>): { novo?: boolean } => (s["novo"] ? { novo: true } : {}),
@@ -75,6 +75,30 @@ function fmtDeadlineDateTime(deadline: Deadline) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone }).format(new Date(deadline.dueDate));
 }
 
+function deadlineDayKey(deadline: Deadline) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: deadline.timeZone ?? DEFAULT_DEADLINE_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(deadline.dueDate));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values["year"]}-${values["month"]}-${values["day"]}`;
+}
+
+function calendarDayKey(year: number, month: number, day: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function appointmentDayKey(appointment: Appointment) {
+  const date = new Date(appointment.at);
+  return calendarDayKey(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+type ScheduleItem =
+  | { type: "prazo"; id: string; at: string; title: string; assigneeId: string; matterId: string; sourceLabel: string; deadline: Deadline }
+  | { type: "compromisso"; id: string; at: string; title: string; assigneeId: string; matterId?: string; appointment: Appointment };
+
 function Prazos() {
   const { org } = Route.useParams();
   const { novo } = Route.useSearch();
@@ -83,6 +107,14 @@ function Prazos() {
   const v = useOfficeView(office);
   const { update } = useDemo();
   const [f, setF] = useState<(typeof FILTERS)[number]["id"]>("abertos");
+  const [typeFilter, setTypeFilter] = useState<"todos" | "prazos" | "compromissos">("todos");
+  const [sourceFilter, setSourceFilter] = useState("todas");
+  const [query, setQuery] = useState("");
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
   const [review, setReview] = useState<Deadline | null>(null);
   const [cancelWhy, setCancelWhy] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -91,9 +123,36 @@ function Prazos() {
   const actor = v.me?.name ?? "—";
   if (!canSeeCnj(v.role)) return <DeniedState />;
 
-  const list = v.deadlines
-    .filter((d) => (f === "todos" ? true : f === "abertos" ? !["concluido", "cancelado"].includes(d.status) : d.status === f))
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const sources = [...new Set(v.deadlines.map((deadline) => deadline.sourceLabel.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const filteredDeadlines = v.deadlines.filter((deadline) => {
+    const statusMatches = f === "todos" ? true : f === "abertos" ? !["concluido", "cancelado"].includes(deadline.status) : deadline.status === f;
+    const sourceMatches = sourceFilter === "todas" || deadline.sourceLabel === sourceFilter;
+    const matter = v.matterById(deadline.matterId);
+    const searchable = `${deadline.title} ${deadline.sourceLabel} ${deadline.basis ?? ""} ${deadline.notes ?? ""} ${matter?.code ?? ""} ${matter?.title ?? ""} ${v.memberName(deadline.assigneeId)}`.toLocaleLowerCase("pt-BR");
+    return statusMatches && sourceMatches && searchable.includes(query.trim().toLocaleLowerCase("pt-BR"));
+  });
+  const search = query.trim().toLocaleLowerCase("pt-BR");
+  const filteredAppointments = v.appointments.filter((appointment) => {
+    if (!search) return true;
+    const matter = appointment.matterId ? v.matterById(appointment.matterId) : undefined;
+    const searchable = `${appointment.title} ${v.memberName(appointment.assigneeId)} ${matter?.code ?? ""} ${matter?.title ?? ""} ${v.areaName(appointment.practiceAreaId)}`.toLocaleLowerCase("pt-BR");
+    return searchable.includes(search);
+  });
+  const scheduleItems: ScheduleItem[] = [
+    ...(typeFilter === "compromissos" ? [] : filteredDeadlines.map((deadline): ScheduleItem => ({ type: "prazo", id: deadline.id, at: deadline.dueDate, title: deadline.title, assigneeId: deadline.assigneeId, matterId: deadline.matterId, sourceLabel: deadline.sourceLabel, deadline }))),
+    ...(typeFilter === "prazos" ? [] : filteredAppointments.map((appointment): ScheduleItem => ({ type: "compromisso", id: appointment.id, at: appointment.at, title: appointment.title, assigneeId: appointment.assigneeId, ...(appointment.matterId ? { matterId: appointment.matterId } : {}), appointment }))),
+  ].sort((a, b) => a.at.localeCompare(b.at));
+  const list = scheduleItems.filter((item) => !selectedDay || (item.type === "prazo" ? deadlineDayKey(item.deadline) : appointmentDayKey(item.appointment)) === selectedDay);
+  const calendarYear = calendarMonth.getFullYear();
+  const calendarMonthIndex = calendarMonth.getMonth();
+  const daysInMonth = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
+  const leadingDays = new Date(calendarYear, calendarMonthIndex, 1).getDay();
+  const dayCounts = new Map<string, number>();
+  for (const item of scheduleItems) {
+    const key = item.type === "prazo" ? deadlineDayKey(item.deadline) : appointmentDayKey(item.appointment);
+    dayCounts.set(key, (dayCounts.get(key) ?? 0) + 1);
+  }
+  const shiftMonth = (amount: number) => setCalendarMonth(new Date(calendarYear, calendarMonthIndex + amount, 1));
   const act = (d: Deadline, next: Partial<Deadline>, action: string) => {
     changeDeadline(update, d, next, action, actor);
     setReview((r) => (r ? { ...r, ...next, history: [...r.history, { at: new Date().toISOString(), actor, action }] } : r));
@@ -142,21 +201,87 @@ function Prazos() {
         </ul> : <EmptyState title="Nenhuma fonte demonstrativa cadastrada" />}
         <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">Este painel não atesta cobertura, entrega ou ausência de intimações reais. Consulte fontes oficiais e registre a revisão profissional no fluxo apropriado.</p>
       </section>
-      <div className="mb-4 flex flex-wrap gap-2">
-        {FILTERS.map((x) => <Button key={x.id} size="sm" variant={f === x.id ? "default" : "outline"} aria-pressed={f === x.id} onClick={() => setF(x.id)}>{x.label} <span className="tabular opacity-70">{x.id === "todos" ? v.deadlines.length : x.id === "abertos" ? v.deadlines.filter((d) => !["concluido", "cancelado"].includes(d.status)).length : v.deadlines.filter((d) => d.status === x.id).length}</span></Button>)}
+      <section aria-labelledby="calendar-title" className="mb-6 rounded-xl border bg-card p-4 shadow-soft sm:p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 id="calendar-title" className="font-display text-xl">Calendário de prazos e compromissos</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Contagens seguem tipo, origem e busca. A situação filtra somente prazos; prazos usam o fuso salvo e compromissos usam o horário local da agenda.</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button type="button" size="icon" variant="ghost" aria-label="Mês anterior" onClick={() => shiftMonth(-1)}><ChevronLeft /></Button>
+            <p aria-live="polite" className="min-w-36 text-center font-medium capitalize">{calendarMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</p>
+            <Button type="button" size="icon" variant="ghost" aria-label="Próximo mês" onClick={() => shiftMonth(1)}><ChevronRight /></Button>
+          </div>
+        </div>
+        <div role="group" aria-label="Calendário mensal de prazos" className="grid grid-cols-7 gap-1 sm:gap-2">
+          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((weekday) => <div key={weekday} aria-hidden="true" className="py-1 text-center text-xs font-medium text-muted-foreground">{weekday}</div>)}
+          {Array.from({ length: leadingDays }, (_, index) => <div key={`empty-${index}`} aria-hidden="true" />)}
+          {Array.from({ length: daysInMonth }, (_, index) => {
+            const day = index + 1;
+            const key = calendarDayKey(calendarYear, calendarMonthIndex, day);
+            const count = dayCounts.get(key) ?? 0;
+            const selected = selectedDay === key;
+            const itemLabel = typeFilter === "prazos" ? count === 1 ? "prazo" : "prazos" : typeFilter === "compromissos" ? count === 1 ? "compromisso" : "compromissos" : count === 1 ? "item" : "itens";
+            return <div key={key}>
+              <button type="button" aria-label={`${day} de ${calendarMonth.toLocaleDateString("pt-BR", { month: "long" })}: ${count} ${itemLabel}${selected ? ", selecionado" : ""}`} aria-pressed={selected} onClick={() => setSelectedDay((current) => current === key ? null : key)} className={`flex min-h-14 w-full flex-col items-center justify-center rounded-md border p-1 text-sm transition-colors sm:min-h-16 ${selected ? "border-primary bg-primary text-primary-foreground" : count ? "border-primary/30 bg-primary/5 hover:bg-primary/10" : "border-transparent hover:border-border hover:bg-muted"}`}>
+                <span>{day}</span>
+                {count > 0 && <span className={`mt-0.5 rounded px-1 text-[10px] leading-4 ${selected ? "bg-primary-foreground/15" : "text-primary"}`}>{count} {itemLabel}</span>}
+              </button>
+            </div>;
+          })}
+        </div>
+        {selectedDay && <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
+          <p role="status">Exibindo {list.length} item(ns) em {new Date(`${selectedDay}T12:00:00`).toLocaleDateString("pt-BR", { dateStyle: "long" })}.</p>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedDay(null)}>Limpar dia selecionado</Button>
+        </div>}
+      </section>
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por tipo">
+        {(["todos", "prazos", "compromissos"] as const).map((type) => <Button key={type} type="button" size="sm" variant={typeFilter === type ? "default" : "outline"} aria-pressed={typeFilter === type} onClick={() => setTypeFilter(type)}>{type === "todos" ? "Todos" : type === "prazos" ? "Prazos" : "Compromissos"}</Button>)}
       </div>
-      {list.length === 0 ? <EmptyState title="Nenhum prazo neste filtro" /> : (
+      <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(14rem,auto)]">
+        <div className="relative min-w-0">
+          <Search aria-hidden="true" className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+          <Input aria-label="Buscar prazos e compromissos" placeholder="Buscar título, caso, responsável ou origem" className="bg-card pl-9" value={query} onChange={(event) => setQuery(event.target.value)} />
+        </div>
+        <Select value={sourceFilter} onValueChange={setSourceFilter} disabled={typeFilter === "compromissos"}>
+          <SelectTrigger aria-label="Filtrar origem dos prazos" className="bg-card"><SelectValue placeholder="Todas as origens" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as origens</SelectItem>
+            {sources.map((source) => <SelectItem key={source} value={source}>{source}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+      {typeFilter !== "compromissos" && <section className="mb-4" aria-label="Filtrar prazos por situação">
+        <p className="mb-2 text-xs text-muted-foreground">Situação (aplica-se somente aos prazos)</p>
+        <div className="flex flex-wrap gap-2">
+          {FILTERS.map((x) => <Button key={x.id} type="button" size="sm" variant={f === x.id ? "default" : "outline"} aria-pressed={f === x.id} onClick={() => setF(x.id)}>{x.label} <span className="tabular opacity-70">{x.id === "todos" ? v.deadlines.length : x.id === "abertos" ? v.deadlines.filter((d) => !["concluido", "cancelado"].includes(d.status)).length : v.deadlines.filter((d) => d.status === x.id).length}</span></Button>)}
+        </div>
+      </section>}
+      {list.length === 0 ? <EmptyState title={typeFilter === "compromissos" ? "Nenhum compromisso neste filtro" : "Nenhum prazo ou compromisso neste filtro"} /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
-          {list.map((d) => {
+          {list.map((item) => {
+            if (item.type === "compromisso") {
+              const matter = item.matterId ? v.matterById(item.matterId) : undefined;
+              return <li key={`appointment-${item.id}`} className="flex flex-wrap items-center gap-3 p-4">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-medium">{item.title}</p>
+                  <p className="text-xs text-muted-foreground"><span className="tabular">{fmtDateTime(item.at)}</span> · {v.memberName(item.assigneeId)} · {v.areaName(item.appointment.practiceAreaId)} · Compromisso</p>
+                  {matter && <p className="mt-1 text-xs"><Link to="/o/$org/casos/$id" params={{ org, id: matter.id }} className="text-primary hover:underline">{matter.code} · {matter.title}</Link></p>}
+                </div>
+                <Button size="sm" variant="outline" asChild><Link to="/o/$org/agenda" params={{ org }}>Abrir agenda</Link></Button>
+              </li>;
+            }
+            const d = item.deadline;
             const m = v.matterById(d.matterId);
             return (
-              <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
+              <li key={`deadline-${d.id}`} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{d.title}</p>
                   <p className="text-xs text-muted-foreground">
                     <span className="tabular">{fmtDeadlineDateTime(d)} ({d.timeZone ?? "fuso não informado"})</span> · {v.memberName(d.assigneeId)} · proposto por {d.proposedBy}
                     {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "prazos" }} className="text-primary hover:underline">{m.code}</Link></>}
                   </p>
+                  <p className="mt-1 text-xs text-muted-foreground">Origem: {d.sourceLabel || "Não informada"}</p>
                 </div>
                 <DueBadge iso={d.dueDate} done={["concluido", "cancelado"].includes(d.status)} />
                 <DeadlineStatusChip status={d.status} />

@@ -110,10 +110,14 @@ export interface Matter {
 export interface Proceeding {
   id: string;
   officeId: string;
-  matterId: string;
+  matterId?: string;
+  title?: string;
   cnjMasked?: string;
   court?: string;
+  unit?: string;
+  proceedingClass?: string;
   phase?: string;
+  notes?: string;
   sourceState: "manual_demo";
 }
 
@@ -362,7 +366,7 @@ export interface Receivable {
 export interface TimelineEvent {
   id: string;
   officeId: string;
-  matterId: string;
+  matterId?: string;
   /** Required to enforce document-level visibility in activity feeds. */
   docId?: string;
   at: string;

@@ -11,6 +11,10 @@ export function GlobalSearch({ office, open, onOpenChange }: { office: Office; o
     onOpenChange(false);
     navigate({ to: "/o/$org/casos/$id", params: { org: office.slug, id } });
   };
+  const goToProcess = (id: string) => {
+    onOpenChange(false);
+    navigate({ to: "/o/$org/processos/$id", params: { org: office.slug, id } });
+  };
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput placeholder={`Buscar em ${office.displayName}…`} />
@@ -36,8 +40,8 @@ export function GlobalSearch({ office, open, onOpenChange }: { office: Office; o
         {canSeeCnj(v.role) && (
           <CommandGroup heading="Processos (CNJ de teste)">
             {v.proceedings.map((p) => (
-              <CommandItem key={p.id} value={p.cnjMasked ?? p.id} onSelect={() => go(p.matterId)}>
-                <span className="tabular">{p.cnjMasked}</span>
+              <CommandItem key={p.id} value={`${p.title ?? ""} ${p.cnjMasked ?? ""} ${p.court ?? ""} ${p.unit ?? ""} ${p.id}`} onSelect={() => goToProcess(p.id)}>
+                <span>{p.title ?? "Processo sem título"}</span><span className="ml-auto tabular text-xs text-muted-foreground">{p.cnjMasked ?? "Sem CNJ"}</span>
               </CommandItem>
             ))}
           </CommandGroup>
