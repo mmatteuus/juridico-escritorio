@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildFixtures, OFFICES } from "./fixtures";
-import { canSeeMatter, ROLE_LABEL } from "./permissions";
-import type { DemoData, Matter, Member, Office, RoleId, Task, TimelineEvent } from "./types";
+import { canSeeCnj, canSeeDoc, canSeeMatter, ROLE_LABEL } from "./permissions";
+import type { DemoData, Matter, Member, Office, PublicationReview, RoleId, Task, TimelineEvent } from "./types";
 
 interface DemoState {
   data: DemoData;
@@ -61,26 +61,66 @@ export function useOfficeView(office: Office) {
     const me: Member | undefined = data.members.find((m) => m.officeId === office.id && m.role === role);
     const matters = data.matters.filter((m) => m.officeId === office.id && canSeeMatter(role, m, me?.id));
     const visible = new Set(matters.map((m) => m.id));
+    const matterById = new Map(matters.map((m) => [m.id, m]));
     const inScope = <T extends { officeId: string; matterId?: string }>(arr: T[]) =>
       arr.filter((x) => x.officeId === office.id && (!x.matterId || visible.has(x.matterId)));
+    const docs = inScope(data.docs).filter((doc) => {
+      const matter = matterById.get(doc.matterId);
+      return !!matter && canSeeDoc(role, doc, matter, me?.id);
+    });
+    const visibleDocIds = new Set(docs.map((doc) => doc.id));
+    const visibleClientIds = new Set(matters.flatMap((matter) => matter.clientIds));
+    const clients = data.clients.filter((client) =>
+      client.officeId === office.id && (visibleClientIds.has(client.id) || client.responsibleId === me?.id),
+    );
     return {
       me,
+      contractAnalysisDraft: data.contractAnalysisDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
+      fiscalPreparationDraft: data.fiscalPreparationDrafts.find((draft) => draft.officeId === office.id && draft.memberId === me?.id),
+      userPreferences: data.userPreferences.find((preference) => preference.officeId === office.id && preference.memberId === me?.id),
+      officeProfile: data.officeProfiles.find((profile) => profile.officeId === office.id),
+      officeProfileRevisions: data.officeProfileRevisions
+        .filter((revision) => revision.officeId === office.id)
+        .sort((a, b) => b.proposedAt.localeCompare(a.proposedAt)),
       role,
       matters,
       intakes: data.intakes.filter((i) => i.officeId === office.id),
+      conflicts: data.conflicts.filter((c) => c.officeId === office.id),
+      clientPortalInvites: inScope(data.clientPortalInvites),
+      collaboratorInvites: data.collaboratorInvites.filter((invite) => invite.officeId === office.id),
+      teams: data.teams.filter((team) => team.officeId === office.id),
+      supportTickets: data.supportTickets.filter((ticket) => ticket.officeId === office.id),
+      securitySessions: data.securitySessions.filter((session) => session.officeId === office.id && session.memberId === me?.id),
       members: data.members.filter((m) => m.officeId === office.id),
-      clients: data.clients.filter((c) => c.officeId === office.id),
-      proceedings: inScope(data.proceedings),
-      deadlines: inScope(data.deadlines),
+      clients,
+      proceedings: canSeeCnj(role) ? inScope(data.proceedings) : [],
+      deadlines: canSeeCnj(role) ? inScope(data.deadlines) : [],
+      publicationCoverage: canSeeCnj(role)
+        ? data.publicationCoverage.filter((coverage) => coverage.officeId === office.id)
+        : [],
+      publicationReviews: canSeeCnj(role) ? inScope(data.publicationReviews) as PublicationReview[] : [],
       tasks: inScope(data.tasks),
-      docs: inScope(data.docs),
+      docs,
+      models: data.models.filter((m) => m.officeId === office.id),
+      mandates: inScope(data.mandates),
+      delegations: inScope(data.delegations),
       messages: inScope(data.messages),
       receivables: inScope(data.receivables),
-      timeline: inScope(data.timeline),
-      notifications: inScope(data.notifications),
-      appointments: inScope(data.appointments),
-      memberName: (id?: string) => data.members.find((m) => m.id === id)?.name ?? "—",
-      clientName: (id: string) => data.clients.find((c) => c.id === id && c.officeId === office.id)?.name ?? "—",
+      timeline: inScope(data.timeline).filter((event) =>
+        (canSeeCnj(role) || event.kind !== "prazo") &&
+        (event.kind !== "documento" || (!!event.docId && visibleDocIds.has(event.docId))),
+      ),
+      notifications: inScope(data.notifications).filter((notification) =>
+        canSeeCnj(role) || notification.category !== "prazo",
+      ),
+      appointments: data.appointments.filter((appointment) =>
+        appointment.officeId === office.id &&
+        (appointment.matterId
+          ? visible.has(appointment.matterId)
+          : appointment.assigneeId === me?.id || ["gestor", "socio", "coordenador"].includes(role)),
+      ),
+      memberName: (id?: string) => data.members.find((m) => m.id === id && m.officeId === office.id)?.name ?? "—",
+      clientName: (id: string) => clients.find((c) => c.id === id)?.name ?? "—",
       areaName: (id: string) => office.practiceAreas.find((a) => a.id === id)?.name ?? id,
       matterById: (id?: string): Matter | undefined => matters.find((m) => m.id === id),
     };

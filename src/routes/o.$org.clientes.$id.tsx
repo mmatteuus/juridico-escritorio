@@ -18,7 +18,7 @@ function Cliente() {
   const matters = v.matters.filter((m) => m.clientIds.includes(c.id));
   const ids = new Set(matters.map((m) => m.id));
   const docs = canSeeLegalDocs(v.role) ? v.docs.filter((d) => ids.has(d.matterId)) : [];
-  const intakes = v.intakes.filter((i) => i.name === c.name);
+  const intakes = v.intakes.filter((intake) => !!intake.matterId && matters.some((matter) => matter.id === intake.matterId));
   const openDls = v.deadlines.filter((d) => ids.has(d.matterId) && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const nextFor = (mid: string) => openDls.find((d) => d.matterId === mid);
   const summary = [
@@ -33,7 +33,7 @@ function Cliente() {
       <header className="mb-6 rounded-xl border bg-card p-5 shadow-soft">
         <p className="text-xs text-muted-foreground">{c.kind === "PF" ? "Pessoa física" : "Empresa"} · dados fictícios</p>
         <h1 className="mt-1 font-display text-3xl font-medium">{c.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Contato: {c.contact} · {c.city}</p>
+        <p className="mt-1 text-sm text-muted-foreground">Contato: {c.contact} · {c.city}{c.state ? `/${c.state}` : ""}</p>{c.document && <p className="mt-1 text-xs text-muted-foreground">Documento: {c.kind === "PF" ? "CPF" : "CNPJ"} •••• {c.document.slice(-4)}</p>}{c.conflictStatus === "pendente" && <p className="mt-3 inline-flex rounded-full bg-copper-soft px-2 py-1 text-xs font-medium text-copper">Conflito de interesses pendente</p>}{c.responsibleId && <p className="mt-2 text-xs text-muted-foreground">Responsável: {v.memberName(c.responsibleId)}</p>}{c.notes && <p className="mt-2 text-sm text-muted-foreground">{c.notes}</p>}
         <dl className="mt-4 grid grid-cols-3 gap-3 border-t pt-4">
           {summary.map((x) => <div key={x.label}><dt className="text-xs text-muted-foreground">{x.label}</dt><dd className="font-display text-xl tabular">{x.value}</dd></div>)}
         </dl>

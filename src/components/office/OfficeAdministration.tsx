@@ -1,0 +1,74 @@
+import { useState, type FormEvent } from "react";
+import { Link } from "@tanstack/react-router";
+import { CheckCircle2, CreditCard, PlugZap, Search, ShieldCheck, UserPlus, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
+import { OfficeProfileEditor } from "@/components/office/OfficeProfileEditor";
+import { ROLE_LABEL } from "@/features/demo/permissions";
+import { uid, useDemo, useOfficeView } from "@/features/demo/store";
+import type { Office, RoleId } from "@/features/demo/types";
+
+type Section = "equipe" | "permissoes" | "perfil-escritorio" | "integracoes" | "assinatura" | "suporte" | "configuracoes" | "relatorios";
+const names: Record<Section,string> = { equipe:"Equipe", permissoes:"Permissões", "perfil-escritorio":"Perfil do escritório", integracoes:"Integrações", assinatura:"Assinatura", suporte:"Suporte", configuracoes:"Configurações", relatorios:"Relatórios" };
+const card="rounded-xl border bg-card p-5 shadow-soft";
+const heading="font-display text-xl font-medium";
+const managers:RoleId[]=["gestor","socio"];
+function Info({label,value}:{label:string;value:string|number}){return <div className="flex flex-wrap justify-between gap-2 border-b py-2 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-medium">{value}</dd></div>}
+function Metric({label,value}:{label:string;value:number}){return <div className={card}><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 font-display text-3xl tabular">{value}</p></div>}
+export function OfficeAdministration({office,section}:{office:Office;section:Section}){
+  const view=useOfficeView(office);
+  const {update}=useDemo();
+  const [query,setQuery]=useState("");
+  const [period,setPeriod]=useState("30 dias");
+  const [ticket,setTicket]=useState("");
+  const [ticketCategory,setTicketCategory]=useState<"acesso"|"agenda"|"documentos"|"navegacao"|"outro">("navegacao");
+  const managerAlerts = view.userPreferences?.managerAlerts ?? { deadlines: true, tasks: true };
+  if(section==="permissoes"&&!managers.includes(view.role)) return <DeniedState/>;
+  const members=view.members.filter(m=>`${m.name} ${m.title} ${ROLE_LABEL[m.role]}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+  const days=Number.parseInt(period,10);
+  const since=new Date(); since.setDate(since.getDate()-days); since.setHours(0,0,0,0);
+  const inPeriod=(date:string)=>{const time=new Date(date).getTime(); return Number.isFinite(time)&&time>=since.getTime()&&time<=Date.now()};
+  const recentMatters=view.matters.filter(m=>inPeriod(m.updatedAt));
+  const recentTasks=view.tasks.filter(t=>inPeriod(t.dueAt));
+  const recentDeadlines=view.deadlines.filter(d=>inPeriod(d.dueDate));
+  const recentIntakes=view.intakes.filter(i=>inPeriod(i.createdAt));
+  const submitTicket=(event:FormEvent)=>{
+    event.preventDefault();
+    const description=ticket.trim();
+    if(!description) return;
+    const id=uid("support");
+    update(data=>({...data,supportTickets:[{id,officeId:office.id,category:ticketCategory,referenceId:`DEMO-${id.slice(-6).toUpperCase()}`,description,status:"aberto",createdAt:new Date().toISOString()},...data.supportTickets]}));
+    setTicket("");
+    setTicketCategory("navegacao");
+  };
+  const saveManagerAlert=(key:"deadlines"|"tasks",value:boolean)=>{
+    if(!view.me) return;
+    update(data=>{
+      const existing=data.userPreferences.find(item=>item.officeId===office.id&&item.memberId===view.me?.id);
+      const base=existing??{officeId:office.id,memberId:view.me!.id,categories:{prazo:true,tarefa:true,documento:true,sistema:true},channel:"central" as const,quiet:false,quietStart:"20:00",quietEnd:"08:00",managerAlerts:{deadlines:true,tasks:true}};
+      const preference={...base,managerAlerts:{...base.managerAlerts,[key]:value}};
+      return {...data,userPreferences:[...data.userPreferences.filter(item=>item.officeId!==office.id||item.memberId!==view.me?.id),preference]};
+    });
+  };
+  return <div className="space-y-5"><PageHeader title={names[section]} subtitle={section === "relatorios" ? `${office.displayName} · Conceito da Fase 2 · indicadores ilustrativos` : `${office.displayName} · demonstração`} actions={section === "equipe" && managers.includes(view.role) ? <Button asChild><Link to="/o/$org/convites-colaboradores" params={{org:office.slug}}><UserPlus/>Convidar colaborador</Link></Button> : undefined}/>
+    {section === "suporte" && <p className="rounded-lg border border-copper/30 bg-copper-soft p-3 text-sm text-copper"><strong>Não inclua dados pessoais, documentos, estratégia ou conteúdo jurídico.</strong> Use apenas uma descrição geral; este formulário é local e não envia um ticket real.</p>}
+    {section==="equipe"&&<><div className="grid gap-3 sm:grid-cols-3"><Metric label="Pessoas na equipe" value={view.members.length}/><Metric label="Advogados e coordenação" value={view.members.filter(m=>["advogado","coordenador","socio","gestor"].includes(m.role)).length}/><Metric label="Áreas de atuação" value={office.practiceAreas.length}/></div><section className={card}><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 className={heading}>Profissionais</h2><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground"/><Input aria-label="Buscar profissional" className="pl-9" placeholder="Buscar por nome ou função" value={query} onChange={e=>setQuery(e.target.value)}/></div></div>{members.length?<div className="grid gap-3 md:grid-cols-2">{members.map(m=><Link key={m.id} to="/o/$org/equipe/$id" params={{org:office.slug,id:m.id}} className="flex items-center gap-3 rounded-lg border p-3 hover:border-primary/40 hover:bg-muted/40"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{m.name.split(" ").map(n=>n[0]).slice(0,2).join("")}</span><div className="min-w-0"><p className="truncate font-medium">{m.name}</p><p className="break-words text-xs text-muted-foreground">{m.title} · {ROLE_LABEL[m.role]}</p><p className="break-words text-xs text-muted-foreground">{m.practiceAreaIds.map(view.areaName).join(", ")||"Todas as áreas"}</p></div></Link>)}</div>:<EmptyState title="Nenhum profissional encontrado"/>}</section></>}
+    {section==="permissoes"&&<><section className={card}><div className="mb-4 flex items-center gap-2"><ShieldCheck className="size-5 text-primary"/><h2 className={heading}>Matriz de acesso</h2></div><p className="mb-4 text-sm text-muted-foreground">Perfis demonstrativos. Casos sigilosos exigem concessão explícita.</p><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{Object.entries(ROLE_LABEL).map(([role,label])=><div key={role} className="rounded-lg border p-3"><p className="font-medium">{label}</p><p className="mt-1 text-xs text-muted-foreground">{["gestor","socio"].includes(role)?"Gestão e operação":role==="financeiro"?"Financeiro e dados autorizados":"Operação conforme equipe e caso"}</p><p className="mt-3 text-xs text-primary">{view.members.filter(m=>m.role===role).length} pessoa(s)</p></div>)}</div></section><section className={card}><h2 className={heading}>Visibilidade atual</h2><p className="mt-2 text-sm text-muted-foreground">O perfil atual visualiza {view.matters.length} caso(s) deste escritório após o filtro de confidencialidade.</p></section></>}
+    {section==="perfil-escritorio"&&<OfficeProfileEditor office={office}/>}
+    {section==="integracoes"&&<section className={card}><div className="flex items-center gap-2"><PlugZap className="size-5 text-primary"/><h2 className={heading}>Conexões do escritório</h2></div><p className="mt-2 text-sm text-muted-foreground">Canais previstos para a operação do escritório.</p><div className="mt-5 grid gap-3 sm:grid-cols-2">{[{name:"WhatsApp",note:"Envio manual após revisão"},{name:"Tribunais",note:"Consulta e atualização processual"},{name:"Calendário",note:"Compromissos e prazos"},{name:"Armazenamento",note:"Documentos e versões"}].map(x=><article key={x.name} className="rounded-lg border p-4"><p className="font-medium">{x.name}</p><p className="mt-1 text-xs text-muted-foreground">{x.note}</p><p className="mt-3 text-xs font-medium text-copper">Não conectado na demonstração</p></article>)}</div></section>}
+    {section==="assinatura"&&<div className="grid gap-5 lg:grid-cols-2"><section className={card}><div className="flex items-center gap-2"><CreditCard className="size-5 text-primary"/><h2 className={heading}>Plano do escritório</h2></div><p className="mt-4 font-display text-3xl">Demonstração</p><p className="mt-1 text-sm text-muted-foreground">Apresentação sem cobrança ativa.</p><ul className="mt-5 space-y-2 text-sm"><li><CheckCircle2 className="mr-2 inline size-4 text-success"/>{view.members.length} profissionais na amostra</li><li><CheckCircle2 className="mr-2 inline size-4 text-success"/>{office.practiceAreas.length} áreas de atuação</li><li><CheckCircle2 className="mr-2 inline size-4 text-success"/>Módulos jurídicos demonstrativos</li></ul></section><section className={card}><h2 className={heading}>Uso demonstrativo</h2><dl className="mt-4"><Info label="Clientes" value={view.clients.length}/><Info label="Casos visíveis" value={view.matters.length}/><Info label="Documentos visíveis" value={view.docs.length}/></dl></section></div>}
+    {section==="suporte"&&<div className="grid gap-5 lg:grid-cols-2"><section className={card}><h2 className={heading}>Abrir solicitação</h2><p className="mt-2 text-sm text-muted-foreground">As solicitações ficam neste escritório durante a sessão demo.</p><form onSubmit={submitTicket} className="mt-5 space-y-3"><label htmlFor="support-category" className="block text-sm font-medium">Categoria</label><select id="support-category" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={ticketCategory} onChange={e=>setTicketCategory(e.target.value as typeof ticketCategory)}><option value="acesso">Acesso à conta</option><option value="agenda">Agenda e prazos</option><option value="documentos">Documentos</option><option value="navegacao">Navegação</option><option value="outro">Outro assunto geral</option></select><label htmlFor="support-message" className="block text-sm font-medium">Descrição geral do problema</label><textarea id="support-message" className="min-h-28 w-full rounded-md border bg-background p-3 text-sm" placeholder="Como podemos ajudar?" value={ticket} onChange={e=>setTicket(e.target.value)} required maxLength={500} aria-describedby="support-message-help"/><p id="support-message-help" className="text-xs text-muted-foreground">Até 500 caracteres. Evite nomes, contatos e números de processo.</p><Button type="submit">Registrar solicitação demo</Button></form></section><section className={card}><h2 className={heading}>Solicitações desta sessão</h2>{view.supportTickets.length?<ul className="mt-4 space-y-2">{[...view.supportTickets].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(item=><li key={item.id} className="rounded-lg border p-3 text-sm"><p>{item.description}</p><p className="mt-1 text-xs text-muted-foreground">{item.category ?? "Outro assunto"} · referência {item.referenceId ?? "demo"}</p><p className="mt-2 text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleDateString("pt-BR")} · {item.status==="aberto"?"Aberta":item.status==="em_atendimento"?"Em atendimento":"Resolvida"} · demonstração</p></li>)}</ul>:<div className="mt-4"><EmptyState title="Nenhuma solicitação aberta" hint="Novos registros aparecerão aqui durante a demonstração."/></div>}</section></div>}
+    {section==="configuracoes"&&<div className="grid gap-5 lg:grid-cols-2"><section className={card}><h2 className={heading}>Preferências da sessão</h2><div className="mt-5 space-y-3"><label className="flex items-center justify-between rounded-lg border p-3 text-sm">Alertas de prazo<input type="checkbox" className="size-4 accent-primary" checked={managerAlerts.deadlines} onChange={e=>saveManagerAlert("deadlines",e.target.checked)}/></label><label className="flex items-center justify-between rounded-lg border p-3 text-sm">Alertas de tarefa<input type="checkbox" className="size-4 accent-primary" checked={managerAlerts.tasks} onChange={e=>saveManagerAlert("tasks",e.target.checked)}/></label></div><p className="mt-3 text-xs text-muted-foreground">Preferências simuladas nesta sessão.</p></section><section className={card}><h2 className={heading}>Atalhos do escritório</h2><div className="mt-4 grid gap-2 text-sm">{(["perfil-escritorio","equipe","integracoes","suporte"] as Section[]).map(s=><Link key={s} to={{"perfil-escritorio":"/o/$org/perfil-escritorio",equipe:"/o/$org/equipe",integracoes:"/o/$org/integracoes",suporte:"/o/$org/suporte"}[s as "perfil-escritorio"|"equipe"|"integracoes"|"suporte"]} params={{org:office.slug}} className="rounded-lg border px-3 py-2 hover:bg-muted">{names[s]} →</Link>)}</div></section></div>}
+    {section==="relatorios"&&<><div className="flex flex-wrap items-center gap-2"><label htmlFor="report-period" className="text-sm font-medium">Período</label><select id="report-period" className="h-9 rounded-md border bg-background px-3 text-sm" value={period} onChange={e=>setPeriod(e.target.value)}><option>7 dias</option><option>30 dias</option><option>90 dias</option></select><span className="text-xs text-muted-foreground">Indicadores dos últimos {days} dias da amostra demo</span></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Metric label="Casos atualizados" value={recentMatters.length}/><Metric label="Tarefas com vencimento" value={recentTasks.length}/><Metric label="Prazos com vencimento" value={recentDeadlines.length}/><Metric label="Atendimentos recebidos" value={recentIntakes.length}/></div><div className="grid gap-5 lg:grid-cols-2"><section className={card}><div className="flex items-center gap-2"><Users className="size-5 text-primary"/><h2 className={heading}>Casos por área</h2></div><div className="mt-5 space-y-4">{office.practiceAreas.map(area=>{const n=recentMatters.filter(m=>m.practiceAreaId===area.id).length;return <div key={area.id}><div className="mb-1 flex justify-between text-sm"><span>{area.name}</span><strong>{n}</strong></div><div className="h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-primary" style={{width:`${recentMatters.length?n/recentMatters.length*100:0}%`}}/></div></div>})}</div></section><section className={card}><h2 className={heading}>Casos por estado</h2><dl className="mt-4">{["ativo","em_analise","suspenso","encerrado"].map(status=><Info key={status} label={status.replace("_"," ")} value={recentMatters.filter(m=>m.status===status).length}/>)}</dl></section></div></>}
+  </div>;
+}
+
+
+
+
+
+
+
+
+

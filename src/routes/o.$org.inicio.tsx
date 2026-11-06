@@ -31,18 +31,18 @@ function Inicio() {
   return (
     <>
       <PageHeader title={first ? `${hello}, ${first}` : "Início"} subtitle={`${office.displayName} · ${new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}`} actions={<Button variant="outline" onClick={() => setMeuDiaOpen(true)}><Sun /> Abrir Meu Dia</Button>} />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, Icon, to, alert }) => (
-          <Link key={label} to={to} params={{ org }} className="group rounded-xl border bg-card p-4 shadow-soft transition-colors hover:border-primary/40">
+          <Link key={label} to={to} params={{ org }} className="group min-w-0 rounded-xl border bg-card p-4 shadow-soft transition-colors hover:border-primary/40">
             <Icon className={alert && value > 0 ? "size-4 text-destructive" : "size-4 text-copper"} />
             <p className={`mt-3 font-display text-3xl tabular ${alert && value > 0 ? "text-destructive" : ""}`}>{value}</p>
             <p className="text-sm text-muted-foreground group-hover:text-foreground">{label}</p>
           </Link>
         ))}
       </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-xl border bg-card p-5 shadow-soft">
-          <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Tarefas próximas</h2><Link to="/o/$org/tarefas" params={{ org }} className="text-sm text-primary hover:underline">Ver todas</Link></div>
+      <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <section className="min-w-0 rounded-xl border bg-card p-5 shadow-soft">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-display text-xl">Tarefas próximas</h2><Link to="/o/$org/tarefas" params={{ org }} className="shrink-0 text-sm text-primary hover:underline">Ver todas</Link></div>
           {open.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma tarefa em aberto.</p>}
           <ul className="divide-y">
             {[...open].sort((a, b) => a.dueAt.localeCompare(b.dueAt)).slice(0, 8).map((t) => {
@@ -50,7 +50,7 @@ function Inicio() {
               return (
                 <li key={t.id} className="flex flex-wrap items-center gap-2 py-2.5">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{t.title}</p>
+                    <p className="break-words text-sm font-medium">{t.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {v.memberName(t.assigneeId)} · {TASK_STATUS_LABEL[t.status]} · {isOverdue(t) ? <strong className="text-destructive">atrasada</strong> : fmtDateTime(t.dueAt)}
                       {m && <> · <Link className="text-primary underline-offset-2 hover:underline" to="/o/$org/casos/$id" params={{ org, id: m.id }}>{m.code}</Link></>}
@@ -62,27 +62,27 @@ function Inicio() {
             })}
           </ul>
         </section>
-        <div className="space-y-6">
-          <section className="rounded-xl border bg-card p-5 shadow-soft">
-            <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Prazos em aberto</h2><Link to="/o/$org/prazos" params={{ org }} className="text-sm text-primary hover:underline">Ver todos</Link></div>
+        <div className="min-w-0 space-y-6">
+          <section className="min-w-0 rounded-xl border bg-card p-5 shadow-soft">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-display text-xl">Prazos em aberto</h2><Link to="/o/$org/prazos" params={{ org }} className="shrink-0 text-sm text-primary hover:underline">Ver todos</Link></div>
             {openDls.length === 0 && <p className="text-sm text-muted-foreground">Nenhum prazo em aberto.</p>}
             <ul className="space-y-1">
               {openDls.slice(0, 5).map((d) => (
                 <li key={d.id}><Link to="/o/$org/casos/$id" params={{ org, id: d.matterId }} search={{ tab: "prazos" }} className="block rounded-lg p-2 hover:bg-muted">
-                  <p className="text-sm font-medium">{d.title}</p>
+                  <p className="break-words text-sm font-medium">{d.title}</p>
                   <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><DueBadge iso={d.dueDate} /><DeadlineStatusChip status={d.status} /> <span className="tabular">{fmtDateTime(d.dueDate)}</span></div>
                 </Link></li>
               ))}
             </ul>
           </section>
-          <section className="rounded-xl border bg-card p-5 shadow-soft">
-            <div className="mb-3 flex items-baseline justify-between"><h2 className="font-display text-xl">Agenda de hoje</h2><Link to="/o/$org/agenda" params={{ org }} className="text-sm text-primary hover:underline">Abrir agenda</Link></div>
+          <section className="min-w-0 rounded-xl border bg-card p-5 shadow-soft">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="font-display text-xl">Agenda de hoje</h2><Link to="/o/$org/agenda" params={{ org }} className="shrink-0 text-sm text-primary hover:underline">Abrir agenda</Link></div>
             {today.length === 0 && <p className="text-sm text-muted-foreground">Nenhum compromisso hoje.</p>}
             <ul className="space-y-2 text-sm">
               {today.map((a) => <li key={a.id}><span className="tabular font-semibold">{fmtTime(a.at)}</span> · {a.title}</li>)}
             </ul>
           </section>
-          <section className="rounded-xl border bg-card p-5 shadow-soft">
+          <section className="min-w-0 rounded-xl border bg-card p-5 shadow-soft">
             <h2 className="mb-3 font-display text-xl">Atividade recente</h2>
             <ul className="space-y-2 text-sm">
               {[...v.timeline].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 5).map((e) => <li key={e.id}><span className="font-medium">{e.actor}</span> — {e.text}<span className="block text-xs text-muted-foreground">{fmtDateTime(e.at)}</span></li>)}

@@ -1,4 +1,4 @@
-import type { Matter, RoleId } from "./types";
+import type { Doc, Matter, RoleId } from "./types";
 
 /** DEMO-only UX permissions. Not a security mechanism — real checks belong on the server. */
 
@@ -16,18 +16,13 @@ export const ROLE_LABEL: Record<RoleId, string> = {
 const LAWYER_ROLES: RoleId[] = ["socio", "coordenador", "advogado"];
 
 export function canSeeMatter(role: RoleId, matter: Matter, memberId?: string): boolean {
+  if (!memberId) return false;
   if (matter.confidentiality === "sigilo_reforcado") {
     // Hierarchy never implies access: only explicit grant.
     return matter.grantRoles.includes(role);
   }
-  if (matter.confidentiality === "restrito_a_equipe") {
-    if (matter.grantRoles.includes(role)) return true;
-    return !!memberId && matter.assignedMemberIds.includes(memberId);
-  }
-  if (role === "substituto" || role === "estagiario") {
-    return !!memberId && matter.assignedMemberIds.includes(memberId);
-  }
-  return true;
+  // Ordinary and team-restricted cases need a direct assignment or an explicit role grant.
+  return matter.assignedMemberIds.includes(memberId) || matter.grantRoles.includes(role);
 }
 
 export function canConfirmDeadline(role: RoleId): boolean {
@@ -48,6 +43,15 @@ export function canSeeCnj(role: RoleId): boolean {
 
 export function canSeeLegalDocs(role: RoleId): boolean {
   return role !== "financeiro";
+}
+
+/** Document access is scoped by office, case, and the document's own restriction. */
+export function canSeeDoc(role: RoleId, doc: Doc, matter: Matter, memberId?: string): boolean {
+  if (doc.officeId !== matter.officeId || doc.matterId !== matter.id) return false;
+  if (!memberId) return false;
+  if (!canSeeLegalDocs(role) || !canSeeMatter(role, matter, memberId)) return false;
+  if (doc.visibility !== "restrito") return true;
+  return !!doc.grantedRoles?.includes(role);
 }
 
 export function canApproveIntake(role: RoleId): boolean {

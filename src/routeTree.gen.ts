@@ -11,20 +11,70 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SelecionarEscritorioRouteImport } from './routes/selecionar-escritorio'
 import { Route as OOrgRouteImport } from './routes/o.$org'
+import { Route as OOrgIndexRouteImport } from './routes/o.$org.index'
+import { Route as OOrgAcessoNegadoRouteImport } from './routes/o.$org.acesso-negado'
 import { Route as OOrgAgendaRouteImport } from './routes/o.$org.agenda'
+import { Route as OOrgAnaliseContratualRouteImport } from './routes/o.$org.analise-contratual'
+import { Route as OOrgAnaliseContratualClausulasRouteImport } from './routes/o.$org.analise-contratual-clausulas'
+import { Route as OOrgAnaliseContratualEstruturaRouteImport } from './routes/o.$org.analise-contratual-estrutura'
+import { Route as OOrgAnaliseContratualRevisaoRouteImport } from './routes/o.$org.analise-contratual-revisao'
+import { Route as OOrgAssinaturaRouteImport } from './routes/o.$org.assinatura'
 import { Route as OOrgAtendimentosRouteImport } from './routes/o.$org.atendimentos'
+import { Route as OOrgAtividadeRouteImport } from './routes/o.$org.atividade'
 import { Route as OOrgCaixaDeTrabalhoRouteImport } from './routes/o.$org.caixa-de-trabalho'
+import { Route as OOrgComunicacaoRouteImport } from './routes/o.$org.comunicacao'
+import { Route as OOrgConceitosRouteImport } from './routes/o.$org.conceitos'
+import { Route as OOrgConfiguracoesRouteImport } from './routes/o.$org.configuracoes'
+import { Route as OOrgConflitosRouteImport } from './routes/o.$org.conflitos'
+import { Route as OOrgConvitesRouteImport } from './routes/o.$org.convites'
+import { Route as OOrgConvitesColaboradoresRouteImport } from './routes/o.$org.convites-colaboradores'
+import { Route as OOrgDocumentosRouteImport } from './routes/o.$org.documentos'
+import { Route as OOrgEquipeRouteImport } from './routes/o.$org.equipe'
+import { Route as OOrgEstruturaRouteImport } from './routes/o.$org.estrutura'
 import { Route as OOrgFinanceiroRouteImport } from './routes/o.$org.financeiro'
+import { Route as OOrgIndisponivelRouteImport } from './routes/o.$org.indisponivel'
 import { Route as OOrgInicioRouteImport } from './routes/o.$org.inicio'
+import { Route as OOrgIntegracoesRouteImport } from './routes/o.$org.integracoes'
+import { Route as OOrgModelosRouteImport } from './routes/o.$org.modelos'
 import { Route as OOrgNotificacoesRouteImport } from './routes/o.$org.notificacoes'
+import { Route as OOrgPerfilEscritorioRouteImport } from './routes/o.$org.perfil-escritorio'
+import { Route as OOrgPermissoesRouteImport } from './routes/o.$org.permissoes'
 import { Route as OOrgPrazosRouteImport } from './routes/o.$org.prazos'
+import { Route as OOrgPreferenciasRouteImport } from './routes/o.$org.preferencias'
+import { Route as OOrgPrimeirosPassosRouteImport } from './routes/o.$org.primeiros-passos'
 import { Route as OOrgProcessosRouteImport } from './routes/o.$org.processos'
+import { Route as OOrgProcuracoesRouteImport } from './routes/o.$org.procuracoes'
+import { Route as OOrgRelatoriosRouteImport } from './routes/o.$org.relatorios'
+import { Route as OOrgSegurancaRouteImport } from './routes/o.$org.seguranca'
+import { Route as OOrgSemLicencaRouteImport } from './routes/o.$org.sem-licenca'
+import { Route as OOrgSigiloRouteImport } from './routes/o.$org.sigilo'
+import { Route as OOrgSubstituicoesRouteImport } from './routes/o.$org.substituicoes'
+import { Route as OOrgSuporteRouteImport } from './routes/o.$org.suporte'
 import { Route as OOrgTarefasRouteImport } from './routes/o.$org.tarefas'
 import { Route as OOrgCasosIndexRouteImport } from './routes/o.$org.casos.index'
 import { Route as OOrgCasosIdRouteImport } from './routes/o.$org.casos.$id'
 import { Route as OOrgClientesIndexRouteImport } from './routes/o.$org.clientes.index'
 import { Route as OOrgClientesIdRouteImport } from './routes/o.$org.clientes.$id'
+import { Route as OOrgClientesNovoRouteImport } from './routes/o.$org.clientes.novo'
+import { Route as OOrgComunicacaoIdRouteImport } from './routes/o.$org.comunicacao.$id'
+import { Route as OOrgEquipeIdRouteImport } from './routes/o.$org.equipe.$id'
+import { Route as OOrgFinanceiroIdRouteImport } from './routes/o.$org.financeiro.$id'
+import { Route as OOrgFinanceiroBancosRouteImport } from './routes/o.$org.financeiro.bancos'
+import { Route as OOrgFinanceiroConciliacaoRouteImport } from './routes/o.$org.financeiro.conciliacao'
+import { Route as OOrgFinanceiroConexaoRouteImport } from './routes/o.$org.financeiro.conexao'
+import { Route as OOrgFinanceiroConsentimentosRouteImport } from './routes/o.$org.financeiro.consentimentos'
+import { Route as OOrgFinanceiroExtratoRouteImport } from './routes/o.$org.financeiro.extrato'
+import { Route as OOrgFinanceiroSaldosRouteImport } from './routes/o.$org.financeiro.saldos'
+import { Route as OOrgModelosIdRouteImport } from './routes/o.$org.modelos.$id'
+import { Route as OOrgPrazosIdRouteImport } from './routes/o.$org.prazos.$id'
+import { Route as OOrgProcessosIdRouteImport } from './routes/o.$org.processos.$id'
+import { Route as OOrgTarefasIdRouteImport } from './routes/o.$org.tarefas.$id'
+import { Route as OOrgFinanceiroFiscalClassificacaoRouteImport } from './routes/o.$org.financeiro.fiscal.classificacao'
+import { Route as OOrgFinanceiroFiscalConciliacaoRouteImport } from './routes/o.$org.financeiro.fiscal.conciliacao'
+import { Route as OOrgFinanceiroFiscalPreparacaoRouteImport } from './routes/o.$org.financeiro.fiscal.preparacao'
+import { Route as OOrgFinanceiroFiscalResumoRouteImport } from './routes/o.$org.financeiro.fiscal.resumo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,14 +86,57 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SelecionarEscritorioRoute = SelecionarEscritorioRouteImport.update({
+  id: '/selecionar-escritorio',
+  path: '/selecionar-escritorio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OOrgRoute = OOrgRouteImport.update({
   id: '/o/$org',
   path: '/o/$org',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OOrgIndexRoute = OOrgIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgAcessoNegadoRoute = OOrgAcessoNegadoRouteImport.update({
+  id: '/acesso-negado',
+  path: '/acesso-negado',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgAgendaRoute = OOrgAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgAnaliseContratualRoute = OOrgAnaliseContratualRouteImport.update({
+  id: '/analise-contratual',
+  path: '/analise-contratual',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgAnaliseContratualClausulasRoute =
+  OOrgAnaliseContratualClausulasRouteImport.update({
+    id: '/analise-contratual-clausulas',
+    path: '/analise-contratual-clausulas',
+    getParentRoute: () => OOrgRoute,
+  } as any)
+const OOrgAnaliseContratualEstruturaRoute =
+  OOrgAnaliseContratualEstruturaRouteImport.update({
+    id: '/analise-contratual-estrutura',
+    path: '/analise-contratual-estrutura',
+    getParentRoute: () => OOrgRoute,
+  } as any)
+const OOrgAnaliseContratualRevisaoRoute =
+  OOrgAnaliseContratualRevisaoRouteImport.update({
+    id: '/analise-contratual-revisao',
+    path: '/analise-contratual-revisao',
+    getParentRoute: () => OOrgRoute,
+  } as any)
+const OOrgAssinaturaRoute = OOrgAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgAtendimentosRoute = OOrgAtendimentosRouteImport.update({
@@ -51,9 +144,60 @@ const OOrgAtendimentosRoute = OOrgAtendimentosRouteImport.update({
   path: '/atendimentos',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgAtividadeRoute = OOrgAtividadeRouteImport.update({
+  id: '/atividade',
+  path: '/atividade',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgCaixaDeTrabalhoRoute = OOrgCaixaDeTrabalhoRouteImport.update({
   id: '/caixa-de-trabalho',
   path: '/caixa-de-trabalho',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgComunicacaoRoute = OOrgComunicacaoRouteImport.update({
+  id: '/comunicacao',
+  path: '/comunicacao',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgConceitosRoute = OOrgConceitosRouteImport.update({
+  id: '/conceitos',
+  path: '/conceitos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgConfiguracoesRoute = OOrgConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgConflitosRoute = OOrgConflitosRouteImport.update({
+  id: '/conflitos',
+  path: '/conflitos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgConvitesRoute = OOrgConvitesRouteImport.update({
+  id: '/convites',
+  path: '/convites',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgConvitesColaboradoresRoute =
+  OOrgConvitesColaboradoresRouteImport.update({
+    id: '/convites-colaboradores',
+    path: '/convites-colaboradores',
+    getParentRoute: () => OOrgRoute,
+  } as any)
+const OOrgDocumentosRoute = OOrgDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgEquipeRoute = OOrgEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgEstruturaRoute = OOrgEstruturaRouteImport.update({
+  id: '/estrutura',
+  path: '/estrutura',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgFinanceiroRoute = OOrgFinanceiroRouteImport.update({
@@ -61,9 +205,24 @@ const OOrgFinanceiroRoute = OOrgFinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgIndisponivelRoute = OOrgIndisponivelRouteImport.update({
+  id: '/indisponivel',
+  path: '/indisponivel',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgInicioRoute = OOrgInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgIntegracoesRoute = OOrgIntegracoesRouteImport.update({
+  id: '/integracoes',
+  path: '/integracoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgModelosRoute = OOrgModelosRouteImport.update({
+  id: '/modelos',
+  path: '/modelos',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
@@ -71,14 +230,69 @@ const OOrgNotificacoesRoute = OOrgNotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgPerfilEscritorioRoute = OOrgPerfilEscritorioRouteImport.update({
+  id: '/perfil-escritorio',
+  path: '/perfil-escritorio',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgPermissoesRoute = OOrgPermissoesRouteImport.update({
+  id: '/permissoes',
+  path: '/permissoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgPrazosRoute = OOrgPrazosRouteImport.update({
   id: '/prazos',
   path: '/prazos',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgPreferenciasRoute = OOrgPreferenciasRouteImport.update({
+  id: '/preferencias',
+  path: '/preferencias',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgPrimeirosPassosRoute = OOrgPrimeirosPassosRouteImport.update({
+  id: '/primeiros-passos',
+  path: '/primeiros-passos',
+  getParentRoute: () => OOrgRoute,
+} as any)
 const OOrgProcessosRoute = OOrgProcessosRouteImport.update({
   id: '/processos',
   path: '/processos',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgProcuracoesRoute = OOrgProcuracoesRouteImport.update({
+  id: '/procuracoes',
+  path: '/procuracoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgRelatoriosRoute = OOrgRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgSegurancaRoute = OOrgSegurancaRouteImport.update({
+  id: '/seguranca',
+  path: '/seguranca',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgSemLicencaRoute = OOrgSemLicencaRouteImport.update({
+  id: '/sem-licenca',
+  path: '/sem-licenca',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgSigiloRoute = OOrgSigiloRouteImport.update({
+  id: '/sigilo',
+  path: '/sigilo',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgSubstituicoesRoute = OOrgSubstituicoesRouteImport.update({
+  id: '/substituicoes',
+  path: '/substituicoes',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgSuporteRoute = OOrgSuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
   getParentRoute: () => OOrgRoute,
 } as any)
 const OOrgTarefasRoute = OOrgTarefasRouteImport.update({
@@ -106,122 +320,517 @@ const OOrgClientesIdRoute = OOrgClientesIdRouteImport.update({
   path: '/clientes/$id',
   getParentRoute: () => OOrgRoute,
 } as any)
+const OOrgClientesNovoRoute = OOrgClientesNovoRouteImport.update({
+  id: '/clientes/novo',
+  path: '/clientes/novo',
+  getParentRoute: () => OOrgRoute,
+} as any)
+const OOrgComunicacaoIdRoute = OOrgComunicacaoIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgComunicacaoRoute,
+} as any)
+const OOrgEquipeIdRoute = OOrgEquipeIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgEquipeRoute,
+} as any)
+const OOrgFinanceiroIdRoute = OOrgFinanceiroIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgFinanceiroRoute,
+} as any)
+const OOrgFinanceiroBancosRoute = OOrgFinanceiroBancosRouteImport.update({
+  id: '/bancos',
+  path: '/bancos',
+  getParentRoute: () => OOrgFinanceiroRoute,
+} as any)
+const OOrgFinanceiroConciliacaoRoute =
+  OOrgFinanceiroConciliacaoRouteImport.update({
+    id: '/conciliacao',
+    path: '/conciliacao',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
+const OOrgFinanceiroConexaoRoute = OOrgFinanceiroConexaoRouteImport.update({
+  id: '/conexao',
+  path: '/conexao',
+  getParentRoute: () => OOrgFinanceiroRoute,
+} as any)
+const OOrgFinanceiroConsentimentosRoute =
+  OOrgFinanceiroConsentimentosRouteImport.update({
+    id: '/consentimentos',
+    path: '/consentimentos',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
+const OOrgFinanceiroExtratoRoute = OOrgFinanceiroExtratoRouteImport.update({
+  id: '/extrato',
+  path: '/extrato',
+  getParentRoute: () => OOrgFinanceiroRoute,
+} as any)
+const OOrgFinanceiroSaldosRoute = OOrgFinanceiroSaldosRouteImport.update({
+  id: '/saldos',
+  path: '/saldos',
+  getParentRoute: () => OOrgFinanceiroRoute,
+} as any)
+const OOrgModelosIdRoute = OOrgModelosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgModelosRoute,
+} as any)
+const OOrgPrazosIdRoute = OOrgPrazosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgPrazosRoute,
+} as any)
+const OOrgProcessosIdRoute = OOrgProcessosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgProcessosRoute,
+} as any)
+const OOrgTarefasIdRoute = OOrgTarefasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OOrgTarefasRoute,
+} as any)
+const OOrgFinanceiroFiscalClassificacaoRoute =
+  OOrgFinanceiroFiscalClassificacaoRouteImport.update({
+    id: '/fiscal/classificacao',
+    path: '/fiscal/classificacao',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
+const OOrgFinanceiroFiscalConciliacaoRoute =
+  OOrgFinanceiroFiscalConciliacaoRouteImport.update({
+    id: '/fiscal/conciliacao',
+    path: '/fiscal/conciliacao',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
+const OOrgFinanceiroFiscalPreparacaoRoute =
+  OOrgFinanceiroFiscalPreparacaoRouteImport.update({
+    id: '/fiscal/preparacao',
+    path: '/fiscal/preparacao',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
+const OOrgFinanceiroFiscalResumoRoute =
+  OOrgFinanceiroFiscalResumoRouteImport.update({
+    id: '/fiscal/resumo',
+    path: '/fiscal/resumo',
+    getParentRoute: () => OOrgFinanceiroRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/selecionar-escritorio': typeof SelecionarEscritorioRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/acesso-negado': typeof OOrgAcessoNegadoRoute
   '/o/$org/agenda': typeof OOrgAgendaRoute
+  '/o/$org/analise-contratual': typeof OOrgAnaliseContratualRoute
+  '/o/$org/analise-contratual-clausulas': typeof OOrgAnaliseContratualClausulasRoute
+  '/o/$org/analise-contratual-estrutura': typeof OOrgAnaliseContratualEstruturaRoute
+  '/o/$org/analise-contratual-revisao': typeof OOrgAnaliseContratualRevisaoRoute
+  '/o/$org/assinatura': typeof OOrgAssinaturaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/atividade': typeof OOrgAtividadeRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
-  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
+  '/o/$org/comunicacao': typeof OOrgComunicacaoRouteWithChildren
+  '/o/$org/conceitos': typeof OOrgConceitosRoute
+  '/o/$org/configuracoes': typeof OOrgConfiguracoesRoute
+  '/o/$org/conflitos': typeof OOrgConflitosRoute
+  '/o/$org/convites': typeof OOrgConvitesRoute
+  '/o/$org/convites-colaboradores': typeof OOrgConvitesColaboradoresRoute
+  '/o/$org/documentos': typeof OOrgDocumentosRoute
+  '/o/$org/equipe': typeof OOrgEquipeRouteWithChildren
+  '/o/$org/estrutura': typeof OOrgEstruturaRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRouteWithChildren
+  '/o/$org/indisponivel': typeof OOrgIndisponivelRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/integracoes': typeof OOrgIntegracoesRoute
+  '/o/$org/modelos': typeof OOrgModelosRouteWithChildren
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
-  '/o/$org/prazos': typeof OOrgPrazosRoute
-  '/o/$org/processos': typeof OOrgProcessosRoute
-  '/o/$org/tarefas': typeof OOrgTarefasRoute
+  '/o/$org/perfil-escritorio': typeof OOrgPerfilEscritorioRoute
+  '/o/$org/permissoes': typeof OOrgPermissoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRouteWithChildren
+  '/o/$org/preferencias': typeof OOrgPreferenciasRoute
+  '/o/$org/primeiros-passos': typeof OOrgPrimeirosPassosRoute
+  '/o/$org/processos': typeof OOrgProcessosRouteWithChildren
+  '/o/$org/procuracoes': typeof OOrgProcuracoesRoute
+  '/o/$org/relatorios': typeof OOrgRelatoriosRoute
+  '/o/$org/seguranca': typeof OOrgSegurancaRoute
+  '/o/$org/sem-licenca': typeof OOrgSemLicencaRoute
+  '/o/$org/sigilo': typeof OOrgSigiloRoute
+  '/o/$org/substituicoes': typeof OOrgSubstituicoesRoute
+  '/o/$org/suporte': typeof OOrgSuporteRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRouteWithChildren
+  '/o/$org/': typeof OOrgIndexRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
+  '/o/$org/clientes/novo': typeof OOrgClientesNovoRoute
+  '/o/$org/comunicacao/$id': typeof OOrgComunicacaoIdRoute
+  '/o/$org/equipe/$id': typeof OOrgEquipeIdRoute
+  '/o/$org/financeiro/$id': typeof OOrgFinanceiroIdRoute
+  '/o/$org/financeiro/bancos': typeof OOrgFinanceiroBancosRoute
+  '/o/$org/financeiro/conciliacao': typeof OOrgFinanceiroConciliacaoRoute
+  '/o/$org/financeiro/conexao': typeof OOrgFinanceiroConexaoRoute
+  '/o/$org/financeiro/consentimentos': typeof OOrgFinanceiroConsentimentosRoute
+  '/o/$org/financeiro/extrato': typeof OOrgFinanceiroExtratoRoute
+  '/o/$org/financeiro/saldos': typeof OOrgFinanceiroSaldosRoute
+  '/o/$org/modelos/$id': typeof OOrgModelosIdRoute
+  '/o/$org/prazos/$id': typeof OOrgPrazosIdRoute
+  '/o/$org/processos/$id': typeof OOrgProcessosIdRoute
+  '/o/$org/tarefas/$id': typeof OOrgTarefasIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
   '/o/$org/clientes/': typeof OOrgClientesIndexRoute
+  '/o/$org/financeiro/fiscal/classificacao': typeof OOrgFinanceiroFiscalClassificacaoRoute
+  '/o/$org/financeiro/fiscal/conciliacao': typeof OOrgFinanceiroFiscalConciliacaoRoute
+  '/o/$org/financeiro/fiscal/preparacao': typeof OOrgFinanceiroFiscalPreparacaoRoute
+  '/o/$org/financeiro/fiscal/resumo': typeof OOrgFinanceiroFiscalResumoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/o/$org': typeof OOrgRouteWithChildren
+  '/selecionar-escritorio': typeof SelecionarEscritorioRoute
+  '/o/$org/acesso-negado': typeof OOrgAcessoNegadoRoute
   '/o/$org/agenda': typeof OOrgAgendaRoute
+  '/o/$org/analise-contratual': typeof OOrgAnaliseContratualRoute
+  '/o/$org/analise-contratual-clausulas': typeof OOrgAnaliseContratualClausulasRoute
+  '/o/$org/analise-contratual-estrutura': typeof OOrgAnaliseContratualEstruturaRoute
+  '/o/$org/analise-contratual-revisao': typeof OOrgAnaliseContratualRevisaoRoute
+  '/o/$org/assinatura': typeof OOrgAssinaturaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/atividade': typeof OOrgAtividadeRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
-  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
+  '/o/$org/comunicacao': typeof OOrgComunicacaoRouteWithChildren
+  '/o/$org/conceitos': typeof OOrgConceitosRoute
+  '/o/$org/configuracoes': typeof OOrgConfiguracoesRoute
+  '/o/$org/conflitos': typeof OOrgConflitosRoute
+  '/o/$org/convites': typeof OOrgConvitesRoute
+  '/o/$org/convites-colaboradores': typeof OOrgConvitesColaboradoresRoute
+  '/o/$org/documentos': typeof OOrgDocumentosRoute
+  '/o/$org/equipe': typeof OOrgEquipeRouteWithChildren
+  '/o/$org/estrutura': typeof OOrgEstruturaRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRouteWithChildren
+  '/o/$org/indisponivel': typeof OOrgIndisponivelRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/integracoes': typeof OOrgIntegracoesRoute
+  '/o/$org/modelos': typeof OOrgModelosRouteWithChildren
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
-  '/o/$org/prazos': typeof OOrgPrazosRoute
-  '/o/$org/processos': typeof OOrgProcessosRoute
-  '/o/$org/tarefas': typeof OOrgTarefasRoute
+  '/o/$org/perfil-escritorio': typeof OOrgPerfilEscritorioRoute
+  '/o/$org/permissoes': typeof OOrgPermissoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRouteWithChildren
+  '/o/$org/preferencias': typeof OOrgPreferenciasRoute
+  '/o/$org/primeiros-passos': typeof OOrgPrimeirosPassosRoute
+  '/o/$org/processos': typeof OOrgProcessosRouteWithChildren
+  '/o/$org/procuracoes': typeof OOrgProcuracoesRoute
+  '/o/$org/relatorios': typeof OOrgRelatoriosRoute
+  '/o/$org/seguranca': typeof OOrgSegurancaRoute
+  '/o/$org/sem-licenca': typeof OOrgSemLicencaRoute
+  '/o/$org/sigilo': typeof OOrgSigiloRoute
+  '/o/$org/substituicoes': typeof OOrgSubstituicoesRoute
+  '/o/$org/suporte': typeof OOrgSuporteRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRouteWithChildren
+  '/o/$org': typeof OOrgIndexRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
+  '/o/$org/clientes/novo': typeof OOrgClientesNovoRoute
+  '/o/$org/comunicacao/$id': typeof OOrgComunicacaoIdRoute
+  '/o/$org/equipe/$id': typeof OOrgEquipeIdRoute
+  '/o/$org/financeiro/$id': typeof OOrgFinanceiroIdRoute
+  '/o/$org/financeiro/bancos': typeof OOrgFinanceiroBancosRoute
+  '/o/$org/financeiro/conciliacao': typeof OOrgFinanceiroConciliacaoRoute
+  '/o/$org/financeiro/conexao': typeof OOrgFinanceiroConexaoRoute
+  '/o/$org/financeiro/consentimentos': typeof OOrgFinanceiroConsentimentosRoute
+  '/o/$org/financeiro/extrato': typeof OOrgFinanceiroExtratoRoute
+  '/o/$org/financeiro/saldos': typeof OOrgFinanceiroSaldosRoute
+  '/o/$org/modelos/$id': typeof OOrgModelosIdRoute
+  '/o/$org/prazos/$id': typeof OOrgPrazosIdRoute
+  '/o/$org/processos/$id': typeof OOrgProcessosIdRoute
+  '/o/$org/tarefas/$id': typeof OOrgTarefasIdRoute
   '/o/$org/casos': typeof OOrgCasosIndexRoute
   '/o/$org/clientes': typeof OOrgClientesIndexRoute
+  '/o/$org/financeiro/fiscal/classificacao': typeof OOrgFinanceiroFiscalClassificacaoRoute
+  '/o/$org/financeiro/fiscal/conciliacao': typeof OOrgFinanceiroFiscalConciliacaoRoute
+  '/o/$org/financeiro/fiscal/preparacao': typeof OOrgFinanceiroFiscalPreparacaoRoute
+  '/o/$org/financeiro/fiscal/resumo': typeof OOrgFinanceiroFiscalResumoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/selecionar-escritorio': typeof SelecionarEscritorioRoute
   '/o/$org': typeof OOrgRouteWithChildren
+  '/o/$org/acesso-negado': typeof OOrgAcessoNegadoRoute
   '/o/$org/agenda': typeof OOrgAgendaRoute
+  '/o/$org/analise-contratual': typeof OOrgAnaliseContratualRoute
+  '/o/$org/analise-contratual-clausulas': typeof OOrgAnaliseContratualClausulasRoute
+  '/o/$org/analise-contratual-estrutura': typeof OOrgAnaliseContratualEstruturaRoute
+  '/o/$org/analise-contratual-revisao': typeof OOrgAnaliseContratualRevisaoRoute
+  '/o/$org/assinatura': typeof OOrgAssinaturaRoute
   '/o/$org/atendimentos': typeof OOrgAtendimentosRoute
+  '/o/$org/atividade': typeof OOrgAtividadeRoute
   '/o/$org/caixa-de-trabalho': typeof OOrgCaixaDeTrabalhoRoute
-  '/o/$org/financeiro': typeof OOrgFinanceiroRoute
+  '/o/$org/comunicacao': typeof OOrgComunicacaoRouteWithChildren
+  '/o/$org/conceitos': typeof OOrgConceitosRoute
+  '/o/$org/configuracoes': typeof OOrgConfiguracoesRoute
+  '/o/$org/conflitos': typeof OOrgConflitosRoute
+  '/o/$org/convites': typeof OOrgConvitesRoute
+  '/o/$org/convites-colaboradores': typeof OOrgConvitesColaboradoresRoute
+  '/o/$org/documentos': typeof OOrgDocumentosRoute
+  '/o/$org/equipe': typeof OOrgEquipeRouteWithChildren
+  '/o/$org/estrutura': typeof OOrgEstruturaRoute
+  '/o/$org/financeiro': typeof OOrgFinanceiroRouteWithChildren
+  '/o/$org/indisponivel': typeof OOrgIndisponivelRoute
   '/o/$org/inicio': typeof OOrgInicioRoute
+  '/o/$org/integracoes': typeof OOrgIntegracoesRoute
+  '/o/$org/modelos': typeof OOrgModelosRouteWithChildren
   '/o/$org/notificacoes': typeof OOrgNotificacoesRoute
-  '/o/$org/prazos': typeof OOrgPrazosRoute
-  '/o/$org/processos': typeof OOrgProcessosRoute
-  '/o/$org/tarefas': typeof OOrgTarefasRoute
+  '/o/$org/perfil-escritorio': typeof OOrgPerfilEscritorioRoute
+  '/o/$org/permissoes': typeof OOrgPermissoesRoute
+  '/o/$org/prazos': typeof OOrgPrazosRouteWithChildren
+  '/o/$org/preferencias': typeof OOrgPreferenciasRoute
+  '/o/$org/primeiros-passos': typeof OOrgPrimeirosPassosRoute
+  '/o/$org/processos': typeof OOrgProcessosRouteWithChildren
+  '/o/$org/procuracoes': typeof OOrgProcuracoesRoute
+  '/o/$org/relatorios': typeof OOrgRelatoriosRoute
+  '/o/$org/seguranca': typeof OOrgSegurancaRoute
+  '/o/$org/sem-licenca': typeof OOrgSemLicencaRoute
+  '/o/$org/sigilo': typeof OOrgSigiloRoute
+  '/o/$org/substituicoes': typeof OOrgSubstituicoesRoute
+  '/o/$org/suporte': typeof OOrgSuporteRoute
+  '/o/$org/tarefas': typeof OOrgTarefasRouteWithChildren
+  '/o/$org/': typeof OOrgIndexRoute
   '/o/$org/casos/$id': typeof OOrgCasosIdRoute
   '/o/$org/clientes/$id': typeof OOrgClientesIdRoute
+  '/o/$org/clientes/novo': typeof OOrgClientesNovoRoute
+  '/o/$org/comunicacao/$id': typeof OOrgComunicacaoIdRoute
+  '/o/$org/equipe/$id': typeof OOrgEquipeIdRoute
+  '/o/$org/financeiro/$id': typeof OOrgFinanceiroIdRoute
+  '/o/$org/financeiro/bancos': typeof OOrgFinanceiroBancosRoute
+  '/o/$org/financeiro/conciliacao': typeof OOrgFinanceiroConciliacaoRoute
+  '/o/$org/financeiro/conexao': typeof OOrgFinanceiroConexaoRoute
+  '/o/$org/financeiro/consentimentos': typeof OOrgFinanceiroConsentimentosRoute
+  '/o/$org/financeiro/extrato': typeof OOrgFinanceiroExtratoRoute
+  '/o/$org/financeiro/saldos': typeof OOrgFinanceiroSaldosRoute
+  '/o/$org/modelos/$id': typeof OOrgModelosIdRoute
+  '/o/$org/prazos/$id': typeof OOrgPrazosIdRoute
+  '/o/$org/processos/$id': typeof OOrgProcessosIdRoute
+  '/o/$org/tarefas/$id': typeof OOrgTarefasIdRoute
   '/o/$org/casos/': typeof OOrgCasosIndexRoute
   '/o/$org/clientes/': typeof OOrgClientesIndexRoute
+  '/o/$org/financeiro/fiscal/classificacao': typeof OOrgFinanceiroFiscalClassificacaoRoute
+  '/o/$org/financeiro/fiscal/conciliacao': typeof OOrgFinanceiroFiscalConciliacaoRoute
+  '/o/$org/financeiro/fiscal/preparacao': typeof OOrgFinanceiroFiscalPreparacaoRoute
+  '/o/$org/financeiro/fiscal/resumo': typeof OOrgFinanceiroFiscalResumoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
+    | '/selecionar-escritorio'
     | '/o/$org'
+    | '/o/$org/acesso-negado'
     | '/o/$org/agenda'
+    | '/o/$org/analise-contratual'
+    | '/o/$org/analise-contratual-clausulas'
+    | '/o/$org/analise-contratual-estrutura'
+    | '/o/$org/analise-contratual-revisao'
+    | '/o/$org/assinatura'
     | '/o/$org/atendimentos'
+    | '/o/$org/atividade'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/comunicacao'
+    | '/o/$org/conceitos'
+    | '/o/$org/configuracoes'
+    | '/o/$org/conflitos'
+    | '/o/$org/convites'
+    | '/o/$org/convites-colaboradores'
+    | '/o/$org/documentos'
+    | '/o/$org/equipe'
+    | '/o/$org/estrutura'
     | '/o/$org/financeiro'
+    | '/o/$org/indisponivel'
     | '/o/$org/inicio'
+    | '/o/$org/integracoes'
+    | '/o/$org/modelos'
     | '/o/$org/notificacoes'
+    | '/o/$org/perfil-escritorio'
+    | '/o/$org/permissoes'
     | '/o/$org/prazos'
+    | '/o/$org/preferencias'
+    | '/o/$org/primeiros-passos'
     | '/o/$org/processos'
+    | '/o/$org/procuracoes'
+    | '/o/$org/relatorios'
+    | '/o/$org/seguranca'
+    | '/o/$org/sem-licenca'
+    | '/o/$org/sigilo'
+    | '/o/$org/substituicoes'
+    | '/o/$org/suporte'
     | '/o/$org/tarefas'
+    | '/o/$org/'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
+    | '/o/$org/clientes/novo'
+    | '/o/$org/comunicacao/$id'
+    | '/o/$org/equipe/$id'
+    | '/o/$org/financeiro/$id'
+    | '/o/$org/financeiro/bancos'
+    | '/o/$org/financeiro/conciliacao'
+    | '/o/$org/financeiro/conexao'
+    | '/o/$org/financeiro/consentimentos'
+    | '/o/$org/financeiro/extrato'
+    | '/o/$org/financeiro/saldos'
+    | '/o/$org/modelos/$id'
+    | '/o/$org/prazos/$id'
+    | '/o/$org/processos/$id'
+    | '/o/$org/tarefas/$id'
     | '/o/$org/casos/'
     | '/o/$org/clientes/'
+    | '/o/$org/financeiro/fiscal/classificacao'
+    | '/o/$org/financeiro/fiscal/conciliacao'
+    | '/o/$org/financeiro/fiscal/preparacao'
+    | '/o/$org/financeiro/fiscal/resumo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/o/$org'
+    | '/selecionar-escritorio'
+    | '/o/$org/acesso-negado'
     | '/o/$org/agenda'
+    | '/o/$org/analise-contratual'
+    | '/o/$org/analise-contratual-clausulas'
+    | '/o/$org/analise-contratual-estrutura'
+    | '/o/$org/analise-contratual-revisao'
+    | '/o/$org/assinatura'
     | '/o/$org/atendimentos'
+    | '/o/$org/atividade'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/comunicacao'
+    | '/o/$org/conceitos'
+    | '/o/$org/configuracoes'
+    | '/o/$org/conflitos'
+    | '/o/$org/convites'
+    | '/o/$org/convites-colaboradores'
+    | '/o/$org/documentos'
+    | '/o/$org/equipe'
+    | '/o/$org/estrutura'
     | '/o/$org/financeiro'
+    | '/o/$org/indisponivel'
     | '/o/$org/inicio'
+    | '/o/$org/integracoes'
+    | '/o/$org/modelos'
     | '/o/$org/notificacoes'
+    | '/o/$org/perfil-escritorio'
+    | '/o/$org/permissoes'
     | '/o/$org/prazos'
+    | '/o/$org/preferencias'
+    | '/o/$org/primeiros-passos'
     | '/o/$org/processos'
+    | '/o/$org/procuracoes'
+    | '/o/$org/relatorios'
+    | '/o/$org/seguranca'
+    | '/o/$org/sem-licenca'
+    | '/o/$org/sigilo'
+    | '/o/$org/substituicoes'
+    | '/o/$org/suporte'
     | '/o/$org/tarefas'
+    | '/o/$org'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
+    | '/o/$org/clientes/novo'
+    | '/o/$org/comunicacao/$id'
+    | '/o/$org/equipe/$id'
+    | '/o/$org/financeiro/$id'
+    | '/o/$org/financeiro/bancos'
+    | '/o/$org/financeiro/conciliacao'
+    | '/o/$org/financeiro/conexao'
+    | '/o/$org/financeiro/consentimentos'
+    | '/o/$org/financeiro/extrato'
+    | '/o/$org/financeiro/saldos'
+    | '/o/$org/modelos/$id'
+    | '/o/$org/prazos/$id'
+    | '/o/$org/processos/$id'
+    | '/o/$org/tarefas/$id'
     | '/o/$org/casos'
     | '/o/$org/clientes'
+    | '/o/$org/financeiro/fiscal/classificacao'
+    | '/o/$org/financeiro/fiscal/conciliacao'
+    | '/o/$org/financeiro/fiscal/preparacao'
+    | '/o/$org/financeiro/fiscal/resumo'
   id:
     | '__root__'
     | '/'
     | '/login'
+    | '/selecionar-escritorio'
     | '/o/$org'
+    | '/o/$org/acesso-negado'
     | '/o/$org/agenda'
+    | '/o/$org/analise-contratual'
+    | '/o/$org/analise-contratual-clausulas'
+    | '/o/$org/analise-contratual-estrutura'
+    | '/o/$org/analise-contratual-revisao'
+    | '/o/$org/assinatura'
     | '/o/$org/atendimentos'
+    | '/o/$org/atividade'
     | '/o/$org/caixa-de-trabalho'
+    | '/o/$org/comunicacao'
+    | '/o/$org/conceitos'
+    | '/o/$org/configuracoes'
+    | '/o/$org/conflitos'
+    | '/o/$org/convites'
+    | '/o/$org/convites-colaboradores'
+    | '/o/$org/documentos'
+    | '/o/$org/equipe'
+    | '/o/$org/estrutura'
     | '/o/$org/financeiro'
+    | '/o/$org/indisponivel'
     | '/o/$org/inicio'
+    | '/o/$org/integracoes'
+    | '/o/$org/modelos'
     | '/o/$org/notificacoes'
+    | '/o/$org/perfil-escritorio'
+    | '/o/$org/permissoes'
     | '/o/$org/prazos'
+    | '/o/$org/preferencias'
+    | '/o/$org/primeiros-passos'
     | '/o/$org/processos'
+    | '/o/$org/procuracoes'
+    | '/o/$org/relatorios'
+    | '/o/$org/seguranca'
+    | '/o/$org/sem-licenca'
+    | '/o/$org/sigilo'
+    | '/o/$org/substituicoes'
+    | '/o/$org/suporte'
     | '/o/$org/tarefas'
+    | '/o/$org/'
     | '/o/$org/casos/$id'
     | '/o/$org/clientes/$id'
+    | '/o/$org/clientes/novo'
+    | '/o/$org/comunicacao/$id'
+    | '/o/$org/equipe/$id'
+    | '/o/$org/financeiro/$id'
+    | '/o/$org/financeiro/bancos'
+    | '/o/$org/financeiro/conciliacao'
+    | '/o/$org/financeiro/conexao'
+    | '/o/$org/financeiro/consentimentos'
+    | '/o/$org/financeiro/extrato'
+    | '/o/$org/financeiro/saldos'
+    | '/o/$org/modelos/$id'
+    | '/o/$org/prazos/$id'
+    | '/o/$org/processos/$id'
+    | '/o/$org/tarefas/$id'
     | '/o/$org/casos/'
     | '/o/$org/clientes/'
+    | '/o/$org/financeiro/fiscal/classificacao'
+    | '/o/$org/financeiro/fiscal/conciliacao'
+    | '/o/$org/financeiro/fiscal/preparacao'
+    | '/o/$org/financeiro/fiscal/resumo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  SelecionarEscritorioRoute: typeof SelecionarEscritorioRoute
   OOrgRoute: typeof OOrgRouteWithChildren
 }
 
@@ -241,6 +850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/selecionar-escritorio': {
+      id: '/selecionar-escritorio'
+      path: '/selecionar-escritorio'
+      fullPath: '/selecionar-escritorio'
+      preLoaderRoute: typeof SelecionarEscritorioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$org': {
       id: '/o/$org'
       path: '/o/$org'
@@ -248,11 +864,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$org/': {
+      id: '/o/$org/'
+      path: '/'
+      fullPath: '/o/$org/'
+      preLoaderRoute: typeof OOrgIndexRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/acesso-negado': {
+      id: '/o/$org/acesso-negado'
+      path: '/acesso-negado'
+      fullPath: '/o/$org/acesso-negado'
+      preLoaderRoute: typeof OOrgAcessoNegadoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/agenda': {
       id: '/o/$org/agenda'
       path: '/agenda'
       fullPath: '/o/$org/agenda'
       preLoaderRoute: typeof OOrgAgendaRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/analise-contratual': {
+      id: '/o/$org/analise-contratual'
+      path: '/analise-contratual'
+      fullPath: '/o/$org/analise-contratual'
+      preLoaderRoute: typeof OOrgAnaliseContratualRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/analise-contratual-clausulas': {
+      id: '/o/$org/analise-contratual-clausulas'
+      path: '/analise-contratual-clausulas'
+      fullPath: '/o/$org/analise-contratual-clausulas'
+      preLoaderRoute: typeof OOrgAnaliseContratualClausulasRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/analise-contratual-estrutura': {
+      id: '/o/$org/analise-contratual-estrutura'
+      path: '/analise-contratual-estrutura'
+      fullPath: '/o/$org/analise-contratual-estrutura'
+      preLoaderRoute: typeof OOrgAnaliseContratualEstruturaRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/analise-contratual-revisao': {
+      id: '/o/$org/analise-contratual-revisao'
+      path: '/analise-contratual-revisao'
+      fullPath: '/o/$org/analise-contratual-revisao'
+      preLoaderRoute: typeof OOrgAnaliseContratualRevisaoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/assinatura': {
+      id: '/o/$org/assinatura'
+      path: '/assinatura'
+      fullPath: '/o/$org/assinatura'
+      preLoaderRoute: typeof OOrgAssinaturaRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/atendimentos': {
@@ -262,11 +927,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgAtendimentosRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/atividade': {
+      id: '/o/$org/atividade'
+      path: '/atividade'
+      fullPath: '/o/$org/atividade'
+      preLoaderRoute: typeof OOrgAtividadeRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/caixa-de-trabalho': {
       id: '/o/$org/caixa-de-trabalho'
       path: '/caixa-de-trabalho'
       fullPath: '/o/$org/caixa-de-trabalho'
       preLoaderRoute: typeof OOrgCaixaDeTrabalhoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/comunicacao': {
+      id: '/o/$org/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/o/$org/comunicacao'
+      preLoaderRoute: typeof OOrgComunicacaoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/conceitos': {
+      id: '/o/$org/conceitos'
+      path: '/conceitos'
+      fullPath: '/o/$org/conceitos'
+      preLoaderRoute: typeof OOrgConceitosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/configuracoes': {
+      id: '/o/$org/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/o/$org/configuracoes'
+      preLoaderRoute: typeof OOrgConfiguracoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/conflitos': {
+      id: '/o/$org/conflitos'
+      path: '/conflitos'
+      fullPath: '/o/$org/conflitos'
+      preLoaderRoute: typeof OOrgConflitosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/convites': {
+      id: '/o/$org/convites'
+      path: '/convites'
+      fullPath: '/o/$org/convites'
+      preLoaderRoute: typeof OOrgConvitesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/convites-colaboradores': {
+      id: '/o/$org/convites-colaboradores'
+      path: '/convites-colaboradores'
+      fullPath: '/o/$org/convites-colaboradores'
+      preLoaderRoute: typeof OOrgConvitesColaboradoresRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/documentos': {
+      id: '/o/$org/documentos'
+      path: '/documentos'
+      fullPath: '/o/$org/documentos'
+      preLoaderRoute: typeof OOrgDocumentosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/equipe': {
+      id: '/o/$org/equipe'
+      path: '/equipe'
+      fullPath: '/o/$org/equipe'
+      preLoaderRoute: typeof OOrgEquipeRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/estrutura': {
+      id: '/o/$org/estrutura'
+      path: '/estrutura'
+      fullPath: '/o/$org/estrutura'
+      preLoaderRoute: typeof OOrgEstruturaRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/financeiro': {
@@ -276,11 +1011,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgFinanceiroRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/indisponivel': {
+      id: '/o/$org/indisponivel'
+      path: '/indisponivel'
+      fullPath: '/o/$org/indisponivel'
+      preLoaderRoute: typeof OOrgIndisponivelRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/inicio': {
       id: '/o/$org/inicio'
       path: '/inicio'
       fullPath: '/o/$org/inicio'
       preLoaderRoute: typeof OOrgInicioRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/integracoes': {
+      id: '/o/$org/integracoes'
+      path: '/integracoes'
+      fullPath: '/o/$org/integracoes'
+      preLoaderRoute: typeof OOrgIntegracoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/modelos': {
+      id: '/o/$org/modelos'
+      path: '/modelos'
+      fullPath: '/o/$org/modelos'
+      preLoaderRoute: typeof OOrgModelosRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/notificacoes': {
@@ -290,6 +1046,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgNotificacoesRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/perfil-escritorio': {
+      id: '/o/$org/perfil-escritorio'
+      path: '/perfil-escritorio'
+      fullPath: '/o/$org/perfil-escritorio'
+      preLoaderRoute: typeof OOrgPerfilEscritorioRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/permissoes': {
+      id: '/o/$org/permissoes'
+      path: '/permissoes'
+      fullPath: '/o/$org/permissoes'
+      preLoaderRoute: typeof OOrgPermissoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/prazos': {
       id: '/o/$org/prazos'
       path: '/prazos'
@@ -297,11 +1067,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgPrazosRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/preferencias': {
+      id: '/o/$org/preferencias'
+      path: '/preferencias'
+      fullPath: '/o/$org/preferencias'
+      preLoaderRoute: typeof OOrgPreferenciasRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/primeiros-passos': {
+      id: '/o/$org/primeiros-passos'
+      path: '/primeiros-passos'
+      fullPath: '/o/$org/primeiros-passos'
+      preLoaderRoute: typeof OOrgPrimeirosPassosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
     '/o/$org/processos': {
       id: '/o/$org/processos'
       path: '/processos'
       fullPath: '/o/$org/processos'
       preLoaderRoute: typeof OOrgProcessosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/procuracoes': {
+      id: '/o/$org/procuracoes'
+      path: '/procuracoes'
+      fullPath: '/o/$org/procuracoes'
+      preLoaderRoute: typeof OOrgProcuracoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/relatorios': {
+      id: '/o/$org/relatorios'
+      path: '/relatorios'
+      fullPath: '/o/$org/relatorios'
+      preLoaderRoute: typeof OOrgRelatoriosRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/seguranca': {
+      id: '/o/$org/seguranca'
+      path: '/seguranca'
+      fullPath: '/o/$org/seguranca'
+      preLoaderRoute: typeof OOrgSegurancaRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/sem-licenca': {
+      id: '/o/$org/sem-licenca'
+      path: '/sem-licenca'
+      fullPath: '/o/$org/sem-licenca'
+      preLoaderRoute: typeof OOrgSemLicencaRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/sigilo': {
+      id: '/o/$org/sigilo'
+      path: '/sigilo'
+      fullPath: '/o/$org/sigilo'
+      preLoaderRoute: typeof OOrgSigiloRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/substituicoes': {
+      id: '/o/$org/substituicoes'
+      path: '/substituicoes'
+      fullPath: '/o/$org/substituicoes'
+      preLoaderRoute: typeof OOrgSubstituicoesRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/suporte': {
+      id: '/o/$org/suporte'
+      path: '/suporte'
+      fullPath: '/o/$org/suporte'
+      preLoaderRoute: typeof OOrgSuporteRouteImport
       parentRoute: typeof OOrgRoute
     }
     '/o/$org/tarefas': {
@@ -339,37 +1172,332 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrgClientesIdRouteImport
       parentRoute: typeof OOrgRoute
     }
+    '/o/$org/clientes/novo': {
+      id: '/o/$org/clientes/novo'
+      path: '/clientes/novo'
+      fullPath: '/o/$org/clientes/novo'
+      preLoaderRoute: typeof OOrgClientesNovoRouteImport
+      parentRoute: typeof OOrgRoute
+    }
+    '/o/$org/comunicacao/$id': {
+      id: '/o/$org/comunicacao/$id'
+      path: '/$id'
+      fullPath: '/o/$org/comunicacao/$id'
+      preLoaderRoute: typeof OOrgComunicacaoIdRouteImport
+      parentRoute: typeof OOrgComunicacaoRoute
+    }
+    '/o/$org/equipe/$id': {
+      id: '/o/$org/equipe/$id'
+      path: '/$id'
+      fullPath: '/o/$org/equipe/$id'
+      preLoaderRoute: typeof OOrgEquipeIdRouteImport
+      parentRoute: typeof OOrgEquipeRoute
+    }
+    '/o/$org/financeiro/$id': {
+      id: '/o/$org/financeiro/$id'
+      path: '/$id'
+      fullPath: '/o/$org/financeiro/$id'
+      preLoaderRoute: typeof OOrgFinanceiroIdRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/bancos': {
+      id: '/o/$org/financeiro/bancos'
+      path: '/bancos'
+      fullPath: '/o/$org/financeiro/bancos'
+      preLoaderRoute: typeof OOrgFinanceiroBancosRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/conciliacao': {
+      id: '/o/$org/financeiro/conciliacao'
+      path: '/conciliacao'
+      fullPath: '/o/$org/financeiro/conciliacao'
+      preLoaderRoute: typeof OOrgFinanceiroConciliacaoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/conexao': {
+      id: '/o/$org/financeiro/conexao'
+      path: '/conexao'
+      fullPath: '/o/$org/financeiro/conexao'
+      preLoaderRoute: typeof OOrgFinanceiroConexaoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/consentimentos': {
+      id: '/o/$org/financeiro/consentimentos'
+      path: '/consentimentos'
+      fullPath: '/o/$org/financeiro/consentimentos'
+      preLoaderRoute: typeof OOrgFinanceiroConsentimentosRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/extrato': {
+      id: '/o/$org/financeiro/extrato'
+      path: '/extrato'
+      fullPath: '/o/$org/financeiro/extrato'
+      preLoaderRoute: typeof OOrgFinanceiroExtratoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/saldos': {
+      id: '/o/$org/financeiro/saldos'
+      path: '/saldos'
+      fullPath: '/o/$org/financeiro/saldos'
+      preLoaderRoute: typeof OOrgFinanceiroSaldosRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/modelos/$id': {
+      id: '/o/$org/modelos/$id'
+      path: '/$id'
+      fullPath: '/o/$org/modelos/$id'
+      preLoaderRoute: typeof OOrgModelosIdRouteImport
+      parentRoute: typeof OOrgModelosRoute
+    }
+    '/o/$org/prazos/$id': {
+      id: '/o/$org/prazos/$id'
+      path: '/$id'
+      fullPath: '/o/$org/prazos/$id'
+      preLoaderRoute: typeof OOrgPrazosIdRouteImport
+      parentRoute: typeof OOrgPrazosRoute
+    }
+    '/o/$org/processos/$id': {
+      id: '/o/$org/processos/$id'
+      path: '/$id'
+      fullPath: '/o/$org/processos/$id'
+      preLoaderRoute: typeof OOrgProcessosIdRouteImport
+      parentRoute: typeof OOrgProcessosRoute
+    }
+    '/o/$org/tarefas/$id': {
+      id: '/o/$org/tarefas/$id'
+      path: '/$id'
+      fullPath: '/o/$org/tarefas/$id'
+      preLoaderRoute: typeof OOrgTarefasIdRouteImport
+      parentRoute: typeof OOrgTarefasRoute
+    }
+    '/o/$org/financeiro/fiscal/classificacao': {
+      id: '/o/$org/financeiro/fiscal/classificacao'
+      path: '/fiscal/classificacao'
+      fullPath: '/o/$org/financeiro/fiscal/classificacao'
+      preLoaderRoute: typeof OOrgFinanceiroFiscalClassificacaoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/fiscal/conciliacao': {
+      id: '/o/$org/financeiro/fiscal/conciliacao'
+      path: '/fiscal/conciliacao'
+      fullPath: '/o/$org/financeiro/fiscal/conciliacao'
+      preLoaderRoute: typeof OOrgFinanceiroFiscalConciliacaoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/fiscal/preparacao': {
+      id: '/o/$org/financeiro/fiscal/preparacao'
+      path: '/fiscal/preparacao'
+      fullPath: '/o/$org/financeiro/fiscal/preparacao'
+      preLoaderRoute: typeof OOrgFinanceiroFiscalPreparacaoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
+    '/o/$org/financeiro/fiscal/resumo': {
+      id: '/o/$org/financeiro/fiscal/resumo'
+      path: '/fiscal/resumo'
+      fullPath: '/o/$org/financeiro/fiscal/resumo'
+      preLoaderRoute: typeof OOrgFinanceiroFiscalResumoRouteImport
+      parentRoute: typeof OOrgFinanceiroRoute
+    }
   }
 }
 
+interface OOrgComunicacaoRouteChildren {
+  OOrgComunicacaoIdRoute: typeof OOrgComunicacaoIdRoute
+}
+
+const OOrgComunicacaoRouteChildren: OOrgComunicacaoRouteChildren = {
+  OOrgComunicacaoIdRoute: OOrgComunicacaoIdRoute,
+}
+
+const OOrgComunicacaoRouteWithChildren = OOrgComunicacaoRoute._addFileChildren(
+  OOrgComunicacaoRouteChildren,
+)
+
+interface OOrgEquipeRouteChildren {
+  OOrgEquipeIdRoute: typeof OOrgEquipeIdRoute
+}
+
+const OOrgEquipeRouteChildren: OOrgEquipeRouteChildren = {
+  OOrgEquipeIdRoute: OOrgEquipeIdRoute,
+}
+
+const OOrgEquipeRouteWithChildren = OOrgEquipeRoute._addFileChildren(
+  OOrgEquipeRouteChildren,
+)
+
+interface OOrgFinanceiroRouteChildren {
+  OOrgFinanceiroIdRoute: typeof OOrgFinanceiroIdRoute
+  OOrgFinanceiroBancosRoute: typeof OOrgFinanceiroBancosRoute
+  OOrgFinanceiroConciliacaoRoute: typeof OOrgFinanceiroConciliacaoRoute
+  OOrgFinanceiroConexaoRoute: typeof OOrgFinanceiroConexaoRoute
+  OOrgFinanceiroConsentimentosRoute: typeof OOrgFinanceiroConsentimentosRoute
+  OOrgFinanceiroExtratoRoute: typeof OOrgFinanceiroExtratoRoute
+  OOrgFinanceiroSaldosRoute: typeof OOrgFinanceiroSaldosRoute
+  OOrgFinanceiroFiscalClassificacaoRoute: typeof OOrgFinanceiroFiscalClassificacaoRoute
+  OOrgFinanceiroFiscalConciliacaoRoute: typeof OOrgFinanceiroFiscalConciliacaoRoute
+  OOrgFinanceiroFiscalPreparacaoRoute: typeof OOrgFinanceiroFiscalPreparacaoRoute
+  OOrgFinanceiroFiscalResumoRoute: typeof OOrgFinanceiroFiscalResumoRoute
+}
+
+const OOrgFinanceiroRouteChildren: OOrgFinanceiroRouteChildren = {
+  OOrgFinanceiroIdRoute: OOrgFinanceiroIdRoute,
+  OOrgFinanceiroBancosRoute: OOrgFinanceiroBancosRoute,
+  OOrgFinanceiroConciliacaoRoute: OOrgFinanceiroConciliacaoRoute,
+  OOrgFinanceiroConexaoRoute: OOrgFinanceiroConexaoRoute,
+  OOrgFinanceiroConsentimentosRoute: OOrgFinanceiroConsentimentosRoute,
+  OOrgFinanceiroExtratoRoute: OOrgFinanceiroExtratoRoute,
+  OOrgFinanceiroSaldosRoute: OOrgFinanceiroSaldosRoute,
+  OOrgFinanceiroFiscalClassificacaoRoute:
+    OOrgFinanceiroFiscalClassificacaoRoute,
+  OOrgFinanceiroFiscalConciliacaoRoute: OOrgFinanceiroFiscalConciliacaoRoute,
+  OOrgFinanceiroFiscalPreparacaoRoute: OOrgFinanceiroFiscalPreparacaoRoute,
+  OOrgFinanceiroFiscalResumoRoute: OOrgFinanceiroFiscalResumoRoute,
+}
+
+const OOrgFinanceiroRouteWithChildren = OOrgFinanceiroRoute._addFileChildren(
+  OOrgFinanceiroRouteChildren,
+)
+
+interface OOrgModelosRouteChildren {
+  OOrgModelosIdRoute: typeof OOrgModelosIdRoute
+}
+
+const OOrgModelosRouteChildren: OOrgModelosRouteChildren = {
+  OOrgModelosIdRoute: OOrgModelosIdRoute,
+}
+
+const OOrgModelosRouteWithChildren = OOrgModelosRoute._addFileChildren(
+  OOrgModelosRouteChildren,
+)
+
+interface OOrgPrazosRouteChildren {
+  OOrgPrazosIdRoute: typeof OOrgPrazosIdRoute
+}
+
+const OOrgPrazosRouteChildren: OOrgPrazosRouteChildren = {
+  OOrgPrazosIdRoute: OOrgPrazosIdRoute,
+}
+
+const OOrgPrazosRouteWithChildren = OOrgPrazosRoute._addFileChildren(
+  OOrgPrazosRouteChildren,
+)
+
+interface OOrgProcessosRouteChildren {
+  OOrgProcessosIdRoute: typeof OOrgProcessosIdRoute
+}
+
+const OOrgProcessosRouteChildren: OOrgProcessosRouteChildren = {
+  OOrgProcessosIdRoute: OOrgProcessosIdRoute,
+}
+
+const OOrgProcessosRouteWithChildren = OOrgProcessosRoute._addFileChildren(
+  OOrgProcessosRouteChildren,
+)
+
+interface OOrgTarefasRouteChildren {
+  OOrgTarefasIdRoute: typeof OOrgTarefasIdRoute
+}
+
+const OOrgTarefasRouteChildren: OOrgTarefasRouteChildren = {
+  OOrgTarefasIdRoute: OOrgTarefasIdRoute,
+}
+
+const OOrgTarefasRouteWithChildren = OOrgTarefasRoute._addFileChildren(
+  OOrgTarefasRouteChildren,
+)
+
 interface OOrgRouteChildren {
+  OOrgAcessoNegadoRoute: typeof OOrgAcessoNegadoRoute
   OOrgAgendaRoute: typeof OOrgAgendaRoute
+  OOrgAnaliseContratualRoute: typeof OOrgAnaliseContratualRoute
+  OOrgAnaliseContratualClausulasRoute: typeof OOrgAnaliseContratualClausulasRoute
+  OOrgAnaliseContratualEstruturaRoute: typeof OOrgAnaliseContratualEstruturaRoute
+  OOrgAnaliseContratualRevisaoRoute: typeof OOrgAnaliseContratualRevisaoRoute
+  OOrgAssinaturaRoute: typeof OOrgAssinaturaRoute
   OOrgAtendimentosRoute: typeof OOrgAtendimentosRoute
+  OOrgAtividadeRoute: typeof OOrgAtividadeRoute
   OOrgCaixaDeTrabalhoRoute: typeof OOrgCaixaDeTrabalhoRoute
-  OOrgFinanceiroRoute: typeof OOrgFinanceiroRoute
+  OOrgComunicacaoRoute: typeof OOrgComunicacaoRouteWithChildren
+  OOrgConceitosRoute: typeof OOrgConceitosRoute
+  OOrgConfiguracoesRoute: typeof OOrgConfiguracoesRoute
+  OOrgConflitosRoute: typeof OOrgConflitosRoute
+  OOrgConvitesRoute: typeof OOrgConvitesRoute
+  OOrgConvitesColaboradoresRoute: typeof OOrgConvitesColaboradoresRoute
+  OOrgDocumentosRoute: typeof OOrgDocumentosRoute
+  OOrgEquipeRoute: typeof OOrgEquipeRouteWithChildren
+  OOrgEstruturaRoute: typeof OOrgEstruturaRoute
+  OOrgFinanceiroRoute: typeof OOrgFinanceiroRouteWithChildren
+  OOrgIndisponivelRoute: typeof OOrgIndisponivelRoute
   OOrgInicioRoute: typeof OOrgInicioRoute
+  OOrgIntegracoesRoute: typeof OOrgIntegracoesRoute
+  OOrgModelosRoute: typeof OOrgModelosRouteWithChildren
   OOrgNotificacoesRoute: typeof OOrgNotificacoesRoute
-  OOrgPrazosRoute: typeof OOrgPrazosRoute
-  OOrgProcessosRoute: typeof OOrgProcessosRoute
-  OOrgTarefasRoute: typeof OOrgTarefasRoute
+  OOrgPerfilEscritorioRoute: typeof OOrgPerfilEscritorioRoute
+  OOrgPermissoesRoute: typeof OOrgPermissoesRoute
+  OOrgPrazosRoute: typeof OOrgPrazosRouteWithChildren
+  OOrgPreferenciasRoute: typeof OOrgPreferenciasRoute
+  OOrgPrimeirosPassosRoute: typeof OOrgPrimeirosPassosRoute
+  OOrgProcessosRoute: typeof OOrgProcessosRouteWithChildren
+  OOrgProcuracoesRoute: typeof OOrgProcuracoesRoute
+  OOrgRelatoriosRoute: typeof OOrgRelatoriosRoute
+  OOrgSegurancaRoute: typeof OOrgSegurancaRoute
+  OOrgSemLicencaRoute: typeof OOrgSemLicencaRoute
+  OOrgSigiloRoute: typeof OOrgSigiloRoute
+  OOrgSubstituicoesRoute: typeof OOrgSubstituicoesRoute
+  OOrgSuporteRoute: typeof OOrgSuporteRoute
+  OOrgTarefasRoute: typeof OOrgTarefasRouteWithChildren
+  OOrgIndexRoute: typeof OOrgIndexRoute
   OOrgCasosIdRoute: typeof OOrgCasosIdRoute
   OOrgClientesIdRoute: typeof OOrgClientesIdRoute
+  OOrgClientesNovoRoute: typeof OOrgClientesNovoRoute
   OOrgCasosIndexRoute: typeof OOrgCasosIndexRoute
   OOrgClientesIndexRoute: typeof OOrgClientesIndexRoute
 }
 
 const OOrgRouteChildren: OOrgRouteChildren = {
+  OOrgAcessoNegadoRoute: OOrgAcessoNegadoRoute,
   OOrgAgendaRoute: OOrgAgendaRoute,
+  OOrgAnaliseContratualRoute: OOrgAnaliseContratualRoute,
+  OOrgAnaliseContratualClausulasRoute: OOrgAnaliseContratualClausulasRoute,
+  OOrgAnaliseContratualEstruturaRoute: OOrgAnaliseContratualEstruturaRoute,
+  OOrgAnaliseContratualRevisaoRoute: OOrgAnaliseContratualRevisaoRoute,
+  OOrgAssinaturaRoute: OOrgAssinaturaRoute,
   OOrgAtendimentosRoute: OOrgAtendimentosRoute,
+  OOrgAtividadeRoute: OOrgAtividadeRoute,
   OOrgCaixaDeTrabalhoRoute: OOrgCaixaDeTrabalhoRoute,
-  OOrgFinanceiroRoute: OOrgFinanceiroRoute,
+  OOrgComunicacaoRoute: OOrgComunicacaoRouteWithChildren,
+  OOrgConceitosRoute: OOrgConceitosRoute,
+  OOrgConfiguracoesRoute: OOrgConfiguracoesRoute,
+  OOrgConflitosRoute: OOrgConflitosRoute,
+  OOrgConvitesRoute: OOrgConvitesRoute,
+  OOrgConvitesColaboradoresRoute: OOrgConvitesColaboradoresRoute,
+  OOrgDocumentosRoute: OOrgDocumentosRoute,
+  OOrgEquipeRoute: OOrgEquipeRouteWithChildren,
+  OOrgEstruturaRoute: OOrgEstruturaRoute,
+  OOrgFinanceiroRoute: OOrgFinanceiroRouteWithChildren,
+  OOrgIndisponivelRoute: OOrgIndisponivelRoute,
   OOrgInicioRoute: OOrgInicioRoute,
+  OOrgIntegracoesRoute: OOrgIntegracoesRoute,
+  OOrgModelosRoute: OOrgModelosRouteWithChildren,
   OOrgNotificacoesRoute: OOrgNotificacoesRoute,
-  OOrgPrazosRoute: OOrgPrazosRoute,
-  OOrgProcessosRoute: OOrgProcessosRoute,
-  OOrgTarefasRoute: OOrgTarefasRoute,
+  OOrgPerfilEscritorioRoute: OOrgPerfilEscritorioRoute,
+  OOrgPermissoesRoute: OOrgPermissoesRoute,
+  OOrgPrazosRoute: OOrgPrazosRouteWithChildren,
+  OOrgPreferenciasRoute: OOrgPreferenciasRoute,
+  OOrgPrimeirosPassosRoute: OOrgPrimeirosPassosRoute,
+  OOrgProcessosRoute: OOrgProcessosRouteWithChildren,
+  OOrgProcuracoesRoute: OOrgProcuracoesRoute,
+  OOrgRelatoriosRoute: OOrgRelatoriosRoute,
+  OOrgSegurancaRoute: OOrgSegurancaRoute,
+  OOrgSemLicencaRoute: OOrgSemLicencaRoute,
+  OOrgSigiloRoute: OOrgSigiloRoute,
+  OOrgSubstituicoesRoute: OOrgSubstituicoesRoute,
+  OOrgSuporteRoute: OOrgSuporteRoute,
+  OOrgTarefasRoute: OOrgTarefasRouteWithChildren,
+  OOrgIndexRoute: OOrgIndexRoute,
   OOrgCasosIdRoute: OOrgCasosIdRoute,
   OOrgClientesIdRoute: OOrgClientesIdRoute,
+  OOrgClientesNovoRoute: OOrgClientesNovoRoute,
   OOrgCasosIndexRoute: OOrgCasosIndexRoute,
   OOrgClientesIndexRoute: OOrgClientesIndexRoute,
 }
@@ -379,6 +1507,7 @@ const OOrgRouteWithChildren = OOrgRoute._addFileChildren(OOrgRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  SelecionarEscritorioRoute: SelecionarEscritorioRoute,
   OOrgRoute: OOrgRouteWithChildren,
 }
 export const routeTree = rootRouteImport

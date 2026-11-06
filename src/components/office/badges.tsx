@@ -1,3 +1,4 @@
+import { Link, useParams } from "@tanstack/react-router";
 import { Lock, ShieldAlert, Users, CircleDashed, Eye, CheckCircle2, CircleCheckBig, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { daysUntil } from "@/features/demo/store";
@@ -74,6 +75,7 @@ export function EmptyState({ title, hint }: { title: string; hint?: string | und
 }
 
 export function DeniedState() {
+  const { org } = useParams({ strict: false });
   return (
     <div role="alert" className="mx-auto max-w-md rounded-xl border bg-card p-8 text-center shadow-soft">
       <Lock className="mx-auto size-8 text-muted-foreground" />
@@ -81,6 +83,7 @@ export function DeniedState() {
       <p className="mt-1 text-sm text-muted-foreground">
         Seu perfil de demonstração não tem permissão para este item. Nenhum detalhe é exibido.
       </p>
+      {org && <Link to="/o/$org/inicio" params={{ org }} className="mt-5 inline-flex rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Voltar ao início</Link>}
     </div>
   );
 }

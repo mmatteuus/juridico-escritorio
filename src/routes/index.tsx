@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  // Placeholder dashboard – will be replaced by actual UI later.
-  component: () => <div>Loading…</div>,
+  beforeLoad: () => { throw redirect({ to: "/selecionar-escritorio" }); },
+  component: () => null,
 });
-

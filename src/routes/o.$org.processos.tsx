@@ -18,7 +18,7 @@ function Processos() {
   const { org } = Route.useParams();
   const office = findOffice(org)!;
   const v = useOfficeView(office);
-  const { data, update } = useDemo();
+  const { update } = useDemo();
   const [matterId, setMatterId] = useState("");
   const [cnj, setCnj] = useState("");
   const [court, setCourt] = useState("");
@@ -28,7 +28,7 @@ function Processos() {
   const link = (e: React.FormEvent) => {
     e.preventDefault();
     if (!matterId || !cnj.trim()) { toast.error("Escolha o caso e informe o número de teste."); return; }
-    const dup = data.proceedings.some((p) => p.officeId === office.id && p.cnjMasked === cnj.trim());
+    const dup = v.proceedings.some((p) => p.cnjMasked === cnj.trim());
     if (dup && !warn) { setWarn(true); return; }
     update((d) => ({
       ...d,
@@ -59,7 +59,7 @@ function Processos() {
             const m = v.matterById(p.matterId);
             return (
               <li key={p.id} className="rounded-xl border bg-card p-4 shadow-soft">
-                <p className="tabular break-all font-semibold">{p.cnjMasked}</p>
+                <Link to="/o/$org/processos/$id" params={{org,id:p.id}} className="tabular break-all font-semibold text-primary hover:underline">{p.cnjMasked || "Processo sem número"}</Link>
                 <p className="text-sm text-muted-foreground">{p.court} · Fase: {p.phase}</p>
                 {m && <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "processos" }} className="mt-2 inline-block text-sm text-primary hover:underline">{m.code} · {m.title}</Link>}
               </li>

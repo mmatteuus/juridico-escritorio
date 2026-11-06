@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DeadlineStatusChip, DueBadge, EmptyState, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
 import { findOffice, fmtDateTime, isOverdue, useDemo, useOfficeView } from "@/features/demo/store";
+import { canSeeCnj, canSeeLegalDocs } from "@/features/demo/permissions";
 
 export const Route = createFileRoute("/o/$org/caixa-de-trabalho")({
   head: () => ({ meta: [{ title: "Caixa de trabalho · JURIDO Escritórios" }, { name: "description", content: "Fila unificada de trabalho." }, { name: "robots", content: "noindex" }] }),
@@ -31,7 +32,10 @@ function Caixa() {
     area: { label: "Toda a equipe", tasks: open },
   };
   const tasks = queues[q].tasks.filter((t) => inArea(t.matterId)).sort((a, b) => PRI[a.priority] - PRI[b.priority] || a.dueAt.localeCompare(b.dueAt));
-  const dls = q === "revisao" ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)) : [];
+  const dls = q === "revisao" && canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)) : [];
+  const pendingMessages = q === "revisao" && canSeeLegalDocs(v.role)
+    ? v.messages.filter((message) => message.status === "aguardando_revisao" && inArea(message.matterId))
+    : [];
 
   return (
     <>
@@ -39,7 +43,7 @@ function Caixa() {
       <div className="mb-3 flex flex-wrap gap-2" role="tablist">
         {(Object.keys(queues) as Q[]).map((k) => (
           <Button key={k} role="tab" aria-selected={q === k} size="sm" variant={q === k ? "default" : "outline"} onClick={() => setQ(k)}>
-            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? v.deadlines.filter((d) => d.status === "proposto" || d.status === "em_revisao").length : 0)}</span>
+            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length : 0)}</span>
           </Button>
         ))}
       </div>
@@ -48,14 +52,20 @@ function Caixa() {
           <Button key={a.id} size="sm" variant={area === a.id ? "secondary" : "ghost"} aria-pressed={area === a.id} onClick={() => setArea(a.id)}>{a.name}</Button>
         ))}
       </div>
-      {tasks.length + dls.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
+      {tasks.length + dls.length + pendingMessages.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
           {dls.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1"><p className="text-sm font-medium">Prazo: {d.title}</p><p className="text-xs text-muted-foreground">{fmtDateTime(d.dueDate)} · proposto por {d.proposedBy}</p></div>
               <DueBadge iso={d.dueDate} />
               <DeadlineStatusChip status={d.status} />
-              <Button size="sm" variant="outline" asChild><Link to="/o/$org/casos/$id" params={{ org, id: d.matterId }} search={{ tab: "prazos" }}>Revisar</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/o/$org/prazos/$id" params={{ org, id: d.id }}>Revisar</Link></Button>
+            </li>
+          ))}
+          {pendingMessages.map((message) => (
+            <li key={message.id} className="flex flex-wrap items-center gap-3 p-4">
+              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Comunicação aguardando revisão: {message.recipient}</p><p className="mt-1 break-words text-xs text-muted-foreground">Rascunho não enviado · {message.content}</p></div>
+              <Button size="sm" variant="outline" asChild><Link to="/o/$org/comunicacao/$id" params={{ org, id: message.id }}>Revisar rascunho</Link></Button>
             </li>
           ))}
           {tasks.map((t) => {
@@ -70,7 +80,7 @@ function Caixa() {
                   </p>
                 </div>
                 <PriorityBadge value={t.priority} />
-                <Button size="sm" variant="outline" onClick={() => { update((d) => ({ ...d, tasks: d.tasks.map((x) => (x.id === t.id ? { ...x, status: "concluida" } : x)) })); toast.success("Tarefa concluída"); }}>Concluir</Button>
+                <Button size="sm" variant="outline" onClick={() => { update((d) => ({ ...d, tasks: d.tasks.map((x) => (x.id === t.id && x.officeId === office.id ? { ...x, status: "concluida" } : x)) })); toast.success("Tarefa concluída na demonstração"); }}>Concluir</Button>
               </li>
             );
           })}
