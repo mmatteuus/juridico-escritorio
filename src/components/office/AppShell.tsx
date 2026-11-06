@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { QuickActionFab } from "@/components/office/QuickActionFab";
+import { useState, useEffect, type ReactNode } from "react";
 import {
   Bell, BriefcaseBusiness, CalendarDays, ChevronsUpDown, CircleHelp, ClipboardList, FileText, Gavel, Home,
   Inbox, LayoutTemplate, Menu, MessageSquare, Plus, RotateCcw, Search, Settings, ShieldCheck, Sun, Timer,
@@ -264,6 +265,7 @@ export function AppShell({ office, children }: { office: Office; children: React
         </main>
       </div>
       <GlobalSearch office={office} open={searchOpen} onOpenChange={setSearchOpen} />
+      <QuickActionFab />
       <MeuDiaDialog office={office} />
       <NewMatterDialog office={office} />
     </div>
