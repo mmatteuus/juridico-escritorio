@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { ArrowLeft, Check, Clock3, Mail, ShieldAlert, UserPlus, UserRoundX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
+import { OfficePaginationControls } from "@/components/office/OfficeListPagination";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
+import { useOfficePagination } from "@/components/office/useOfficePagination";
 import { ROLE_LABEL } from "@/features/demo/permissions";
 import { createCollaboratorInvite, changeCollaboratorInviteStatus } from "@/features/demo/collaboratorInvites";
 import { findOffice, fmtDateTime, useDemo, useOfficeView } from "@/features/demo/store";
@@ -42,12 +45,14 @@ function CollaboratorInvitesPage() {
   const [teamId, setTeamId] = useState("");
   const [validityDays, setValidityDays] = useState("7");
   const [statusFilter, setStatusFilter] = useState<"todos" | CollaboratorInviteStatus>("todos");
+  const [query, setQuery] = useState("");
   const [formError, setFormError] = useState("");
   const canManageInvites = view.role === "gestor" || view.role === "socio";
   const teams = view.teams.filter((team) => team.practiceAreaId === practiceAreaId);
-  const rows = view.collaboratorInvites
-    .filter((invite) => statusFilter === "todos" || invite.status === statusFilter)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const rows = useMemo(() => view.collaboratorInvites
+    .filter((invite) => (statusFilter === "todos" || invite.status === statusFilter) && `${invite.email} ${ROLE_LABEL[invite.role]} ${office.practiceAreas.find((area) => area.id === invite.practiceAreaId)?.name ?? ""} ${view.teams.find((team) => team.id === invite.teamId)?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(query.toLocaleLowerCase("pt-BR")))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [view, office.practiceAreas, statusFilter, query]);
+  const pagination = useOfficePagination(rows, `${query}|${statusFilter}`);
   const reservedSeats = view.members.length + view.collaboratorInvites.filter((invite) => invite.status === "pendente" || invite.status === "aceito").length;
   const availableSeats = Math.max(0, office.memberSeatLimit - reservedSeats);
   const hasAvailableSeat = availableSeats > 0;
@@ -119,13 +124,14 @@ function CollaboratorInvitesPage() {
       <div className="flex flex-wrap gap-2"><Button type="submit" disabled={!hasAvailableSeat}><Mail className="size-4" /> Criar convite demo</Button><Button type="button" variant="outline" onClick={() => { setShowForm(false); setFormError(""); }}>Cancelar</Button></div>
     </form>}
 
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-xl">Histórico de convites</h2><p className="text-sm text-muted-foreground">Estados locais; aceite não cria conta nem concede acesso real.</p></div><select aria-label="Filtrar convites por status" className="h-10 rounded-md border bg-background px-3 text-sm" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}><option value="todos">Todos os status</option>{Object.entries(statusLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-xl">Histórico de convites</h2><p className="text-sm text-muted-foreground">Estados locais; aceite não cria conta nem concede acesso real.</p></div><div className="flex flex-wrap gap-2"><Input aria-label="Buscar convite interno" className="w-full sm:w-64" placeholder="Buscar e-mail, função ou área" value={query} onChange={(event) => setQuery(event.target.value)} /><select aria-label="Filtrar convites por status" className="h-10 rounded-md border bg-background px-3 text-sm" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}><option value="todos">Todos os status</option>{Object.entries(statusLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div></div>
+    <SavedFilterViews officeId={office.id} role={view.role} collection="convites-colaboradores" currentValues={{ query, status: statusFilter }} onApply={(filters) => { setQuery(filters.query); setStatusFilter((["todos", ...Object.keys(statusLabel)] as string[]).includes(filters.status) ? filters.status as typeof statusFilter : "todos"); }} />
 
-    {rows.length ? <ul className="grid gap-3 lg:grid-cols-2">{rows.map((invite) => {
+    {rows.length ? <><ul className="grid gap-3 lg:grid-cols-2">{pagination.items.map((invite) => {
       const area = office.practiceAreas.find((candidate) => candidate.id === invite.practiceAreaId);
       const team = view.teams.find((candidate) => candidate.id === invite.teamId && candidate.practiceAreaId === invite.practiceAreaId);
       return <li key={invite.id}><article className={`${card} h-full`}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="break-all font-semibold">{invite.email}</p><p className="mt-1 text-sm text-muted-foreground">{ROLE_LABEL[invite.role]} · {area?.name ?? "Área indisponível"}{team ? ` · ${team.name}` : " · sem equipe"}</p></div><span className={`rounded-full px-3 py-1 text-xs font-medium ${statusTone[invite.status]}`}>{statusLabel[invite.status]}</span></div><dl className="mt-4 grid gap-2 border-t pt-3 text-xs text-muted-foreground sm:grid-cols-2"><div><dt>Criado</dt><dd className="mt-0.5 text-foreground">{fmtDateTime(invite.createdAt)}</dd></div><div><dt>Válido até</dt><dd className="mt-0.5 text-foreground">{fmtDateTime(invite.expiresAt)}</dd></div><div><dt>Preparado por</dt><dd className="mt-0.5 text-foreground">{view.memberName(invite.createdByMemberId)}</dd></div>{invite.acceptedAt && <div><dt>Aceite simulado</dt><dd className="mt-0.5 text-foreground">{fmtDateTime(invite.acceptedAt)}</dd></div>}</dl><ul className="mt-3 space-y-1 border-t pt-3 text-xs text-muted-foreground">{invite.history.slice(-2).map((entry, index) => <li key={`${entry.at}-${index}`}>{fmtDateTime(entry.at)} · {entry.actor}: {entry.action}</li>)}</ul>{invite.status === "pendente" && <div className="mt-4 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => changeStatus(invite, "aceito")}><Check className="size-4" /> Simular aceite</Button><Button size="sm" variant="outline" onClick={() => changeStatus(invite, "expirado")}><Clock3 className="size-4" /> Simular expiração</Button><Button size="sm" variant="ghost" onClick={() => changeStatus(invite, "revogado")}><UserRoundX className="size-4" /> Revogar demo</Button></div>}{invite.status === "aceito" && <Button className="mt-4" size="sm" variant="outline" onClick={() => changeStatus(invite, "revogado")}><UserRoundX className="size-4" /> Revogar convite demo</Button>}</article></li>;
-    })}</ul> : <EmptyState title="Nenhum convite neste filtro" hint="Crie um convite demonstrativo ou ajuste o filtro de status." />}
+    })}</ul><OfficePaginationControls pagination={pagination} /></> : <EmptyState title="Nenhum convite neste filtro" hint="Crie um convite demonstrativo ou ajuste o filtro de status." />}
 
     <p className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-muted-foreground"><ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-700" />A autenticação do convidado, a aprovação de membership, a notificação real e a revogação server-side não são simuladas como concluídas. Esta tela não altera a equipe ativa.</p>
   </div>;

@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import type { OfficePaginationState } from "@/components/office/useOfficePagination";
 
-export function OfficePaginationControls({ pagination }: { pagination: OfficePaginationState }) {
+export function OfficePaginationControls({ pagination, ariaLabel = "Paginação da lista" }: { pagination: OfficePaginationState; ariaLabel?: string }) {
   const pageSizes = [3, 5, 10, 25, 50];
   if (pagination.total === 0) return null;
 
   return (
-    <nav aria-label="Paginação da lista" className="mt-4 flex flex-col gap-3 rounded-lg border bg-card px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <nav aria-label={ariaLabel} className="mt-4 flex flex-col gap-3 rounded-lg border bg-card px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <p aria-live="polite" className="text-sm text-muted-foreground">
         Exibindo <span className="tabular-nums">{pagination.start}–{pagination.end}</span> de <span className="tabular-nums">{pagination.total}</span> {pagination.total === 1 ? "registro" : "registros"}
       </p>

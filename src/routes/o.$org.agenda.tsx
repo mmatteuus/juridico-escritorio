@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeadlineStatusChip, EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { findOffice, fmtDateTime, fmtTime, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { Appointment, DeadlineStatus } from "@/features/demo/types";
 import { cn } from "@/lib/utils";
@@ -110,6 +111,15 @@ function Agenda() {
             <SelectContent><SelectItem value="todas">Todas as áreas</SelectItem>{office.practiceAreas.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select>
         </span>
       </div>
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="agenda" currentValues={{ mode, anchor: localDateTime(anchor).slice(0, 10), who, area }} onApply={(filters) => {
+        const modes: Mode[] = ["dia", "semana", "mes"];
+        const dateParts = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(filters.anchor);
+        const savedDate = dateParts ? new Date(Number(dateParts[1]), Number(dateParts[2]) - 1, Number(dateParts[3])) : null;
+        setMode(modes.includes(filters.mode as Mode) ? filters.mode as Mode : "semana");
+        setAnchor(savedDate && Number.isFinite(savedDate.getTime()) ? startOf(savedDate) : startOf(new Date()));
+        setWho(filters.who === "todos" || v.members.some((member) => member.id === filters.who) ? filters.who : "todos");
+        setArea(filters.area === "todas" || office.practiceAreas.some((practiceArea) => practiceArea.id === filters.area) ? filters.area : "todas");
+      }} /></div>
       {items.length === 0 && <EmptyState title="Nada agendado neste período" />}
       <div className={cn("grid gap-2", mode === "mes" ? "grid-cols-2 sm:grid-cols-4 lg:grid-cols-7" : "")}>
         {days.map((d) => {

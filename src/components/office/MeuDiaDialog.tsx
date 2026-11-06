@@ -25,6 +25,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
   const v = useOfficeView(office);
   const navigate = useNavigate();
   const [hideToday, setHideToday] = useState(false);
+  const [deferredUntil, setDeferredUntil] = useState<number | null>(null);
   const key = `jurido-meudia:${office.id}:${role}:${new Date().toDateString()}`;
 
   const close = () => {
@@ -67,11 +68,22 @@ export function MeuDiaDialog({ office }: { office: Office }) {
   const hasWork = groups.some((group) => group.items.length > 0);
 
   useEffect(() => {
-    if (shownThisSession.has(key)) return;
+    if (deferredUntil !== null) {
+      const delay = Math.max(0, deferredUntil - Date.now());
+      const timer = window.setTimeout(() => {
+        setDeferredUntil(null);
+        if (hasWork) {
+          shownThisSession.add(key);
+          setMeuDiaOpen(true);
+        }
+      }, delay);
+      return () => window.clearTimeout(timer);
+    }
+    if (shownThisSession.has(key)) return undefined;
     try {
       if (window.localStorage.getItem(key) === "hidden") {
         shownThisSession.add(key);
-        return;
+        return undefined;
       }
     } catch {
       // The in-session demo can still show the daily summary without persistent storage.
@@ -80,7 +92,8 @@ export function MeuDiaDialog({ office }: { office: Office }) {
       shownThisSession.add(key);
       setMeuDiaOpen(true);
     }
-  }, [hasWork, key, setMeuDiaOpen]);
+    return undefined;
+  }, [deferredUntil, hasWork, key, setMeuDiaOpen]);
 
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
@@ -126,6 +139,9 @@ export function MeuDiaDialog({ office }: { office: Office }) {
             </Button>
             <Button variant="outline" onClick={() => { close(); navigate({ to: "/o/$org/caixa-de-trabalho", params: { org: office.slug } }); }}>
               Ver todas
+            </Button>
+            <Button variant="outline" onClick={() => { shownThisSession.delete(key); setDeferredUntil(Date.now() + 15 * 60_000); setHideToday(false); setMeuDiaOpen(false); }}>
+              Adiar 15 min
             </Button>
             <Button onClick={close}>Dispensar</Button>
           </div>

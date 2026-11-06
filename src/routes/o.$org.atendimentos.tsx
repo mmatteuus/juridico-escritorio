@@ -195,7 +195,7 @@ function Atendimentos() {
           return (
             <section key={s.id} className="w-64 shrink-0 rounded-xl border bg-muted/60 p-3" aria-label={s.label}>
               <h2 className="mb-2 flex justify-between text-sm font-semibold">{s.label}<span className="text-muted-foreground">{items.length}</span></h2>
-              <IntakeStageCards items={items} resetKey={`${query}|${stageFilter}|${s.id}`} onSelect={setSel} memberName={v.memberName} areaName={v.areaName} />
+              <IntakeStageCards items={items} stageLabel={s.label} resetKey={`${query}|${stageFilter}|${s.id}`} onSelect={setSel} memberName={v.memberName} areaName={v.areaName} />
             </section>
           );
         })}
@@ -274,8 +274,9 @@ function Atendimentos() {
   );
 }
 
-function IntakeStageCards({ items, resetKey, onSelect, memberName, areaName }: {
+function IntakeStageCards({ items, stageLabel, resetKey, onSelect, memberName, areaName }: {
   items: Intake[];
+  stageLabel: string;
   resetKey: string;
   onSelect: (item: Intake) => void;
   memberName: (memberId: string | undefined) => string;
@@ -295,6 +296,6 @@ function IntakeStageCards({ items, resetKey, onSelect, memberName, areaName }: {
         </li>
       ))}
     </ul>
-    <OfficePaginationControls pagination={pagination} />
+    <OfficePaginationControls pagination={pagination} ariaLabel={`Paginação da etapa ${stageLabel}`} />
   </>;
 }
