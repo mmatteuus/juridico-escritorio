@@ -102,3 +102,13 @@ A contagem de rotas deste Lovable **não equivale** às 61 telas Stitch do app s
 
 A autorização permanece uma simulação no navegador: a concessão por papel ao criar um caso pode alcançar outros usuários do mesmo papel. A arquitetura de autenticação, revogação e política no backend descrita nas decisões DEC-093 a DEC-096 não foi implementada neste repositório frontend-only.
 
+## Continuação da auditoria — 2026-11-06
+
+- A auditoria identificou que a busca global cobria somente casos, clientes e processos, e desabilitava clientes sem caso. A busca agora inclui atendimentos, tarefas, prazos e documentos visíveis, abre as fichas correspondentes e permite abrir o cadastro do cliente independentemente de vínculo com caso. As coleções vêm de `useOfficeView`; documentos e prazos mantêm os guards de perfil existentes.
+- A matriz de permissões agora troca a tabela larga por cartões abaixo de `xl`, sem rolagem horizontal obrigatória em mobile/tablet.
+- Verificação no Chromium local: navegação da busca para as sete categorias (casos, clientes, atendimentos, tarefas, prazos, documentos e processos) abriu a rota/ficha esperada. Em 390 px, 10 rotas representativas — início, atendimentos, casos, processos, prazos, tarefas, documentos, financeiro, permissões e perfil — não tiveram overflow no documento. Captura manual da matriz em 390 px confirmou leitura em cartões.
+- A varredura ampla de 61 rotas × 4 viewports foi interrompida após a sessão local de CDP parar de responder e o processo exceder memória; por isso não se declara QA responsivo completo.
+- A convenção de filtros/visualizações salvos da nota 19 segue sem interface neste checkout. É uma lacuna secundária/P2, distinta das rotas principais e da comparação visual ainda pendente.
+- Os conectores do navegador da VPS recusaram acesso por reautenticação/HTTP 429 nesta rodada. O requisito de comparação visual com os 61 originais Stitch segue sem evidência neste checkout; os HTML e as capturas de referência continuam no app separado descrito nas notas 65/68/72/77.
+- Busca global ampliada e cards da matriz foram verificados com `npx tsc --noEmit`, `npm run build` e `git diff --check` após a rodada.
+

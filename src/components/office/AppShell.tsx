@@ -250,7 +250,7 @@ export function AppShell({ office, children }: { office: Office; children: React
             className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border bg-background px-3 text-sm text-muted-foreground hover:border-primary/40 sm:max-w-sm"
           >
             <Search className="size-4" />
-            <span className="min-w-0 truncate">Buscar caso, cliente ou CNJ…</span>
+            <span className="min-w-0 truncate">Buscar neste escritório…</span>
           </button>
           <div className="ml-auto flex shrink-0 items-center gap-1">
             <DemoTag className="hidden md:inline-block" />
