@@ -99,7 +99,7 @@ function appointmentDayKey(appointment: Appointment) {
 }
 
 type ScheduleItem =
-  | { type: "prazo"; id: string; at: string; title: string; assigneeId: string; matterId: string; sourceLabel: string; deadline: Deadline }
+  | { type: "prazo"; id: string; at: string; title: string; assigneeId: string; matterId?: string; sourceLabel: string; deadline: Deadline }
   | { type: "compromisso"; id: string; at: string; title: string; assigneeId: string; matterId?: string; appointment: Appointment };
 
 function Prazos() {
@@ -122,14 +122,15 @@ function Prazos() {
   const [cancelWhy, setCancelWhy] = useState("");
   const [newDate, setNewDate] = useState("");
   const [changeReason, setChangeReason] = useState("");
-  const [form, setForm] = useState({ matterId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
+  const [form, setForm] = useState({ matterId: "", proceedingId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
   const actor = v.me?.name ?? "—";
   const sources = [...new Set(v.deadlines.map((deadline) => deadline.sourceLabel.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   const filteredDeadlines = v.deadlines.filter((deadline) => {
     const statusMatches = f === "todos" ? true : f === "abertos" ? !["concluido", "cancelado"].includes(deadline.status) : deadline.status === f;
     const sourceMatches = sourceFilter === "todas" || deadline.sourceLabel === sourceFilter;
-    const matter = v.matterById(deadline.matterId);
-    const searchable = `${deadline.title} ${deadline.sourceLabel} ${deadline.basis ?? ""} ${deadline.notes ?? ""} ${matter?.code ?? ""} ${matter?.title ?? ""} ${v.memberName(deadline.assigneeId)}`.toLocaleLowerCase("pt-BR");
+    const matter = deadline.matterId ? v.matterById(deadline.matterId) : undefined;
+    const proceeding = v.proceedings.find((item) => item.id === deadline.proceedingId);
+    const searchable = `${deadline.title} ${deadline.sourceLabel} ${deadline.basis ?? ""} ${deadline.notes ?? ""} ${matter?.code ?? ""} ${matter?.title ?? ""} ${proceeding?.cnjMasked ?? ""} ${v.memberName(deadline.assigneeId)}`.toLocaleLowerCase("pt-BR");
     return statusMatches && sourceMatches && searchable.includes(query.trim().toLocaleLowerCase("pt-BR"));
   });
   const search = query.trim().toLocaleLowerCase("pt-BR");
@@ -140,7 +141,7 @@ function Prazos() {
     return searchable.includes(search);
   });
   const scheduleItems: ScheduleItem[] = [
-    ...(typeFilter === "compromissos" ? [] : filteredDeadlines.map((deadline): ScheduleItem => ({ type: "prazo", id: deadline.id, at: deadline.dueDate, title: deadline.title, assigneeId: deadline.assigneeId, matterId: deadline.matterId, sourceLabel: deadline.sourceLabel, deadline }))),
+    ...(typeFilter === "compromissos" ? [] : filteredDeadlines.map((deadline): ScheduleItem => ({ type: "prazo", id: deadline.id, at: deadline.dueDate, title: deadline.title, assigneeId: deadline.assigneeId, ...(deadline.matterId ? { matterId: deadline.matterId } : {}), sourceLabel: deadline.sourceLabel, deadline }))),
     ...(typeFilter === "prazos" ? [] : filteredAppointments.map((appointment): ScheduleItem => ({ type: "compromisso", id: appointment.id, at: appointment.at, title: appointment.title, assigneeId: appointment.assigneeId, ...(appointment.matterId ? { matterId: appointment.matterId } : {}), appointment }))),
   ].sort((a, b) => a.at.localeCompare(b.at));
   const list = scheduleItems.filter((item) => !selectedDay || (item.type === "prazo" ? deadlineDayKey(item.deadline) : appointmentDayKey(item.appointment)) === selectedDay);
@@ -163,12 +164,15 @@ function Prazos() {
   };
   const create = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.matterId || !form.title.trim() || !form.date || !form.assigneeId || !form.sourceLabel.trim()) { toast.error("Preencha caso, título, data e horário, responsável e fonte."); return; }
+    if (!form.title.trim() || !form.date || !form.assigneeId || !form.sourceLabel.trim()) { toast.error("Preencha título, data e horário, responsável e fonte."); return; }
+    const matter = form.matterId ? v.matterById(form.matterId) : undefined;
+    const proceeding = form.proceedingId ? v.proceedings.find((item) => item.id === form.proceedingId && (matter ? item.matterId === matter.id : !item.matterId)) : undefined;
+    if ((form.matterId && !matter) || (form.proceedingId && !proceeding)) { toast.error("Confira se o caso e o processo pertencem ao mesmo vínculo visível."); return; }
     const dueDate = localDateTimeToIso(form.date, form.timeZone);
     if (!dueDate) { toast.error("Este horário não existe no fuso selecionado por causa da mudança de horário local. Escolha outro horário."); return; }
-    const d: Deadline = { id: uid("d"), officeId: office.id, matterId: form.matterId, title: form.title.trim(), dueDate, timeZone: form.timeZone, status: "proposto", assigneeId: form.assigneeId, proposedBy: actor, version: 1, sourceLabel: form.sourceLabel.trim(), ...(form.basis.trim() ? { basis: form.basis.trim() } : {}), ...(form.notes.trim() ? { notes: form.notes.trim() } : {}), history: [{ at: new Date().toISOString(), actor, action: `Propôs prazo com base em: ${form.sourceLabel.trim()}` }] };
-    update((s) => ({ ...s, deadlines: [...s.deadlines, d], timeline: [timelineEvent({ officeId: office.id, matterId: d.matterId, actor, kind: "prazo", text: `Propôs prazo: ${d.title}` }), ...s.timeline] }));
-    setForm({ matterId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
+    const d: Deadline = { id: uid("d"), officeId: office.id, ...(matter ? { matterId: matter.id } : {}), ...(proceeding ? { proceedingId: proceeding.id } : {}), title: form.title.trim(), dueDate, timeZone: form.timeZone, status: "proposto", assigneeId: form.assigneeId, proposedBy: actor, version: 1, sourceLabel: form.sourceLabel.trim(), ...(form.basis.trim() ? { basis: form.basis.trim() } : {}), ...(form.notes.trim() ? { notes: form.notes.trim() } : {}), history: [{ at: new Date().toISOString(), actor, action: `Propôs prazo com base em: ${form.sourceLabel.trim()}` }] };
+    update((s) => ({ ...s, deadlines: [...s.deadlines, d], ...(d.matterId ? { timeline: [timelineEvent({ officeId: office.id, matterId: d.matterId, actor, kind: "prazo", text: `Propôs prazo: ${d.title}` }), ...s.timeline] } : {}) }));
+    setForm({ matterId: "", proceedingId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
     navigate({ search: {}, replace: true });
     toast.success("Prazo proposto — aguarda confirmação de advogado");
   };
@@ -276,7 +280,8 @@ function Prazos() {
               </li>;
             }
             const d = item.deadline;
-            const m = v.matterById(d.matterId);
+            const m = d.matterId ? v.matterById(d.matterId) : undefined;
+            const linkedProceeding = d.proceedingId ? v.proceedings.find((item) => item.id === d.proceedingId) : undefined;
             return (
               <li key={`deadline-${d.id}`} className="flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-0 flex-1">
@@ -284,6 +289,8 @@ function Prazos() {
                   <p className="text-xs text-muted-foreground">
                     <span className="tabular">{fmtDeadlineDateTime(d)} ({d.timeZone ?? "fuso não informado"})</span> · {v.memberName(d.assigneeId)} · proposto por {d.proposedBy}
                     {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "prazos" }} className="text-primary hover:underline">{m.code}</Link></>}
+                    {!m && <span> · Sem caso vinculado</span>}
+                    {linkedProceeding && <> · <Link to="/o/$org/processos/$id" params={{ org, id: linkedProceeding.id }} className="text-primary hover:underline">{linkedProceeding.cnjMasked ?? "Processo vinculado"}</Link></>}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">Origem: {d.sourceLabel || "Não informada"}</p>
                 </div>
@@ -344,9 +351,8 @@ function Prazos() {
         <DialogContent>
           <DialogHeader><DialogTitle className="font-display text-xl font-medium">Propor prazo</DialogTitle><DialogDescription>O prazo fica como "proposto" até um advogado confirmar.</DialogDescription></DialogHeader>
           <form onSubmit={create} className="space-y-3">
-            <div className="space-y-1.5"><Label htmlFor="deadline-case">Caso</Label>
-              <Select value={form.matterId} onValueChange={(x) => setForm({ ...form, matterId: x })}><SelectTrigger id="deadline-case"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{v.matters.map((m) => <SelectItem key={m.id} value={m.id}>{m.code} · {m.title}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="deadline-case">Caso (opcional)</Label><select id="deadline-case" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={form.matterId} onChange={(event) => setForm({ ...form, matterId: event.target.value, proceedingId: "" })}><option value="">Sem caso vinculado</option>{v.matters.map((m) => <option key={m.id} value={m.id}>{m.code} · {m.title}</option>)}</select></div>
+            <div className="space-y-1.5"><Label htmlFor="deadline-proceeding">Processo (opcional)</Label><select id="deadline-proceeding" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={form.proceedingId} onChange={(event) => setForm({ ...form, proceedingId: event.target.value })}><option value="">Sem processo vinculado</option>{v.proceedings.filter((item) => form.matterId ? item.matterId === form.matterId : !item.matterId).map((item) => <option key={item.id} value={item.id}>{item.cnjMasked ?? item.title ?? "Processo sem número"}</option>)}</select><p className="text-xs text-muted-foreground">Sem caso, selecione apenas um processo independente.</p></div>
             <div className="space-y-1.5"><Label htmlFor="p-t">Título</Label><Input id="p-t" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div className="space-y-1.5"><Label htmlFor="p-assignee">Responsável</Label><select id="p-assignee" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={form.assigneeId} onChange={(e)=>setForm({...form,assigneeId:e.target.value})} required>{v.members.map(member=><option key={member.id} value={member.id}>{member.name}</option>)}</select></div>
             <div className="space-y-1.5"><Label htmlFor="p-time-zone">Fuso horário (IANA)</Label><Select value={form.timeZone} onValueChange={(timeZone) => setForm({ ...form, timeZone })}><SelectTrigger id="p-time-zone"><SelectValue placeholder="Selecione o fuso" /></SelectTrigger><SelectContent>{DEADLINE_TIME_ZONES.map((timeZone) => <SelectItem key={timeZone.id} value={timeZone.id}>{timeZone.label} · {timeZone.id}</SelectItem>)}</SelectContent></Select><p className="text-xs text-muted-foreground">Escolha o fuso em que a data e hora informadas devem ser interpretadas.</p></div>

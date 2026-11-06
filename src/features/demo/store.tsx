@@ -64,9 +64,15 @@ export function useOfficeView(office: Office) {
     const matterById = new Map(matters.map((m) => [m.id, m]));
     const inScope = <T extends { officeId: string; matterId?: string }>(arr: T[]) =>
       arr.filter((x) => x.officeId === office.id && (!x.matterId || visible.has(x.matterId)));
+    const proceedings = canSeeCnj(role) ? inScope(data.proceedings) : [];
     const docs = inScope(data.docs).filter((doc) => {
-      const matter = matterById.get(doc.matterId);
-      return !!matter && canSeeDoc(role, doc, matter, me?.id);
+      const matter = doc.matterId ? matterById.get(doc.matterId) : undefined;
+      const proceeding = doc.proceedingId ? proceedings.find((item) => item.id === doc.proceedingId) : undefined;
+      if (doc.proceedingId && !proceeding) return false;
+      if (doc.matterId && !matter) return false;
+      if (doc.matterId && proceeding && proceeding.matterId !== doc.matterId) return false;
+      const processMatter = proceeding?.matterId ? matterById.get(proceeding.matterId) : undefined;
+      return canSeeDoc(role, doc, matter ?? processMatter, me?.id);
     });
     const visibleDocIds = new Set(docs.map((doc) => doc.id));
     const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(role);
@@ -110,8 +116,14 @@ export function useOfficeView(office: Office) {
       securitySessions: data.securitySessions.filter((session) => session.officeId === office.id && session.memberId === me?.id),
       members: data.members.filter((m) => m.officeId === office.id),
       clients,
-      proceedings: canSeeCnj(role) ? inScope(data.proceedings) : [],
-      deadlines: canSeeCnj(role) ? inScope(data.deadlines) : [],
+      proceedings,
+      deadlines: canSeeCnj(role)
+        ? inScope(data.deadlines).filter((deadline) => {
+          const proceeding = deadline.proceedingId ? proceedings.find((item) => item.id === deadline.proceedingId) : undefined;
+          if (deadline.proceedingId && !proceeding) return false;
+          return !proceeding || !deadline.matterId || proceeding.matterId === deadline.matterId;
+        })
+        : [],
       publicationCoverage: canSeeCnj(role)
         ? data.publicationCoverage.filter((coverage) => coverage.officeId === office.id)
         : [],

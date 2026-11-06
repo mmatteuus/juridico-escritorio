@@ -58,10 +58,11 @@ export function canSeeLegalDocs(role: RoleId): boolean {
 }
 
 /** Document access is scoped by office, case, and the document's own restriction. */
-export function canSeeDoc(role: RoleId, doc: Doc, matter: Matter, memberId?: string): boolean {
-  if (doc.officeId !== matter.officeId || doc.matterId !== matter.id) return false;
+export function canSeeDoc(role: RoleId, doc: Doc, matter: Matter | undefined, memberId?: string): boolean {
+  if (matter && (doc.officeId !== matter.officeId || (doc.matterId && doc.matterId !== matter.id))) return false;
+  if (doc.matterId && !matter) return false;
   if (!memberId) return false;
-  if (!canSeeLegalDocs(role) || !canSeeMatter(role, matter, memberId)) return false;
+  if (!canSeeLegalDocs(role) || (matter && !canSeeMatter(role, matter, memberId))) return false;
   if (doc.visibility !== "restrito") return true;
   return !!doc.grantedRoles?.includes(role);
 }

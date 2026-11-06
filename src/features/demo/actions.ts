@@ -22,7 +22,7 @@ export function changeDeadline(update: Update, d: Deadline, next: Partial<Deadli
     deadlines: s.deadlines.map((x) =>
       x.id === d.id && x.officeId === d.officeId ? { ...x, ...next, history: [...x.history, { at: new Date().toISOString(), actor, action }] } : x,
     ),
-    timeline: [timelineEvent({ officeId: d.officeId, matterId: d.matterId, actor, kind: "prazo", text: `${action}: ${d.title}` }), ...s.timeline],
+    timeline: d.matterId ? [timelineEvent({ officeId: d.officeId, matterId: d.matterId, actor, kind: "prazo", text: `${action}: ${d.title}` }), ...s.timeline] : s.timeline,
   }));
 }
 

@@ -55,7 +55,7 @@ function Notificacoes() {
               </div>
               <div className="flex w-full flex-wrap gap-2 pl-5 sm:w-auto sm:pl-0">
               {n.taskId && v.tasks.some(task => task.id === n.taskId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/tarefas/$id" params={{ org, id: n.taskId }} onClick={() => mark(n.id)}>Abrir tarefa</Link></Button>}
-              {n.docId && v.docs.some(doc => doc.id === n.docId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId ?? v.docs.find(doc => doc.id === n.docId)!.matterId }} search={{ tab: "documentos" }} onClick={() => mark(n.id)}>Abrir documento</Link></Button>}
+              {n.docId && v.docs.some(doc => doc.id === n.docId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/documentos" params={{ org }} search={{ docId: n.docId }} onClick={() => mark(n.id)}>Abrir documento</Link></Button>}
               {!n.taskId && !n.docId && n.matterId && v.matterById(n.matterId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId }} onClick={() => mark(n.id)}>Abrir caso</Link></Button>}
               {n.category === "suporte" && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/suporte" params={{ org }} onClick={() => mark(n.id)}>Abrir suporte</Link></Button>}
               {!n.read && <Button size="sm" variant="outline" onClick={() => mark(n.id)}>Marcar lida</Button>}

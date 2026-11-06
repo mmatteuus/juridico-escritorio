@@ -18,7 +18,7 @@ export const Route = createFileRoute("/o/$org/agenda")({
 });
 
 type Mode = "dia" | "semana" | "mes";
-type Item = { id: string; at: string; title: string; kind: "Tarefa" | "Prazo" | "Compromisso"; matterId?: string | undefined; who?: string; practiceAreaId?: string; status?: DeadlineStatus };
+type Item = { id: string; at: string; title: string; kind: "Tarefa" | "Prazo" | "Compromisso"; matterId?: string | undefined; proceedingId?: string; who?: string; practiceAreaId?: string; status?: DeadlineStatus };
 
 const startOf = (d: Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const localDateTime = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
@@ -52,7 +52,7 @@ function Agenda() {
 
   const items: Item[] = [
     ...v.tasks.filter((t) => t.status !== "concluida" && !!t.dueAt).map((t): Item => ({ id: t.id, at: t.dueAt!, title: t.title, kind: "Tarefa", matterId: t.matterId, who: t.assigneeId })),
-    ...v.deadlines.filter((d) => d.status !== "cancelado").map((d): Item => ({ id: d.id, at: d.dueDate, title: d.title, kind: "Prazo", matterId: d.matterId, who: d.assigneeId, status: d.status })),
+    ...v.deadlines.filter((d) => d.status !== "cancelado").map((d): Item => ({ id: d.id, at: d.dueDate, title: d.title, kind: "Prazo", ...(d.matterId ? { matterId: d.matterId } : {}), ...(d.proceedingId ? { proceedingId: d.proceedingId } : {}), who: d.assigneeId, status: d.status })),
     ...v.appointments.map((a): Item => ({ id: a.id, at: a.at, title: a.title, kind: "Compromisso", matterId: a.matterId, who: a.assigneeId, practiceAreaId: a.practiceAreaId })),
   ].filter((i) => {
     const t = new Date(i.at);
@@ -140,7 +140,7 @@ function Agenda() {
                   );
                   return (
                     <li key={i.id}>
-                      {i.matterId ? <Link to="/o/$org/casos/$id" params={{ org, id: i.matterId }} search={i.kind === "Prazo" ? { tab: "prazos" } : i.kind === "Tarefa" ? { tab: "tarefas" } : {}} className="block rounded-md p-1.5 hover:bg-muted">{body}</Link> : <Button type="button" variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-md p-1.5 text-left" aria-label={`Ver detalhes: ${i.title}`} onClick={() => setSelectedItem(i)}>{body}</Button>}
+                      {i.matterId ? <Link to="/o/$org/casos/$id" params={{ org, id: i.matterId }} search={i.kind === "Prazo" ? { tab: "prazos" } : i.kind === "Tarefa" ? { tab: "tarefas" } : {}} className="block rounded-md p-1.5 hover:bg-muted">{body}</Link> : i.proceedingId ? <Link to="/o/$org/processos/$id" params={{ org, id: i.proceedingId }} className="block rounded-md p-1.5 hover:bg-muted">{body}</Link> : <Button type="button" variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-md p-1.5 text-left" aria-label={`Ver detalhes: ${i.title}`} onClick={() => setSelectedItem(i)}>{body}</Button>}
                     </li>
                   );
                 })}

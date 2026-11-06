@@ -85,7 +85,7 @@ function Inicio() {
             {openDls.length === 0 && <p className="text-sm text-muted-foreground">Nenhum prazo em aberto.</p>}
             <ul className="space-y-1">
               {openDls.slice(0, 5).map((d) => (
-                <li key={d.id}><Link to="/o/$org/casos/$id" params={{ org, id: d.matterId }} search={{ tab: "prazos" }} className="block rounded-lg p-2 hover:bg-muted">
+                <li key={d.id}><Link to="/o/$org/prazos/$id" params={{ org, id: d.id }} className="block rounded-lg p-2 hover:bg-muted">
                   <p className="break-words text-sm font-medium">{d.title}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><DueBadge iso={d.dueDate} /><DeadlineStatusChip status={d.status} /> <span className="tabular">{fmtDateTime(d.dueDate)}</span></div>
                 </Link></li>

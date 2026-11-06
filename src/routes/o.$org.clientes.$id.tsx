@@ -17,11 +17,11 @@ function Cliente() {
   if (!c) return <DeniedState />;
   const matters = v.matters.filter((m) => m.clientIds.includes(c.id));
   const ids = new Set(matters.map((m) => m.id));
-  const docs = canSeeLegalDocs(v.role) ? v.docs.filter((d) => ids.has(d.matterId)) : [];
+  const docs = canSeeLegalDocs(v.role) ? v.docs.filter((d) => !!d.matterId && ids.has(d.matterId)) : [];
   const intakes = v.intakes
     .filter((intake) => intake.existingClientId === c.id || (!!intake.matterId && matters.some((matter) => matter.id === intake.matterId)))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  const openDls = v.deadlines.filter((d) => ids.has(d.matterId) && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const openDls = v.deadlines.filter((d) => !!d.matterId && ids.has(d.matterId) && !["concluido", "cancelado"].includes(d.status)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const nextFor = (mid: string) => openDls.find((d) => d.matterId === mid);
   const summary = [
     { label: "Casos visíveis", value: String(matters.length) },

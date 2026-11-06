@@ -132,7 +132,8 @@ export interface DeadlineHistory {
 export interface Deadline {
   id: string;
   officeId: string;
-  matterId: string;
+  matterId?: string;
+  proceedingId?: string;
   title: string;
   dueDate: string;
   /** Proposed replacement; current confirmed date remains effective until human approval. */
@@ -224,7 +225,8 @@ export interface DocumentFileMetadata {
 export interface Doc {
   id: string;
   officeId: string;
-  matterId: string;
+  matterId?: string;
+  proceedingId?: string;
   title: string;
   version: number;
   category: string;
