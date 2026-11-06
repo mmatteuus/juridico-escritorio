@@ -24,6 +24,57 @@ const FILTERS: { id: DeadlineStatus | "abertos" | "todos"; label: string }[] = [
   { id: "confirmado", label: "Confirmados" }, { id: "concluido", label: "Concluídos" }, { id: "cancelado", label: "Cancelados" }, { id: "todos", label: "Todos" },
 ];
 
+const DEADLINE_TIME_ZONES = [
+  { id: "America/Noronha", label: "Fernando de Noronha" },
+  { id: "America/Belem", label: "Belém" },
+  { id: "America/Fortaleza", label: "Fortaleza" },
+  { id: "America/Recife", label: "Recife" },
+  { id: "America/Maceio", label: "Maceió" },
+  { id: "America/Bahia", label: "Bahia" },
+  { id: "America/Sao_Paulo", label: "Brasília / São Paulo" },
+  { id: "America/Araguaina", label: "Araguaína" },
+  { id: "America/Cuiaba", label: "Cuiabá" },
+  { id: "America/Campo_Grande", label: "Campo Grande" },
+  { id: "America/Boa_Vista", label: "Boa Vista" },
+  { id: "America/Manaus", label: "Manaus" },
+  { id: "America/Porto_Velho", label: "Porto Velho" },
+  { id: "America/Rio_Branco", label: "Rio Branco" },
+  { id: "America/Eirunepe", label: "Eirunepé" },
+  { id: "America/Santarem", label: "Santarém" },
+] as const;
+const DEFAULT_DEADLINE_TIME_ZONE = "America/Sao_Paulo";
+
+function localDateTimeToIso(value: string, timeZone: string): string | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+  const desired = match.slice(1).map(Number);
+  const target = Date.UTC(desired[0]!, desired[1]! - 1, desired[2]!, desired[3]!, desired[4]!);
+  let candidate = target;
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(candidate)).map((part) => [part.type, part.value]));
+    const represented = Date.UTC(Number(parts["year"]), Number(parts["month"]) - 1, Number(parts["day"]), Number(parts["hour"]), Number(parts["minute"]));
+    const adjustment = target - represented;
+    if (adjustment === 0) return new Date(candidate).toISOString();
+    candidate += adjustment;
+  }
+  return null;
+}
+
+function fmtDeadlineDateTime(deadline: Deadline) {
+  const timeZone = deadline.timeZone ?? DEFAULT_DEADLINE_TIME_ZONE;
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone }).format(new Date(deadline.dueDate));
+}
+
 function Prazos() {
   const { org } = Route.useParams();
   const { novo } = Route.useSearch();
@@ -36,7 +87,7 @@ function Prazos() {
   const [cancelWhy, setCancelWhy] = useState("");
   const [newDate, setNewDate] = useState("");
   const [changeReason, setChangeReason] = useState("");
-  const [form, setForm] = useState({ matterId: "", title: "", date: "", assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
+  const [form, setForm] = useState({ matterId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
   const actor = v.me?.name ?? "—";
   if (!canSeeCnj(v.role)) return <DeniedState />;
 
@@ -51,9 +102,11 @@ function Prazos() {
   const create = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.matterId || !form.title.trim() || !form.date || !form.assigneeId || !form.sourceLabel.trim()) { toast.error("Preencha caso, título, data e horário, responsável e fonte."); return; }
-    const d: Deadline = { id: uid("d"), officeId: office.id, matterId: form.matterId, title: form.title.trim(), dueDate: new Date(form.date).toISOString(), status: "proposto", assigneeId: form.assigneeId, proposedBy: actor, version: 1, sourceLabel: form.sourceLabel.trim(), ...(form.basis.trim() ? { basis: form.basis.trim() } : {}), ...(form.notes.trim() ? { notes: form.notes.trim() } : {}), history: [{ at: new Date().toISOString(), actor, action: `Propôs prazo com base em: ${form.sourceLabel.trim()}` }] };
+    const dueDate = localDateTimeToIso(form.date, form.timeZone);
+    if (!dueDate) { toast.error("Este horário não existe no fuso selecionado por causa da mudança de horário local. Escolha outro horário."); return; }
+    const d: Deadline = { id: uid("d"), officeId: office.id, matterId: form.matterId, title: form.title.trim(), dueDate, timeZone: form.timeZone, status: "proposto", assigneeId: form.assigneeId, proposedBy: actor, version: 1, sourceLabel: form.sourceLabel.trim(), ...(form.basis.trim() ? { basis: form.basis.trim() } : {}), ...(form.notes.trim() ? { notes: form.notes.trim() } : {}), history: [{ at: new Date().toISOString(), actor, action: `Propôs prazo com base em: ${form.sourceLabel.trim()}` }] };
     update((s) => ({ ...s, deadlines: [...s.deadlines, d], timeline: [timelineEvent({ officeId: office.id, matterId: d.matterId, actor, kind: "prazo", text: `Propôs prazo: ${d.title}` }), ...s.timeline] }));
-    setForm({ matterId: "", title: "", date: "", assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
+    setForm({ matterId: "", title: "", date: "", timeZone: DEFAULT_DEADLINE_TIME_ZONE, assigneeId: v.me?.id ?? "", sourceLabel: "", basis: "", notes: "" });
     navigate({ search: {}, replace: true });
     toast.success("Prazo proposto — aguarda confirmação de advogado");
   };
@@ -101,7 +154,7 @@ function Prazos() {
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{d.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    <span className="tabular">{fmtDateTime(d.dueDate)}</span> · {v.memberName(d.assigneeId)} · proposto por {d.proposedBy}
+                    <span className="tabular">{fmtDeadlineDateTime(d)} ({d.timeZone ?? "fuso não informado"})</span> · {v.memberName(d.assigneeId)} · proposto por {d.proposedBy}
                     {m && <> · <Link to="/o/$org/casos/$id" params={{ org, id: m.id }} search={{ tab: "prazos" }} className="text-primary hover:underline">{m.code}</Link></>}
                   </p>
                 </div>
@@ -120,9 +173,9 @@ function Prazos() {
           {review && <>
             <DialogHeader>
               <DialogTitle className="font-display text-xl font-medium">{review.title}</DialogTitle>
-              <DialogDescription>Data vigente: {fmtDateTime(review.dueDate)} · Fonte: {review.sourceLabel} · Responsável: {v.memberName(review.assigneeId)} · v{review.version}</DialogDescription>
+              <DialogDescription>Data vigente: {fmtDeadlineDateTime(review)} ({review.timeZone ?? "fuso não informado"}) · Fonte: {review.sourceLabel} · Responsável: {v.memberName(review.assigneeId)} · v{review.version}</DialogDescription>
             </DialogHeader>
-            {review.proposedDueDate && <div className="rounded-lg border border-warning/40 bg-warning-soft p-3 text-sm"><p className="font-semibold">Nova data proposta · v{review.proposedVersion ?? review.version + 1}: {fmtDateTime(review.proposedDueDate)}</p><p className="mt-1 text-muted-foreground">Data vigente v{review.version}: {fmtDateTime(review.dueDate)}. Motivo/fonte: {review.proposedReason || "Não informado"}. A data vigente continua valendo até aprovação.</p></div>}
+            {review.proposedDueDate && <div className="rounded-lg border border-warning/40 bg-warning-soft p-3 text-sm"><p className="font-semibold">Nova data proposta · v{review.proposedVersion ?? review.version + 1}: {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: review.timeZone ?? DEFAULT_DEADLINE_TIME_ZONE }).format(new Date(review.proposedDueDate))} ({review.timeZone ?? "fuso não informado"})</p><p className="mt-1 text-muted-foreground">Data vigente v{review.version}: {fmtDeadlineDateTime(review)}. Motivo/fonte: {review.proposedReason || "Não informado"}. A data vigente continua valendo até aprovação.</p></div>}
             <div className="flex flex-wrap gap-2"><DeadlineStatusChip status={review.status} /><DueBadge iso={review.dueDate} done={["concluido", "cancelado"].includes(review.status)} /></div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Histórico</p>
             {(review.basis || review.notes) && <div className="rounded-lg bg-muted/40 p-3 text-sm"><p><strong>Fundamento:</strong> {review.basis || "Não informado"}</p>{review.notes && <p className="mt-2"><strong>Observações:</strong> {review.notes}</p>}</div>}
@@ -166,7 +219,8 @@ function Prazos() {
                 <SelectContent>{v.matters.map((m) => <SelectItem key={m.id} value={m.id}>{m.code} · {m.title}</SelectItem>)}</SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="p-t">Título</Label><Input id="p-t" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div className="space-y-1.5"><Label htmlFor="p-assignee">Responsável</Label><select id="p-assignee" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={form.assigneeId} onChange={(e)=>setForm({...form,assigneeId:e.target.value})} required>{v.members.map(member=><option key={member.id} value={member.id}>{member.name}</option>)}</select></div>
-            <div className="space-y-1.5"><Label htmlFor="p-d">Data e hora local</Label><Input id="p-d" type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required/><p className="text-xs text-muted-foreground">Fuso do dispositivo: {Intl.DateTimeFormat().resolvedOptions().timeZone || "fuso local"}. A demonstração não calcula prazo legal.</p></div>
+            <div className="space-y-1.5"><Label htmlFor="p-time-zone">Fuso horário (IANA)</Label><Select value={form.timeZone} onValueChange={(timeZone) => setForm({ ...form, timeZone })}><SelectTrigger id="p-time-zone"><SelectValue placeholder="Selecione o fuso" /></SelectTrigger><SelectContent>{DEADLINE_TIME_ZONES.map((timeZone) => <SelectItem key={timeZone.id} value={timeZone.id}>{timeZone.label} · {timeZone.id}</SelectItem>)}</SelectContent></Select><p className="text-xs text-muted-foreground">Escolha o fuso em que a data e hora informadas devem ser interpretadas.</p></div>
+            <div className="space-y-1.5"><Label htmlFor="p-d">Data e hora local</Label><Input id="p-d" type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required/><p className="text-xs text-muted-foreground">O horário digitado será interpretado em {form.timeZone}. O fuso será salvo com a proposta. A demonstração não calcula prazo legal.</p></div>
             <div className="space-y-1.5"><Label htmlFor="p-source">Fonte / referência</Label><Input id="p-source" value={form.sourceLabel} onChange={(e)=>setForm({...form,sourceLabel:e.target.value})} placeholder="Ex.: cadastro manual ou referência recebida" required maxLength={180}/></div>
             <div className="space-y-1.5"><Label htmlFor="p-basis">Fundamento / regra de contagem (opcional)</Label><Input id="p-basis" value={form.basis} onChange={(e)=>setForm({...form,basis:e.target.value})} placeholder="Regra a conferir pelo profissional" maxLength={240}/></div>
             <div className="space-y-1.5"><Label htmlFor="p-notes">Observações (opcional)</Label><textarea id="p-notes" className="min-h-20 w-full rounded-md border bg-background p-3 text-sm" value={form.notes} onChange={(e)=>setForm({...form,notes:e.target.value})} maxLength={1000}/></div>

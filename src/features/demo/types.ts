@@ -138,6 +138,8 @@ export interface Deadline {
   confirmedAt?: string;
   version: number;
   sourceLabel: string;
+  /** IANA zone used to interpret the proposed local date/time. */
+  timeZone?: string;
   basis?: string;
   notes?: string;
   history: DeadlineHistory[];
@@ -196,6 +198,13 @@ export interface Task {
   instructions?: string;
   proceedingId?: string;
   appointmentId?: string;
+  history?: TaskHistoryEntry[];
+}
+
+export interface TaskHistoryEntry {
+  at: string;
+  actor: string;
+  action: string;
 }
 
 export interface DocumentFileMetadata {
@@ -218,6 +227,17 @@ export interface Doc {
   grantedRoles?: RoleId[];
   createdBy: string;
   createdAt: string;
+  description?: string;
+  content?: string;
+  status?: "rascunho" | "revisao_pendente" | "aprovado";
+  authorMemberId?: string;
+  submittedByMemberId?: string;
+  submissionReason?: string;
+  reviewerMemberId?: string;
+  reviewerName?: string;
+  reviewReason?: string;
+  versions?: DocRevision[];
+  history?: DocWorkflowEvent[];
   /** Illustrative evidence metadata; it does not prove receipt or authenticity. */
   evidenceSource?: string;
   evidenceIdentifier?: string;
@@ -226,6 +246,26 @@ export interface Doc {
   originalContent?: string;
   interpretation?: string;
   interpretationVersion?: number;
+}
+
+export interface DocRevision {
+  version: number;
+  title: string;
+  description: string;
+  content: string;
+  createdAt: string;
+  createdBy: string;
+  createdByMemberId?: string;
+}
+
+export interface DocWorkflowEvent {
+  at: string;
+  actor: string;
+  actorMemberId?: string;
+  action: string;
+  reason?: string;
+  version: number;
+  status: "rascunho" | "revisao_pendente" | "aprovado";
 }
 
 export interface MatterDocumentChecklistItem {
@@ -240,6 +280,23 @@ export interface MatterDocumentChecklist {
   items: MatterDocumentChecklistItem[];
 }
 
+export type DocumentModelStatus = "rascunho" | "em_revisao" | "publicado";
+
+export interface DocumentModelRevision {
+  version: number;
+  name: string;
+  areaId: string;
+  content: string;
+  status: DocumentModelStatus;
+  updatedAt: string;
+  authorMemberId?: string;
+  authorName?: string;
+  submissionReason?: string;
+  reviewerMemberId?: string;
+  reviewerName?: string;
+  reviewReason?: string;
+}
+
 export interface DocumentModel {
   id: string;
   officeId: string;
@@ -248,6 +305,14 @@ export interface DocumentModel {
   content: string;
   version: number;
   updatedAt: string;
+  status?: DocumentModelStatus;
+  authorMemberId?: string;
+  authorName?: string;
+  submissionReason?: string;
+  reviewerMemberId?: string;
+  reviewerName?: string;
+  reviewReason?: string;
+  versions?: DocumentModelRevision[];
 }
 
 export interface Mandate {
@@ -306,10 +371,13 @@ export interface Notification {
   id: string;
   officeId: string;
   at: string;
-  category: "prazo" | "tarefa" | "documento" | "sistema";
+  category: "prazo" | "tarefa" | "documento" | "atribuicao" | "mencao" | "resposta_cliente" | "suporte" | "sincronizacao" | "sistema";
   priority: "alta" | "normal";
   title: string;
+  recipientMemberId?: string;
   matterId?: string;
+  taskId?: string;
+  docId?: string;
   read: boolean;
   snoozedUntil?: string;
 }
@@ -360,6 +428,8 @@ export interface Intake {
   officeId: string;
   name: string;
   contact: string;
+  clientKind: Client["kind"];
+  existingClientId?: string;
   practiceAreaId: string;
   summary: string;
   stage: IntakeStage;
@@ -438,6 +508,8 @@ export interface SupportTicket {
   category?: "acesso" | "agenda" | "documentos" | "navegacao" | "outro";
   referenceId?: string;
   description: string;
+  technicalContext?: { app: string; route: string; requestReference: string; capturedAt: string };
+  caseContextConsent?: { caseCode: string; consentedAt: string };
   status: "aberto" | "em_atendimento" | "resolvido";
   createdAt: string;
 }

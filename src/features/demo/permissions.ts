@@ -1,4 +1,4 @@
-import type { Doc, Matter, RoleId } from "./types";
+import type { Doc, Matter, RoleId, Task } from "./types";
 
 /** DEMO-only UX permissions. Not a security mechanism — real checks belong on the server. */
 
@@ -27,6 +27,18 @@ export function canSeeMatter(role: RoleId, matter: Matter, memberId?: string): b
 
 export function canConfirmDeadline(role: RoleId): boolean {
   return LAWYER_ROLES.includes(role);
+}
+
+export function canApproveTask(role: RoleId): boolean {
+  return LAWYER_ROLES.includes(role);
+}
+
+export function canDelegateTask(role: RoleId): boolean {
+  return [...LAWYER_ROLES, "gestor"].includes(role);
+}
+
+export function canManageTask(role: RoleId, task: Pick<Task, "assigneeId" | "requesterId">, memberId?: string): boolean {
+  return canDelegateTask(role) || (!!memberId && (task.assigneeId === memberId || task.requesterId === memberId));
 }
 
 export function canProposeDeadline(role: RoleId): boolean {

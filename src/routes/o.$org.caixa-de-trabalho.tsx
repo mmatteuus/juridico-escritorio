@@ -2,9 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { DeadlineStatusChip, DueBadge, EmptyState, PageHeader, PriorityBadge, TASK_STATUS_LABEL } from "@/components/office/badges";
-import { findOffice, fmtDateTime, isOverdue, useDemo, useOfficeView } from "@/features/demo/store";
-import { canSeeCnj, canSeeLegalDocs } from "@/features/demo/permissions";
+import { canTransitionTask, TASK_TRANSITIONS } from "@/features/demo/actions";
+import { findOffice, fmtDateTime, isOverdue, timelineEvent, useDemo, useOfficeView } from "@/features/demo/store";
+import { canApproveTask, canManageTask, canSeeCnj, canSeeLegalDocs } from "@/features/demo/permissions";
+import type { Task, TaskStatus } from "@/features/demo/types";
 
 export const Route = createFileRoute("/o/$org/caixa-de-trabalho")({
   head: () => ({ meta: [{ title: "Caixa de trabalho · JURIDO Escritórios" }, { name: "description", content: "Fila unificada de trabalho." }, { name: "robots", content: "noindex" }] }),
@@ -21,6 +26,8 @@ function Caixa() {
   const { update } = useDemo();
   const [q, setQ] = useState<Q>("minhas");
   const [area, setArea] = useState("todas");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [reason, setReason] = useState("");
   const me = v.me?.id;
   const open = v.tasks.filter((t) => t.status !== "concluida");
   const inArea = (matterId?: string) => area === "todas" || v.matterById(matterId)?.practiceAreaId === area;
@@ -37,12 +44,34 @@ function Caixa() {
     ? v.messages.filter((message) => message.status === "aguardando_revisao" && inArea(message.matterId))
     : [];
 
+  const changeTaskStatus = (task: Task, next: TaskStatus) => {
+    const current = v.tasks.find((item) => item.id === task.id && item.officeId === office.id);
+    if (!current || !canManageTask(v.role, current, v.me?.id) || !reason.trim() || !canTransitionTask(current.status, next) || (next === "concluida" && !canApproveTask(v.role))) {
+      toast.error("A etapa não está disponível ou falta a justificativa.");
+      return;
+    }
+    update((data) => ({
+      ...data,
+      tasks: data.tasks.map((item) => item.id === current.id && item.officeId === office.id ? { ...item, status: next, history: [...(item.history ?? []), { at: new Date().toISOString(), actor: v.me?.name ?? "Equipe", action: `${TASK_STATUS_LABEL[next]} · ${reason.trim()}` }] } : item),
+      timeline: current.matterId ? [timelineEvent({
+        officeId: office.id,
+        matterId: current.matterId,
+        actor: v.me?.name ?? "Equipe",
+        kind: "tarefa",
+        text: `${current.title}: ${TASK_STATUS_LABEL[next]}. ${reason.trim()}`,
+      }), ...data.timeline] : data.timeline,
+    }));
+    setSelectedTask({ ...current, status: next });
+    setReason("");
+    toast.success("Tarefa atualizada na demonstração");
+  };
+
   return (
     <>
       <PageHeader title="Caixa de trabalho" subtitle="Tudo o que precisa de ação, ordenado por prioridade e data." />
-      <div className="mb-3 flex flex-wrap gap-2" role="tablist">
+      <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Filtrar caixa de trabalho">
         {(Object.keys(queues) as Q[]).map((k) => (
-          <Button key={k} role="tab" aria-selected={q === k} size="sm" variant={q === k ? "default" : "outline"} onClick={() => setQ(k)}>
+          <Button key={k} aria-pressed={q === k} size="sm" variant={q === k ? "default" : "outline"} onClick={() => setQ(k)}>
             {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length : 0)}</span>
           </Button>
         ))}
@@ -80,12 +109,33 @@ function Caixa() {
                   </p>
                 </div>
                 <PriorityBadge value={t.priority} />
-                <Button size="sm" variant="outline" onClick={() => { update((d) => ({ ...d, tasks: d.tasks.map((x) => (x.id === t.id && x.officeId === office.id ? { ...x, status: "concluida" } : x)) })); toast.success("Tarefa concluída na demonstração"); }}>Concluir</Button>
+                <Button size="sm" variant="outline" disabled={!canManageTask(v.role, t, v.me?.id)} onClick={() => { setSelectedTask(t); setReason(""); }}>Etapa rápida</Button>
               </li>
             );
           })}
         </ul>
       )}
+      <Dialog open={!!selectedTask} onOpenChange={(isOpen) => { if (!isOpen) { setSelectedTask(null); setReason(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedTask?.title}</DialogTitle>
+            <DialogDescription>Responsável: {v.memberName(selectedTask?.assigneeId)} · Data-alvo interna: {selectedTask && fmtDateTime(selectedTask.dueAt)}</DialogDescription>
+          </DialogHeader>
+          {selectedTask && <>
+            <div className="flex flex-wrap gap-2"><PriorityBadge value={selectedTask.priority}/><span className="text-sm">{TASK_STATUS_LABEL[selectedTask.status]}</span></div>
+            <div>
+              <Label htmlFor="work-queue-task-reason">Justificativa da etapa</Label>
+              <Input id="work-queue-task-reason" className="mt-2" placeholder="Motivo da mudança de etapa" value={reason} onChange={(event) => setReason(event.target.value)} required />
+            </div>
+            <DialogFooter className="flex-wrap gap-2">
+              {TASK_TRANSITIONS[selectedTask.status].filter(next => next !== "concluida" || canApproveTask(v.role)).map((next) => <Button key={next} variant={next === "concluida" ? "default" : "outline"} disabled={!reason.trim() || !canTransitionTask(selectedTask.status, next)} onClick={() => changeTaskStatus(selectedTask, next)}>
+                {next === "em_andamento" ? "Retomar / iniciar" : next === "aguardando_cliente" ? "Aguardar cliente" : next === "aguardando_revisao" ? "Enviar para revisão" : "Concluir após revisão"}
+              </Button>)}
+              {selectedTask.status === "aguardando_revisao" && !canApproveTask(v.role) && <p className="w-full text-xs text-muted-foreground">A conclusão após revisão exige advogado, sócio ou coordenador nesta demonstração.</p>}
+            </DialogFooter>
+          </>}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -16,6 +16,24 @@ export const Route = createFileRoute("/o/$org/prazos/$id")({
   component: ReviewDeadline,
 });
 
+const DEFAULT_TIME_ZONE = "America/Sao_Paulo";
+function localDateTimeToIso(value: string, timeZone: string): string | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [year, month, day, hour, minute] = match.slice(1).map(Number);
+  const target = Date.UTC(year!, month! - 1, day!, hour!, minute!);
+  let candidate = target;
+  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(candidate)).map((part) => [part.type, part.value]));
+    const represented = Date.UTC(Number(parts["year"]), Number(parts["month"]) - 1, Number(parts["day"]), Number(parts["hour"]), Number(parts["minute"]));
+    const adjustment = target - represented;
+    if (adjustment === 0) return new Date(candidate).toISOString();
+    candidate += adjustment;
+  }
+  return null;
+}
+
 function ReviewDeadline() {
   const { org, id } = Route.useParams();
   const office = findOffice(org)!;
@@ -29,6 +47,8 @@ function ReviewDeadline() {
   if (!deadline) return <div className="space-y-4"><EmptyState title="Prazo não encontrado ou sem acesso" hint="Confira o escritório e suas permissões para este caso."/><Button variant="outline" asChild><Link to="/o/$org/prazos" params={{org}}>Voltar aos prazos</Link></Button></div>;
   const matter = view.matterById(deadline.matterId);
   const actor = view.me?.name ?? "Profissional";
+  const timeZone = deadline?.timeZone ?? DEFAULT_TIME_ZONE;
+  const formatDeadlineDate = (date: string) => new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone }).format(new Date(date));
   const open = deadline.status !== "cancelado" && deadline.status !== "concluido";
   const reviewer = canConfirmDeadline(view.role);
   function act(next: Partial<Deadline>, description: string) {
@@ -37,20 +57,20 @@ function ReviewDeadline() {
   }
   function reschedule() {
     if (!newDate || !canProposeDeadline(view.role) || !open) return;
-    const date = new Date(`${newDate}T18:00:00`);
-    if (Number.isNaN(date.getTime())) { toast.error("Informe uma data válida."); return; }
-    act(rescheduleDeadline(deadline!, date.toISOString(), changeReason), "Propôs alteração da data e solicitou nova revisão");
+    const proposedDate = localDateTimeToIso(newDate, timeZone);
+    if (!proposedDate) { toast.error("Informe uma data e horário válidos neste fuso."); return; }
+    act({ ...rescheduleDeadline(deadline!, proposedDate, changeReason), timeZone }, "Propôs alteração da data e solicitou nova revisão");
     setNewDate("");
     setChangeReason("");
   }
   return <div className="space-y-5"><Button variant="ghost" size="sm" asChild><Link to="/o/$org/prazos" params={{org}}><ArrowLeft/> Todos os prazos</Link></Button>
     <PageHeader title={deadline.title} subtitle={`${matter?.code ?? "Caso"} · Revisão humana do prazo`}/>
-    <div className="grid gap-3 sm:grid-cols-3"><Stat icon={<CalendarClock className="size-5 text-copper"/>} label="Data vigente" value={fmtDateTime(deadline.dueDate)}/><Stat icon={<ShieldCheck className="size-5 text-primary"/>} label="Responsável" value={view.memberName(deadline.assigneeId)}/><Stat icon={<History className="size-5 text-primary"/>} label="Versão" value={`v${deadline.version}`}/></div>
+    <div className="grid gap-3 sm:grid-cols-3"><Stat icon={<CalendarClock className="size-5 text-copper"/>} label="Data vigente" value={formatDeadlineDate(deadline.dueDate)}/><Stat icon={<ShieldCheck className="size-5 text-primary"/>} label="Responsável" value={view.memberName(deadline.assigneeId)}/><Stat icon={<History className="size-5 text-primary"/>} label="Versão" value={`v${deadline.version}`}/></div>
     <PublicationReviewPanel office={office} reviews={view.publicationReviews.filter(review => review.linkedDeadlineId === deadline.id || review.matterId === deadline.matterId)} />
-    <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]"><section className="rounded-xl border bg-card p-5 shadow-soft"><div className="flex flex-wrap items-center gap-3"><h2 className="font-display text-xl">Conferência</h2><DeadlineStatusChip status={deadline.status}/><DueBadge iso={deadline.dueDate} done={!open}/></div><p className="mt-3 text-sm text-muted-foreground">Confirme a origem e a data antes de aprovar. Este demonstrativo não calcula prazo judicial nem pratica ato automaticamente.</p><dl className="mt-5 grid gap-3 text-sm"><Info label="Origem" value={deadline.sourceLabel}/><Info label="Proposto por" value={deadline.proposedBy}/><Info label="Responsável" value={view.memberName(deadline.assigneeId)}/><Info label="Caso" value={matter?.title ?? "Caso indisponível"}/><Info label="Confirmado por" value={deadline.confirmedBy ?? "Aguardando revisão"}/><Info label="Confirmação" value={deadline.confirmedAt ? fmtDateTime(deadline.confirmedAt) : "—"}/></dl>
+    <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]"><section className="rounded-xl border bg-card p-5 shadow-soft"><div className="flex flex-wrap items-center gap-3"><h2 className="font-display text-xl">Conferência</h2><DeadlineStatusChip status={deadline.status}/><DueBadge iso={deadline.dueDate} done={!open}/></div><p className="mt-3 text-sm text-muted-foreground">Confirme a origem e a data antes de aprovar. Este demonstrativo não calcula prazo judicial nem pratica ato automaticamente.</p><dl className="mt-5 grid gap-3 text-sm"><Info label="Origem" value={deadline.sourceLabel}/><Info label="Fuso da proposta" value={timeZone}/><Info label="Proposto por" value={deadline.proposedBy}/><Info label="Responsável" value={view.memberName(deadline.assigneeId)}/><Info label="Caso" value={matter?.title ?? "Caso indisponível"}/><Info label="Confirmado por" value={deadline.confirmedBy ?? "Aguardando revisão"}/><Info label="Confirmação" value={deadline.confirmedAt ? fmtDateTime(deadline.confirmedAt) : "—"}/></dl>
       {matter && <Link to="/o/$org/casos/$id" params={{org,id:matter.id}} search={{tab:"prazos"}} className="mt-5 inline-block text-sm text-primary hover:underline">Abrir caso {matter.code} →</Link>}
-      {deadline.proposedDueDate && <div className="mt-4 rounded-lg border border-warning/40 bg-warning-soft p-4 text-sm"><p className="font-semibold">Alteração aguardando aprovação · proposta v{deadline.proposedVersion ?? deadline.version + 1}</p><p className="mt-1">Data vigente v{deadline.version}: {fmtDateTime(deadline.dueDate)} · Data proposta: {fmtDateTime(deadline.proposedDueDate)}</p><p className="mt-1 text-muted-foreground">Motivo: {deadline.proposedReason || "Não informado"}. A data vigente permanece ativa até aprovação profissional.</p></div>}
-      {open && <div className="mt-6 space-y-4 border-t pt-5"><h3 className="font-medium">Ações demonstrativas</h3>{canProposeDeadline(view.role) && <div className="grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-end"><label className="grid gap-1 text-sm" htmlFor="new-deadline-date">Propor nova data<Input id="new-deadline-date" type="date" value={newDate} onChange={e=>setNewDate(e.target.value)} className="w-full sm:w-44"/></label><label className="grid gap-1 text-sm" htmlFor="deadline-change-reason">Fonte e justificativa<Input id="deadline-change-reason" value={changeReason} onChange={e=>setChangeReason(e.target.value)} placeholder="Referência e motivo da alteração"/></label><Button variant="outline" disabled={!newDate || !changeReason.trim()} onClick={reschedule}>Enviar para revisão</Button></div>}
+      {deadline.proposedDueDate && <div className="mt-4 rounded-lg border border-warning/40 bg-warning-soft p-4 text-sm"><p className="font-semibold">Alteração aguardando aprovação · proposta v{deadline.proposedVersion ?? deadline.version + 1}</p><p className="mt-1">Data vigente v{deadline.version}: {formatDeadlineDate(deadline.dueDate)} · Data proposta: {formatDeadlineDate(deadline.proposedDueDate)}</p><p className="mt-1 text-muted-foreground">Motivo: {deadline.proposedReason || "Não informado"}. A data vigente permanece ativa até aprovação profissional.</p></div>}
+      {open && <div className="mt-6 space-y-4 border-t pt-5"><h3 className="font-medium">Ações demonstrativas</h3>{canProposeDeadline(view.role) && <div className="grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-end"><label className="grid gap-1 text-sm" htmlFor="new-deadline-date">Nova data e horário ({timeZone})<Input id="new-deadline-date" type="datetime-local" value={newDate} onChange={e=>setNewDate(e.target.value)} className="w-full sm:w-56"/></label><label className="grid gap-1 text-sm" htmlFor="deadline-change-reason">Fonte e justificativa<Input id="deadline-change-reason" value={changeReason} onChange={e=>setChangeReason(e.target.value)} placeholder="Referência e motivo da alteração"/></label><Button variant="outline" disabled={!newDate || !changeReason.trim()} onClick={reschedule}>Enviar para revisão</Button></div>}
         <div className="flex flex-wrap gap-2">{deadline.status==="proposto" && canProposeDeadline(view.role) && <Button variant="outline" onClick={()=>act({status:"em_revisao"},"Encaminhou para revisão humana")}>Encaminhar para revisão</Button>}{["proposto","em_revisao"].includes(deadline.status) && reviewer && <Button onClick={()=>act({...(deadline.proposedDueDate ? { dueDate: deadline.proposedDueDate, version: deadline.proposedVersion ?? deadline.version + 1, proposedDueDate: undefined, proposedReason: undefined, proposedVersion: undefined } : {}),status:"confirmado",confirmedBy:actor,confirmedAt:new Date().toISOString()},"Confirmou o prazo após revisão") }><CheckCircle2/> Aprovar data e confirmar</Button>}{deadline.status==="confirmado" && reviewer && <Button variant="outline" onClick={()=>act({status:"concluido"},"Marcou o prazo como concluído")}>Marcar concluído</Button>}</div>
         {reviewer && <div className="flex flex-wrap items-end gap-2"><label htmlFor="cancel-reason" className="grid flex-1 gap-1 text-sm">Justificativa para cancelamento<Input id="cancel-reason" value={reason} onChange={e=>setReason(e.target.value)} placeholder="Informe o motivo"/></label><Button variant="destructive" disabled={!reason.trim()} onClick={()=>{act({status:"cancelado"},`Cancelou o prazo: ${reason.trim()}`);setReason("")}}>Cancelar prazo</Button></div>}
         {!reviewer && <p className="text-xs text-muted-foreground">A confirmação e o cancelamento exigem perfil de advogado autorizado.</p>}

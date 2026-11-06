@@ -10,7 +10,7 @@ export const Route = createFileRoute("/o/$org/notificacoes")({
   component: Notificacoes,
 });
 
-const CATS = { todas: "Todas", prazo: "Prazos", tarefa: "Tarefas", documento: "Documentos", sistema: "Sistema", adiadas: "Adiadas" } as const;
+const CATS = { todas: "Todas", prazo: "Prazos", tarefa: "Tarefas", atribuicao: "Atribuições", mencao: "Menções", documento: "Documentos", resposta_cliente: "Clientes", suporte: "Suporte", sincronizacao: "Atualização", sistema: "Sistema", adiadas: "Adiadas" } as const;
 
 function Notificacoes() {
   const { org } = Route.useParams();
@@ -34,9 +34,9 @@ function Notificacoes() {
   return (
     <>
       <PageHeader title="Notificações" subtitle={`${activeUnread} não lidas na central · ${v.notifications.filter(isSnoozed).length} adiadas`} actions={<Button variant="outline" onClick={() => mark()} disabled={!v.notifications.some((n) => !n.read)}>Marcar todas como lidas</Button>} />
-      <div className="mb-4 flex flex-wrap gap-2" role="tablist">
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar notificações">
         {(Object.keys(CATS) as (keyof typeof CATS)[]).map((c) => (
-          <Button key={c} role="tab" aria-selected={cat === c} size="sm" variant={cat === c ? "default" : "outline"} onClick={() => setCat(c)}>{CATS[c]}</Button>
+          <Button key={c} aria-pressed={cat === c} size="sm" variant={cat === c ? "default" : "outline"} onClick={() => setCat(c)}>{CATS[c]}</Button>
         ))}
       </div>
       {list.length === 0 ? <EmptyState title="Sem notificações nesta categoria" /> : (
@@ -48,7 +48,10 @@ function Notificacoes() {
                 <p className={cn("text-sm", !n.read && "font-semibold")}>{n.title} {n.priority === "alta" && <span className="ml-1 text-xs font-semibold text-destructive">· prioridade alta</span>}</p>
                 <p className="text-xs text-muted-foreground">{CATS[n.category]} · {fmtDateTime(n.at)} {!n.read && "· não lida"}{isSnoozed(n) && n.snoozedUntil && ` · adiada até ${fmtDateTime(n.snoozedUntil)}`}</p>
               </div>
-              {n.matterId && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId }} onClick={() => mark(n.id)}>Abrir caso</Link></Button>}
+              {n.taskId && v.tasks.some(task => task.id === n.taskId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/tarefas/$id" params={{ org, id: n.taskId }} onClick={() => mark(n.id)}>Abrir tarefa</Link></Button>}
+              {n.docId && v.docs.some(doc => doc.id === n.docId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId ?? v.docs.find(doc => doc.id === n.docId)!.matterId }} search={{ tab: "documentos" }} onClick={() => mark(n.id)}>Abrir documento</Link></Button>}
+              {!n.taskId && !n.docId && n.matterId && v.matterById(n.matterId) && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/casos/$id" params={{ org, id: n.matterId }} onClick={() => mark(n.id)}>Abrir caso</Link></Button>}
+              {n.category === "suporte" && <Button size="sm" variant="ghost" asChild><Link to="/o/$org/suporte" params={{ org }} onClick={() => mark(n.id)}>Abrir suporte</Link></Button>}
               {!n.read && <Button size="sm" variant="outline" onClick={() => mark(n.id)}>Marcar lida</Button>}
               {cat === "adiadas" ? <Button size="sm" variant="outline" onClick={() => unsnooze(n.id)}>Reativar agora</Button> : <Button size="sm" variant="ghost" onClick={() => snooze(n.id)}>Adiar 24h</Button>}
             </li>

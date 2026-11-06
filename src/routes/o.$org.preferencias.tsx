@@ -11,13 +11,16 @@ export const Route = createFileRoute("/o/$org/preferencias")({
   component: PreferencesPage,
 });
 const categoryLabel: Record<Notification["category"], string> = {
-  prazo: "Prazos", tarefa: "Tarefas", documento: "Documentos", sistema: "Sistema",
+  prazo: "Prazos", tarefa: "Tarefas", documento: "Documentos", atribuicao: "Atribuições", mencao: "Menções", resposta_cliente: "Respostas de clientes", suporte: "Suporte", sincronizacao: "Atualização e sincronização", sistema: "Sistema",
 };
 const categoryHint: Record<Notification["category"], string> = {
   prazo: "Alterações e revisões de prazos", tarefa: "Atribuições e andamento de tarefas",
-  documento: "Novos documentos e revisões", sistema: "Avisos de operação do escritório",
+  documento: "Novos documentos e revisões", atribuicao: "Trabalho atribuído a você", mencao: "Menções em atualizações da equipe",
+  resposta_cliente: "Retornos aguardando leitura da equipe", suporte: "Atualizações de solicitações de suporte",
+  sincronizacao: "Estado informativo de atualização de fontes", sistema: "Avisos de operação do escritório",
 };
-const categories: Notification["category"][] = ["prazo", "tarefa", "documento", "sistema"];
+const categories: Notification["category"][] = ["prazo", "tarefa", "atribuicao", "mencao", "documento", "resposta_cliente", "suporte", "sincronizacao", "sistema"];
+const defaultCategories = Object.fromEntries(categories.map(category => [category, true])) as Record<Notification["category"], boolean>;
 const card = "rounded-xl border bg-card p-5 shadow-soft";
 
 function PreferencesPage() {
@@ -28,7 +31,7 @@ function PreferencesPage() {
 }
 function PreferencesContent({ officeId, memberId, name, notifications, officeName, preferences }: { officeId: string; memberId: string; name: string; notifications: Notification[]; officeName: string; preferences: OfficeUserPreferences | undefined }) {
   const { update } = useDemo();
-  const [enabled, setEnabled] = useState<Record<Notification["category"], boolean>>(preferences?.categories ?? { prazo: true, tarefa: true, documento: true, sistema: true });
+  const [enabled, setEnabled] = useState<Record<Notification["category"], boolean>>({ ...defaultCategories, ...preferences?.categories });
   const [channel, setChannel] = useState<"central" | "resumo">(preferences?.channel ?? "central");
   const [quiet, setQuiet] = useState(preferences?.quiet ?? false);
   const [quietStart, setQuietStart] = useState(preferences?.quietStart ?? "20:00");

@@ -69,6 +69,14 @@ export function useOfficeView(office: Office) {
       return !!matter && canSeeDoc(role, doc, matter, me?.id);
     });
     const visibleDocIds = new Set(docs.map((doc) => doc.id));
+    const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(role);
+    const tasks = inScope(data.tasks).filter((task) => !!task.matterId || task.assigneeId === me?.id || task.requesterId === me?.id || canSeeOfficeQueue);
+    const notifications = inScope(data.notifications).filter((notification) =>
+      (!notification.recipientMemberId || notification.recipientMemberId === me?.id || canSeeOfficeQueue) &&
+      (!notification.taskId || tasks.some((task) => task.id === notification.taskId)) &&
+      (!notification.docId || visibleDocIds.has(notification.docId)) &&
+      (canSeeCnj(role) || notification.category !== "prazo"),
+    );
     const visibleClientIds = new Set(matters.flatMap((matter) => matter.clientIds));
     const clients = data.clients.filter((client) =>
       client.officeId === office.id && (visibleClientIds.has(client.id) || client.responsibleId === me?.id),
@@ -100,7 +108,7 @@ export function useOfficeView(office: Office) {
         ? data.publicationCoverage.filter((coverage) => coverage.officeId === office.id)
         : [],
       publicationReviews: canSeeCnj(role) ? inScope(data.publicationReviews) as PublicationReview[] : [],
-      tasks: inScope(data.tasks),
+      tasks,
       docs,
       models: data.models.filter((m) => m.officeId === office.id),
       mandates: inScope(data.mandates),
@@ -111,9 +119,7 @@ export function useOfficeView(office: Office) {
         (canSeeCnj(role) || event.kind !== "prazo") &&
         (event.kind !== "documento" || (!!event.docId && visibleDocIds.has(event.docId))),
       ),
-      notifications: inScope(data.notifications).filter((notification) =>
-        canSeeCnj(role) || notification.category !== "prazo",
-      ),
+      notifications,
       appointments: data.appointments.filter((appointment) =>
         appointment.officeId === office.id &&
         (appointment.matterId

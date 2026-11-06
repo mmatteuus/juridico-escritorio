@@ -42,9 +42,10 @@ function Atendimentos() {
   const v = useOfficeView(office);
   const { update } = useDemo();
   const [sel, setSel] = useState<Intake | null>(null);
-  const [form, setForm] = useState({ name: "", contact: "", counterparty: "", area: office.practiceAreas[0]?.id ?? "", summary: "" });
+  const [form, setForm] = useState({ name: "", contact: "", clientKind: "PF" as Intake["clientKind"], existingClientId: "", counterparty: "", area: office.practiceAreas[0]?.id ?? "", summary: "" });
   const actor = v.me?.name ?? "—";
   const canApprove = canApproveIntake(v.role);
+  const existingClients = v.clients.filter(client => client.officeId === office.id);
 
   useEffect(() => {
     if (!intakeId) return;
@@ -75,7 +76,14 @@ function Atendimentos() {
       toast.error("A conversão exige aprovação profissional e revisão de conflito concluída.");
       return;
     }
-    const clientId = uid("c");
+    const selectedClient = i.existingClientId
+      ? existingClients.find(client => client.id === i.existingClientId)
+      : undefined;
+    if (i.existingClientId && (!selectedClient || selectedClient.kind !== i.clientKind)) {
+      toast.error("O cliente selecionado não está disponível para este perfil ou escritório.");
+      return;
+    }
+    const clientId = selectedClient?.id ?? uid("c");
     const matterId = uid("k");
     const checks = conflictsFor(i);
     const cleared = checks.every(check => check.status === "sem_indicio");
@@ -87,7 +95,9 @@ function Atendimentos() {
     };
     update((d) => ({
       ...d,
-      clients: [...d.clients, { id: clientId, officeId: office.id, name: i.name, kind: "PF", contact: i.contact, city: "—", conflictStatus: cleared ? "liberado" : "pendente" }],
+      clients: d.clients.some(client => client.id === clientId && client.officeId === office.id)
+        ? d.clients
+        : [...d.clients, { id: clientId, officeId: office.id, name: i.name, kind: i.clientKind, contact: i.contact, city: "—", conflictStatus: cleared ? "liberado" : "pendente" }],
       matters: [matter, ...d.matters],
       intakes: d.intakes.map((x) => (x.officeId === office.id && x.id === i.id ? { ...x, stage: "convertido", matterId } : x)),
       timeline: [timelineEvent({ officeId: office.id, matterId, actor, kind: "cadastro", text: "Caso criado a partir de atendimento" }), ...d.timeline],
@@ -100,12 +110,18 @@ function Atendimentos() {
   const create = (e: React.FormEvent) => {
     e.preventDefault();
     const counterparties = [...new Set(form.counterparty.split(/[,;\n]+/).map(value => value.trim()).filter(Boolean))];
-    if (!form.name.trim() || !form.contact.trim() || !counterparties.length || !form.area) { toast.error("Preencha nome, contato, ao menos uma parte relacionada e área de atuação."); return; }
+    const selectedClient = form.existingClientId
+      ? existingClients.find(client => client.id === form.existingClientId)
+      : undefined;
+    if (form.existingClientId && (!selectedClient || selectedClient.kind !== form.clientKind)) { toast.error("Selecione um cliente visível deste escritório."); return; }
+    if ((!selectedClient && (!form.name.trim() || !form.contact.trim())) || !counterparties.length || !form.area) { toast.error("Preencha nome, contato, ao menos uma parte relacionada e área de atuação."); return; }
+    const prospectName = selectedClient?.name ?? form.name.trim();
+    const prospectContact = selectedClient?.contact ?? form.contact.trim();
     const intakeId = uid("i");
     const createdAt = new Date().toISOString();
-    const checks: ConflictCheck[] = counterparties.map(counterparty => ({ id: uid("conflito"), officeId: office.id, intakeId, prospect: form.name.trim(), counterparty, summary: form.summary.trim(), status: "pendente", createdAt, reviewedBy: undefined, reviewReason: undefined, reviewedAt: undefined }));
-    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: form.name.trim(), contact: form.contact.trim(), practiceAreaId: form.area, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
-    setForm({ ...form, name: "", contact: "", counterparty: "", summary: "" });
+    const checks: ConflictCheck[] = counterparties.map(counterparty => ({ id: uid("conflito"), officeId: office.id, intakeId, prospect: prospectName, counterparty, summary: form.summary.trim(), status: "pendente", createdAt, reviewedBy: undefined, reviewReason: undefined, reviewedAt: undefined }));
+    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: prospectName, contact: prospectContact, clientKind: selectedClient?.kind ?? form.clientKind, ...(selectedClient ? { existingClientId: selectedClient.id } : {}), practiceAreaId: form.area, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
+    setForm({ ...form, name: "", contact: "", clientKind: "PF", existingClientId: "", counterparty: "", summary: "" });
     navigate({ search: {}, replace: true });
     toast.success("Atendimento registrado; revisão de conflito pendente na demonstração");
   };
@@ -141,7 +157,7 @@ function Atendimentos() {
           {sel && <>
             <DialogHeader>
               <DialogTitle className="font-display text-xl font-medium">{sel.name}</DialogTitle>
-              <DialogDescription>{v.areaName(sel.practiceAreaId)} · {STAGES.find((s) => s.id === sel.stage)?.label} · {sel.contact}</DialogDescription>
+              <DialogDescription>{sel.clientKind} · {sel.existingClientId ? "Cliente existente selecionado" : "Novo cliente na conversão"} · {v.areaName(sel.practiceAreaId)} · {STAGES.find((s) => s.id === sel.stage)?.label} · {sel.contact}</DialogDescription>
             </DialogHeader>
             <p className="text-sm">{sel.summary}</p>
             <section className="rounded-lg border bg-muted/30 p-3">
@@ -168,8 +184,29 @@ function Atendimentos() {
         <DialogContent>
           <DialogHeader><DialogTitle className="font-display text-xl font-medium">Novo atendimento</DialogTitle><DialogDescription>Use apenas dados fictícios.</DialogDescription></DialogHeader>
           <form onSubmit={create} className="space-y-3">
-            <div className="space-y-1.5"><Label htmlFor="i-n">Nome</Label><Input id="i-n" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoComplete="name" required /></div>
-            <div className="space-y-1.5"><Label htmlFor="i-c">Contato</Label><Input id="i-c" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} placeholder="Telefone, e-mail ou outro contato" required /></div>
+            <div className="space-y-1.5"><Label htmlFor="i-existing-client">Cliente existente (opcional)</Label>
+              <Select value={form.existingClientId || "novo"} onValueChange={(clientId) => {
+                if (clientId === "novo") {
+                  setForm({ ...form, existingClientId: "", name: form.existingClientId ? "" : form.name, contact: form.existingClientId ? "" : form.contact });
+                  return;
+                }
+                const client = existingClients.find(item => item.id === clientId);
+                if (client) setForm({ ...form, existingClientId: client.id, clientKind: client.kind, name: client.name, contact: client.contact });
+              }}>
+                <SelectTrigger id="i-existing-client" aria-label="Cliente existente opcional"><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="novo">Novo cliente / prospect</SelectItem>{existingClients.map(client => <SelectItem key={client.id} value={client.id}>{client.kind} · {client.name}</SelectItem>)}</SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Clientes disponíveis conforme o acesso deste perfil neste escritório.</p>
+            </div>
+            <div className="space-y-1.5"><Label htmlFor="i-kind">Tipo de cliente</Label>
+              <Select value={form.clientKind} disabled={!!form.existingClientId} onValueChange={(clientKind) => setForm({ ...form, clientKind: clientKind as Intake["clientKind"] })}>
+                <SelectTrigger id="i-kind" aria-label="Tipo de cliente"><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="PF">Pessoa física (PF)</SelectItem><SelectItem value="PJ">Pessoa jurídica (PJ)</SelectItem></SelectContent>
+              </Select>
+              {form.existingClientId && <p className="text-xs text-muted-foreground">O tipo acompanha o cadastro do cliente selecionado.</p>}
+            </div>
+            <div className="space-y-1.5"><Label htmlFor="i-n">{form.clientKind === "PJ" ? "Nome / razão social" : "Nome"}</Label><Input id="i-n" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoComplete="name" readOnly={!!form.existingClientId} required /></div>
+            <div className="space-y-1.5"><Label htmlFor="i-c">Contato</Label><Input id="i-c" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} placeholder="Telefone, e-mail ou outro contato" readOnly={!!form.existingClientId} required /></div>
             <div className="space-y-1.5"><Label htmlFor="i-counterparty">Partes contrárias ou relacionadas</Label><Input id="i-counterparty" value={form.counterparty} onChange={(e) => setForm({ ...form, counterparty: e.target.value })} placeholder="Separe por vírgula ou escreva ‘a identificar’" required /><p className="text-xs text-muted-foreground">Cada parte cria uma verificação pendente. A busca não conclui nem decide conflito automaticamente.</p></div>
             <div className="space-y-1.5"><Label htmlFor="i-area">Área</Label>
               <Select value={form.area} onValueChange={(a) => setForm({ ...form, area: a })}><SelectTrigger id="i-area" aria-label="Área de atuação" aria-required="true"><SelectValue /></SelectTrigger>
