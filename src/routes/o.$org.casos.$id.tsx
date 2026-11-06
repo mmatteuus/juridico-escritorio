@@ -88,8 +88,8 @@ function Dossie() {
           <div className="rounded-xl border bg-card p-5 md:col-span-2"><h2 className="font-display text-lg">Resumo</h2><p className="mt-2 text-sm">{m.summary}</p></div>
           <div className="rounded-xl border bg-card p-5 text-sm">
             <p>{procs.length ? `${procs.length} processo(s) vinculados` : "Sem processo judicial — caso válido."}</p>
-            <p className="mt-1">{dls.filter((d) => d.status !== "concluido").length} prazo(s) em aberto</p>
-            <p className="mt-1">{tasks.filter((t) => t.status !== "concluida").length} tarefa(s) em aberto</p>
+            <p className="mt-1">{(() => { const n = dls.filter((d) => d.status !== "concluido").length; return `${n} ${n === 1 ? "prazo" : "prazos"} em aberto`; })()}</p>
+            <p className="mt-1">{(() => { const n = tasks.filter((t) => t.status !== "concluida").length; return `${n} ${n === 1 ? "tarefa" : "tarefas"} em aberto`; })()}</p>
           </div>
         </TabsContent>
 

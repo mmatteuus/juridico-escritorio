@@ -99,7 +99,7 @@ export function buildFixtures(): DemoData {
         id: "a-k4", officeId: "off-a", code: "AP-2026-002", title: "Reestruturação societária (sigilo)",
         clientIds: ["a-c4"], practiceAreaId: "civel", status: "ativo", assignedMemberIds: ["a-m2"],
         confidentiality: "sigilo_reforcado", grantRoles: ["socio"], updatedAt: day(-3, 14),
-        summary: "Caso restrito aos sócios com grant expresso.",
+        summary: "Caso restrito aos sócios com acesso liberado de forma expressa.",
       },
       {
         id: "b-k1", officeId: "off-b", code: "NH-2026-021", title: "Divórcio consensual com partilha",
