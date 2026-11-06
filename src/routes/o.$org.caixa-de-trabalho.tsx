@@ -43,6 +43,9 @@ function Caixa() {
   const pendingMessages = q === "revisao" && canSeeLegalDocs(v.role)
     ? v.messages.filter((message) => message.status === "aguardando_revisao" && inArea(message.matterId))
     : [];
+  const pendingIntakes = q === "revisao" && v.role !== "financeiro"
+    ? v.intakes.filter((intake) => !["convertido", "arquivado"].includes(intake.stage) && (area === "todas" || area === intake.practiceAreaId))
+    : [];
   const pendingDocuments = q === "revisao" && canSeeLegalDocs(v.role)
     ? v.docs.filter((doc) => doc.status === "revisao_pendente" && inArea(doc.matterId))
     : [];
@@ -75,7 +78,7 @@ function Caixa() {
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Filtrar caixa de trabalho">
         {(Object.keys(queues) as Q[]).map((k) => (
           <Button key={k} aria-pressed={q === k} size="sm" variant={q === k ? "default" : "outline"} onClick={() => setQ(k)}>
-            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length + pendingDocuments.length : 0)}</span>
+            {queues[k].label} <span className="tabular opacity-70">{queues[k].tasks.length + (k === "revisao" ? (canSeeCnj(v.role) ? v.deadlines.filter((d) => (d.status === "proposto" || d.status === "em_revisao") && inArea(d.matterId)).length : 0) + pendingMessages.length + pendingDocuments.length + pendingIntakes.length : 0)}</span>
           </Button>
         ))}
       </div>
@@ -84,8 +87,14 @@ function Caixa() {
           <Button key={a.id} size="sm" variant={area === a.id ? "secondary" : "ghost"} aria-pressed={area === a.id} onClick={() => setArea(a.id)}>{a.name}</Button>
         ))}
       </div>
-      {tasks.length + dls.length + pendingMessages.length + pendingDocuments.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
+      {tasks.length + dls.length + pendingMessages.length + pendingDocuments.length + pendingIntakes.length === 0 ? <EmptyState title="Fila vazia" hint="Nada pendente nesta visão." /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
+          {pendingIntakes.map((intake) => (
+            <li key={intake.id} className="flex flex-wrap items-center gap-3 p-4">
+              <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">Atendimento aguardando triagem: {intake.name}</p><p className="mt-1 break-words text-xs text-muted-foreground">{intake.stage.replaceAll("_", " ")} · responsável {v.memberName(intake.assigneeId)} · revisão humana pendente</p></div>
+              <Button size="sm" variant="outline" asChild><Link to="/o/$org/atendimentos" params={{ org }} search={{ intakeId: intake.id }}>Revisar atendimento</Link></Button>
+            </li>
+          ))}
           {dls.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1"><p className="text-sm font-medium">Prazo: {d.title}</p><p className="text-xs text-muted-foreground">{fmtDateTime(d.dueDate)} · proposto por {d.proposedBy}</p></div>

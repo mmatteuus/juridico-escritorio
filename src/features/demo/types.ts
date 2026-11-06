@@ -93,6 +93,8 @@ export interface Matter {
   code: string;
   title: string;
   matterNature: MatterNature;
+  /** Links an analysis draft to the intake whose conflict review gates conversion. */
+  sourceIntakeId?: string;
   clientIds: string[];
   opposingParties?: string;
   practiceAreaId: string;
@@ -432,6 +434,7 @@ export interface Intake {
   contact: string;
   clientKind: Client["kind"];
   existingClientId?: string;
+  requesterId?: string;
   assigneeId?: string;
   practiceAreaId: string;
   matterNature: MatterNature;

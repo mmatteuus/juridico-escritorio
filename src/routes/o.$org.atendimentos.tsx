@@ -103,24 +103,32 @@ function Atendimentos() {
       toast.error("O cliente selecionado não está disponível para este perfil ou escritório.");
       return;
     }
-    const clientId = selectedClient?.id ?? uid("c");
-    const matterId = uid("k");
+    const existingDraft = i.matterId ? v.matterById(i.matterId) : undefined;
+    if (i.matterId && !existingDraft) {
+      toast.error("O rascunho vinculado não está disponível para este perfil. Peça ao responsável pelo rascunho para concluir a conversão.");
+      return;
+    }
+    const clientId = existingDraft?.clientIds[0] ?? selectedClient?.id ?? uid("c");
+    const matterId = existingDraft?.id ?? uid("k");
     const checks = conflictsFor(i);
     const cleared = checks.every(check => check.status === "sem_indicio");
-    const matter: Matter = {
+    const now = new Date().toISOString();
+    const matter: Matter = existingDraft ?? {
       id: matterId, officeId: office.id, code: `${office.monogram}-2026-${100 + v.matters.length + 1}`,
-      title: `Caso – ${i.name}`, matterNature: i.matterNature, clientIds: [clientId], opposingParties: checks.map(check => check.counterparty).join(", "), practiceAreaId: i.practiceAreaId, status: "em_analise",
+      title: `Caso – ${i.name}`, matterNature: i.matterNature, sourceIntakeId: i.id, clientIds: [clientId], opposingParties: checks.map(check => check.counterparty).join(", "), practiceAreaId: i.practiceAreaId, status: "em_analise",
       assignedMemberIds: v.me ? [v.me.id] : [], confidentiality: "normal", grantRoles: [],
-      updatedAt: new Date().toISOString(), summary: i.summary,
+      updatedAt: now, summary: i.summary,
     };
     update((d) => ({
       ...d,
       clients: d.clients.some(client => client.id === clientId && client.officeId === office.id)
         ? d.clients
         : [...d.clients, { id: clientId, officeId: office.id, name: i.name, kind: i.clientKind, contact: i.contact, city: "—", conflictStatus: cleared ? "liberado" : "pendente" }],
-      matters: [matter, ...d.matters],
+      matters: existingDraft
+        ? d.matters.map(current => current.id === matter.id && current.officeId === office.id ? { ...current, updatedAt: now, sourceIntakeId: i.id } : current)
+        : [matter, ...d.matters],
       intakes: d.intakes.map((x) => (x.officeId === office.id && x.id === i.id ? { ...x, stage: "convertido", matterId } : x)),
-      timeline: [timelineEvent({ officeId: office.id, matterId, actor, kind: "cadastro", text: "Caso criado a partir de atendimento" }), ...d.timeline],
+      timeline: [timelineEvent({ officeId: office.id, matterId, actor, kind: "cadastro", text: existingDraft ? "Rascunho de caso liberado após aprovação do atendimento (demo)" : "Caso criado a partir de atendimento aprovado (demo)" }), ...d.timeline],
     }));
     toast.success("Atendimento convertido em caso");
     setSel(null);
@@ -140,7 +148,7 @@ function Atendimentos() {
     const intakeId = uid("i");
     const createdAt = new Date().toISOString();
     const checks: ConflictCheck[] = counterparties.map(counterparty => ({ id: uid("conflito"), officeId: office.id, intakeId, prospect: prospectName, counterparty, summary: form.summary.trim(), status: "pendente", createdAt, reviewedBy: undefined, reviewReason: undefined, reviewedAt: undefined }));
-    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: prospectName, contact: prospectContact, clientKind: selectedClient?.kind ?? form.clientKind, ...(selectedClient ? { existingClientId: selectedClient.id } : {}), assigneeId: v.me!.id, practiceAreaId: form.area, matterNature: form.matterNature as MatterNature, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
+    update((d) => ({ ...d, intakes: [{ id: intakeId, officeId: office.id, name: prospectName, contact: prospectContact, clientKind: selectedClient?.kind ?? form.clientKind, ...(selectedClient ? { existingClientId: selectedClient.id } : {}), requesterId: v.me!.id, assigneeId: v.me!.id, practiceAreaId: form.area, matterNature: form.matterNature as MatterNature, summary: form.summary.trim(), stage: "novo", createdAt }, ...d.intakes], conflicts: [...checks, ...d.conflicts] }));
     setForm({ ...form, name: "", contact: "", clientKind: "PF", existingClientId: "", counterparty: "", matterNature: "", summary: "" });
     navigate({ search: {}, replace: true });
     toast.success("Atendimento registrado; revisão de conflito pendente na demonstração");

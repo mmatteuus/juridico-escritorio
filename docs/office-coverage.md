@@ -89,6 +89,8 @@ A biblioteca de documentos aceita descrição e texto demonstrativo, cria snapsh
 - Na auditoria de 2026-11-06 contra as notas 06, 19, 20, 39 e 44: documentos com revisão pendente agora aparecem na Caixa de Trabalho e no Meu Dia, com link limitado ao documento visível/autorizado; a fila de atendimentos recorta por responsável, exceto para gestão; casos registram natureza explicitamente e não inferem isso pelo número de processos; financeiro grava previsões em centavos inteiros e deixou de exibir liquidação/pagamento.
 - `npx tsc --noEmit` e `npm run build` passaram após essa auditoria. Não foram executados testes nem inspeção manual de cada fluxo e viewport nesta rodada.
 - O cadastro direto de caso é rotulado como rascunho em análise e orienta novos potenciais clientes a passar primeiro por atendimento e revisão humana de conflitos.
+- Nesta continuação, o cadastro direto também cria atendimento vinculado ao rascunho e verificações pendentes para cada parte relacionada; exige responsável profissional autorizado, e a conversão aprovada reutiliza o mesmo caso. Solicitante e responsável veem o atendimento, enquanto a gestão mantém acesso à fila do escritório. Atendimentos pendentes aparecem no Meu Dia e na Caixa de Trabalho, com links para a revisão.
+- `npx tsc --noEmit`, `npm run build` e `git diff --check` passaram para esta continuação. Não foi feita inspeção manual de todos os fluxos/telas nesta rodada.
 
 ## O que ainda não está comprovado
 

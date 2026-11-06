@@ -100,6 +100,7 @@ function CaseDetail() {
   const matter = view.matterById(id);
   if (!matter) return <DeniedState />;
   const matterId = matter.id;
+  const sourceIntake = view.intakes.find((intake) => intake.id === matter.sourceIntakeId);
   const processes = view.proceedings.filter((item) => item.matterId === matter.id);
   const tasks = view.tasks
     .filter((item) => item.matterId === matter.id)
@@ -213,6 +214,13 @@ function CaseDetail() {
         subtitle={`${matter.code} · ${view.areaName(matter.practiceAreaId)} · ${clients.map((client) => client.name).join(", ") || "Sem cliente vinculado"}${matter.opposingParties ? ` · Parte contrária: ${matter.opposingParties}` : ""} · Equipe: ${members.map((member) => member.name).join(", ") || "Sem responsável"} · atualizado em ${fmtDate(matter.updatedAt)}`}
         actions={<ConfidentialityBadge value={matter.confidentiality} />}
       />
+      {sourceIntake && !["convertido", "arquivado"].includes(sourceIntake.stage) && (
+        <section className="rounded-lg border border-copper/30 bg-copper-soft p-4 text-sm text-copper" role="status">
+          <p className="font-semibold">Rascunho em análise · revisão de conflito pendente</p>
+          <p className="mt-1">A conversão só fica disponível após a revisão humana e aprovação do atendimento vinculado.</p>
+          <Link to="/o/$org/atendimentos" params={{ org }} search={{ intakeId: sourceIntake.id }} className="mt-2 inline-flex font-semibold underline">Abrir atendimento e revisão</Link>
+        </section>
+      )}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Metric icon={<BriefcaseBusiness />} label="Estado" value={status[matter.status]} />
         <Metric icon={<Gavel />} label="Processos vinculados" value={String(processes.length)} />

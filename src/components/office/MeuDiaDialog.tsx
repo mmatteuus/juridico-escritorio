@@ -15,6 +15,7 @@ type DayTarget =
   | { type: "prazo"; id: string }
   | { type: "caso"; id: string }
   | { type: "documento"; id: string }
+  | { type: "atendimento"; id: string }
   | { type: "prazos" }
   | { type: "agenda" }
   | { type: "procuracoes" };
@@ -42,6 +43,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
     if (target.type === "prazo") navigate({ to: "/o/$org/prazos/$id", params: { org: office.slug, id: target.id } });
     if (target.type === "caso") navigate({ to: "/o/$org/casos/$id", params: { org: office.slug, id: target.id }, search: { tab: "comunicacoes" } });
     if (target.type === "documento") navigate({ to: "/o/$org/documentos", params: { org: office.slug }, search: { docId: target.id } });
+    if (target.type === "atendimento") navigate({ to: "/o/$org/atendimentos", params: { org: office.slug }, search: { intakeId: target.id } });
     if (target.type === "prazos") navigate({ to: "/o/$org/prazos", params: { org: office.slug } });
     if (target.type === "agenda") navigate({ to: "/o/$org/agenda", params: { org: office.slug } });
     if (target.type === "procuracoes") navigate({ to: "/o/$org/procuracoes", params: { org: office.slug } });
@@ -57,6 +59,7 @@ export function MeuDiaDialog({ office }: { office: Office }) {
     ] },
     { title: "Aguardando cliente", Icon: Hourglass, items: mine.filter((t) => t.status === "aguardando_cliente").map((t) => ({ id: t.id, label: t.title, meta: "Aguardando documentos", target: { type: "tarefa" as const, id: t.id } })) },
     { title: "Retornos de clientes", Icon: Hourglass, items: v.notifications.filter((n) => n.category === "resposta_cliente" && !n.read && n.matterId && v.matterById(n.matterId)).map((n) => ({ id: n.id, label: n.title, meta: "Retorno demonstrativo · revisar comunicações", target: { type: "caso" as const, id: n.matterId! } })) },
+    ...(v.role !== "financeiro" ? [{ title: "Atendimentos em triagem", Icon: FileText, items: v.intakes.filter((intake) => !["convertido", "arquivado"].includes(intake.stage)).map((intake) => ({ id: intake.id, label: intake.name, meta: `${intake.stage.replaceAll("_", " ")} · atendimento demonstrativo`, target: { type: "atendimento" as const, id: intake.id } })) }] : []),
     ...(canSeeCnj(v.role) ? [{ title: "Cobertura a conferir", Icon: ShieldAlert, items: v.notifications.filter((n) => n.category === "sincronizacao" && !n.read && (!n.matterId || v.matterById(n.matterId))).map((n) => ({ id: n.id, label: n.title, meta: "Estado ilustrativo · não confirma coleta externa", target: { type: "prazos" as const } })) }] : []),
     ...(canSeeLegalDocs(v.role) ? [{ title: "Procurações em revisão", Icon: FileText, items: v.mandates.filter((mandate) => mandate.status === "minuta" || mandate.status === "em_revisao").map((mandate) => ({ id: mandate.id, label: mandate.title, meta: mandate.status === "minuta" ? "Minuta · revisão pendente" : "Aguardando revisão", target: { type: "procuracoes" as const } })) }] : []),
     ...(canSeeLegalDocs(v.role) ? [{ title: "Documentos aguardando revisão", Icon: FileText, items: v.docs.filter((doc) => doc.status === "revisao_pendente").map((doc) => ({ id: doc.id, label: doc.title, meta: `${doc.category} · revisão profissional pendente · demonstração`, target: { type: "documento" as const, id: doc.id } })) }] : []),

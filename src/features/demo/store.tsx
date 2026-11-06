@@ -71,7 +71,7 @@ export function useOfficeView(office: Office) {
     const visibleDocIds = new Set(docs.map((doc) => doc.id));
     const canSeeOfficeQueue = ["gestor", "socio", "coordenador"].includes(role);
     const intakes = data.intakes.filter((intake) =>
-      intake.officeId === office.id && (canSeeOfficeQueue || intake.assigneeId === me?.id),
+      intake.officeId === office.id && (canSeeOfficeQueue || intake.assigneeId === me?.id || intake.requesterId === me?.id),
     );
     const visibleIntakeIds = new Set(intakes.map((intake) => intake.id));
     const tasks = inScope(data.tasks).filter((task) => !!task.matterId || task.assigneeId === me?.id || task.requesterId === me?.id || canSeeOfficeQueue);
