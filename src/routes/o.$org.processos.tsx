@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeniedState, EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
 
@@ -107,6 +108,7 @@ function Processos() {
         <div className="relative min-w-0 flex-1"><Search aria-hidden="true" className="absolute left-3 top-2.5 size-4 text-muted-foreground"/><Input aria-label="Buscar processos" placeholder="Buscar título, CNJ, tribunal, unidade, classe ou caso" value={query} onChange={(event) => setQuery(event.target.value)} className="bg-card pl-9" /></div>
         <Select value={matterFilter} onValueChange={(value) => setMatterFilter(value as MatterFilter)}><SelectTrigger className="w-full bg-card sm:w-52" aria-label="Filtrar vínculo com caso"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Com e sem caso</SelectItem><SelectItem value="com_caso">Com caso</SelectItem><SelectItem value="sem_caso">Sem caso</SelectItem></SelectContent></Select>
       </div>
+      <div className="mt-3"><SavedFilterViews officeId={office.id} role={v.role} collection="processos" currentValues={{ query, matterFilter }} onApply={(filters) => { setQuery(filters.query); setMatterFilter(filters.matterFilter as MatterFilter); }} /></div>
       <p className="text-xs text-muted-foreground" aria-live="polite">Exibindo {visible.length} de {v.proceedings.length} processo(s) visível(is).</p>
 
       {visible.length === 0 ? <EmptyState title={v.proceedings.length ? "Nenhum processo encontrado" : "Nenhum processo visível"} hint={v.proceedings.length ? "Ajuste a busca ou o filtro de vínculo." : "Cadastre um processo fictício para iniciar a demonstração."} /> : (

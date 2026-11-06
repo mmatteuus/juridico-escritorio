@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeadlineStatusChip, DeniedState, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { changeDeadline, rescheduleDeadline } from "@/features/demo/actions";
 import { canConfirmDeadline, canProposeDeadline, canSeeCnj } from "@/features/demo/permissions";
 import { findOffice, fmtDateTime, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
@@ -257,6 +258,7 @@ function Prazos() {
           {FILTERS.map((x) => <Button key={x.id} type="button" size="sm" variant={f === x.id ? "default" : "outline"} aria-pressed={f === x.id} onClick={() => setF(x.id)}>{x.label} <span className="tabular opacity-70">{x.id === "todos" ? v.deadlines.length : x.id === "abertos" ? v.deadlines.filter((d) => !["concluido", "cancelado"].includes(d.status)).length : v.deadlines.filter((d) => d.status === x.id).length}</span></Button>)}
         </div>
       </section>}
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="prazos" currentValues={{ query, f, typeFilter, sourceFilter, selectedDay: selectedDay ?? "" }} onApply={(filters) => { setQuery(filters.query); setF(filters.f as typeof f); setTypeFilter(filters.typeFilter as typeof typeFilter); setSourceFilter(filters.sourceFilter); setSelectedDay(filters.selectedDay || null); }} /></div>
       {list.length === 0 ? <EmptyState title={typeFilter === "compromissos" ? "Nenhum compromisso neste filtro" : "Nenhum prazo ou compromisso neste filtro"} /> : (
         <ul className="divide-y rounded-xl border bg-card shadow-soft">
           {list.map((item) => {

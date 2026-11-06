@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DeniedState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { canApproveIntake } from "@/features/demo/permissions";
 import { findOffice, fmtDate, timelineEvent, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { ConflictCheck, Intake, IntakeStage, Matter, MatterNature } from "@/features/demo/types";
@@ -183,6 +184,7 @@ function Atendimentos() {
           <SelectContent><SelectItem value="todas">Todas as etapas</SelectItem>{STAGES.map((stage) => <SelectItem key={stage.id} value={stage.id}>{stage.label}</SelectItem>)}</SelectContent>
         </Select>
       </div>
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="atendimentos" currentValues={{ query, stageFilter }} onApply={(filters) => { setQuery(filters.query); setStageFilter(filters.stageFilter as IntakeStage | "todas"); }} /></div>
       <p className="mb-3 text-sm text-muted-foreground" aria-live="polite">{matchingIntakes.filter((intake) => stageFilter === "todas" || intake.stage === stageFilter).length} de {v.intakes.length} atendimento(s) na busca atual</p>
       <div className="flex gap-3 overflow-x-auto pb-4">
         {STAGES.map((s) => {

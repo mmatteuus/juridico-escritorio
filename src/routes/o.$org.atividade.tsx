@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Activity, Search, ShieldCheck } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { Input } from "@/components/ui/input";
 import { findOffice, fmtDateTime, useOfficeView } from "@/features/demo/store";
 import type { TimelineEvent } from "@/features/demo/types";
@@ -47,6 +48,7 @@ function ActivityPage() {
         <label className="sr-only" htmlFor="activity-matter">Caso</label><select id="activity-matter" aria-label="Filtrar por caso" className="h-9 rounded-md border bg-background px-3 text-sm" value={matter} onChange={event=>setMatter(event.target.value)}><option value="todos">Todos os casos</option>{view.matters.map(item=><option key={item.id} value={item.id}>{item.code}</option>)}</select>
       </div>
     </section>
+    <SavedFilterViews officeId={office.id} role={view.role} collection="atividade" currentValues={{ query, kind, actor, matter }} onApply={(filters) => { setQuery(filters.query); setKind(filters.kind); setActor(filters.actor); setMatter(filters.matter); }} />
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,1fr)]">
       <section className={card} aria-label="Linha do tempo"><div className="border-b px-5 py-4"><h2 className="font-display text-xl">Linha do tempo</h2><p className="text-xs text-muted-foreground">{events.length} registro(s) no filtro atual</p></div>
         {events.length ? <ol className="divide-y">{events.map(event=><li key={event.id}><button type="button" onClick={()=>setSelectedId(event.id)} aria-current={selected?.id===event.id ? "true" : undefined} className={`flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/60 ${selected?.id===event.id ? "bg-primary/5" : ""}`}><span className="mt-1 grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><Activity className="size-4"/></span><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{event.text}</span><span className="mt-1 block text-xs text-muted-foreground">{event.actor} · {kinds[event.kind]} · {fmtDateTime(event.at)}</span><span className="mt-1 block text-xs text-primary">{event.matterId ? view.matterById(event.matterId)?.code ?? "Caso indisponível" : "Processo independente"}</span></span></button></li>)}</ol> : <div className="p-5"><EmptyState title="Nenhuma atividade encontrada" hint="Ajuste os filtros para ver outros registros."/></div>}

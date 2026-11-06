@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfidentialityBadge, DueBadge, EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { canCreateMatter } from "@/features/demo/permissions";
 import { findOffice, fmtDate, useDemo, useOfficeView } from "@/features/demo/store";
 import type { MatterNature } from "@/features/demo/types";
@@ -45,6 +46,7 @@ function Casos() {
           <SelectContent><SelectItem value="todas">Todas as naturezas</SelectItem>{Object.entries(MATTER_NATURE).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
         </Select>
       </div>
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="casos" currentValues={{ q, area, nature }} onApply={(filters) => { setQ(filters.q); setArea(filters.area); setNature(filters.nature as MatterNature | "todas"); }} /></div>
       {list.length === 0 ? <EmptyState title="Nenhum caso encontrado" hint="Ajuste os filtros ou crie um novo caso." /> : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {list.map((m) => {

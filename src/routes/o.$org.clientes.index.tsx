@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { findOffice, useOfficeView } from "@/features/demo/store";
 
 export const Route = createFileRoute("/o/$org/clientes/")({
@@ -34,6 +35,7 @@ function Clientes() {
           <Button key={k} size="sm" variant={kind === k ? "default" : "outline"} onClick={() => setKind(k)} aria-pressed={kind === k}>{k === "todos" ? "Todos" : k === "PF" ? "Pessoa física" : "Empresa"}</Button>
         ))}
       </div>
+      <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="clientes" currentValues={{ q, kind }} onApply={(filters) => { setQ(filters.q); setKind(filters.kind as typeof kind); }} /></div>
       {list.length === 0 ? <EmptyState title="Nenhum cliente encontrado" /> : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {list.map((c) => {

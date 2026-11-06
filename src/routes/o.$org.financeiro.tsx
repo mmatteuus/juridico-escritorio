@@ -4,6 +4,7 @@ import { Plus, Search, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader, EmptyState, DeniedState } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { canSeeFinance } from "@/features/demo/permissions";
 import { findOffice, fmtDate, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import { formatBrlCents, parseBrlCents } from "@/features/demo/money";
@@ -337,6 +338,7 @@ function FinancePage() {
             </select>
           </div>
         </div>
+        <div className="mb-4"><SavedFilterViews officeId={office.id} role={v.role} collection="financeiro" currentValues={{ query, kind, reviewState }} onApply={(filters) => { setQuery(filters.query); setKind(filters.kind); setReviewState(filters.reviewState as typeof reviewState); }} /></div>
         {rows.length ? (
           <div className="grid gap-2">
             {rows.map((r) => {

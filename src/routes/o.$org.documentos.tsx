@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState, PageHeader } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { canSeeLegalDocs } from "@/features/demo/permissions";
 import { findOffice, fmtDate, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { Doc, DocRevision, DocWorkflowEvent, DocumentFileMetadata, RoleId } from "@/features/demo/types";
@@ -202,6 +203,7 @@ function DocumentosPage() {
       <Select value={type} onValueChange={setType}><SelectTrigger aria-label="Filtrar por tipo" className="w-48 bg-card"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todos os tipos</SelectItem>{types.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
       <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}><SelectTrigger aria-label="Filtrar por estado" className="w-48 bg-card"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todos os estados</SelectItem>{Object.entries(docStatusLabel).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select>
     </div>
+    <div className="mb-4"><SavedFilterViews officeId={office.id} role={view.role} collection="documentos" currentValues={{ query, type, statusFilter }} onApply={(filters) => { setQuery(filters.query); setType(filters.type); setStatusFilter(filters.statusFilter as typeof statusFilter); }} /></div>
     {docs.length === 0 ? <EmptyState title="Nenhum documento encontrado" hint="Ajuste os filtros ou crie um registro para um caso visível." /> : <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {docs.map((doc) => <li key={doc.id}><button type="button" onClick={() => setPreviewId(doc.id)} className="h-full w-full rounded-xl border bg-card p-5 text-left shadow-soft hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-primary">
         <div className="mb-3 flex items-center justify-between"><FileText className="size-5 text-primary" /><span className="rounded-full bg-muted px-2 py-1 text-xs">v{doc.version} · {statusLabel(doc)}</span></div>

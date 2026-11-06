@@ -4,6 +4,7 @@ import { MessageSquare, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader, EmptyState } from "@/components/office/badges";
+import { SavedFilterViews } from "@/components/office/SavedFilterViews";
 import { findOffice, uid, useDemo, useOfficeView } from "@/features/demo/store";
 import type { MessageDraft } from "@/features/demo/types";
 
@@ -152,6 +153,7 @@ function ComunicacaoPage() {
           ))}
         </select>
       </div>
+      <div className="mt-3"><SavedFilterViews officeId={office.id} role={v.role} collection="comunicacao" currentValues={{ query, status }} onApply={(filters) => { setQuery(filters.query); setStatus(filters.status); }} /></div>
       {filtered.length ? (
         <div className="grid gap-3">
           {filtered.map((m) => (
